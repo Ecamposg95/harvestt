@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tokens como canales RGB para usar opacidad en Tailwind: bg-accent/20 */
+:root {
+  --c-bg: 247 248 246;
+  --c-surface: 255 255 255;
+  --c-raised: 240 243 240;
+  --c-border: 221 227 222;
+  --c-fg: 20 28 25;
+  --c-muted: 95 110 103;
+  --c-accent: 5 150 105;
+  --c-accent-fg: 255 255 255;
+  --c-danger: 200 50 50;
+  --c-warning: 180 120 10;
+  color-scheme: light;
+}
+
+.dark {
+  --c-bg: 11 15 14;
+  --c-surface: 18 24 22;
+  --c-raised: 26 33 31;
+  --c-border: 40 50 47;
+  --c-fg: 230 236 233;
+  --c-muted: 140 156 149;
+  --c-accent: 52 211 153;
+  --c-accent-fg: 6 20 15;
+  --c-danger: 248 113 113;
+  --c-warning: 251 191 36;
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  @apply bg-bg font-sans text-fg antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid rgb(var(--c-accent));
+  outline-offset: 2px;
+}
