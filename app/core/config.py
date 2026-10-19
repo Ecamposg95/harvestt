@@ -40,6 +40,8 @@ class Settings:
     s3_region: str = field(default_factory=lambda: _env("S3_REGION", "auto"))
     s3_access_key_id: str = field(default_factory=lambda: _env("S3_ACCESS_KEY_ID"))
     s3_secret_access_key: str = field(default_factory=lambda: _env("S3_SECRET_ACCESS_KEY"))
+    # Railway buckets usan virtual-host; MinIO local suele requerir "path"
+    s3_addressing_style: str = field(default_factory=lambda: _env("S3_ADDRESSING_STYLE", "virtual"))
 
     @property
     def is_development(self) -> bool:

@@ -55,6 +55,7 @@ class LocalStorage:
 class S3Storage:
     def __init__(self):
         import boto3
+        from botocore.config import Config
 
         self.bucket = settings.s3_bucket
         self.client = boto3.client(
@@ -63,6 +64,7 @@ class S3Storage:
             region_name=settings.s3_region or None,
             aws_access_key_id=settings.s3_access_key_id,
             aws_secret_access_key=settings.s3_secret_access_key,
+            config=Config(s3={"addressing_style": settings.s3_addressing_style}),
         )
 
     def put(self, key: str, fileobj: BinaryIO, content_type: str) -> None:

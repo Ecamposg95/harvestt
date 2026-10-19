@@ -37,20 +37,25 @@ def test_me_requires_token(client):
 
 
 def test_context_rejects_foreign_org(client, db):
-    from fastapi import Depends
+    from fastapi import Depends, FastAPI
+    from fastapi.testclient import TestClient
 
     from app.core.deps import RequestContext, get_context
-    from app.main import app
+    from app.core.errors import install_error_handling
 
-    @app.get("/api/v1/_test/ctx")
+    probe = FastAPI()
+    install_error_handling(probe)
+
+    @probe.get("/ctx")
     def _ctx(ctx: RequestContext = Depends(get_context)):
         return {"org": ctx.organization_id, "role": ctx.role}
 
+    probe_client = TestClient(probe)
     alfa, _ = make_member(db, "alfa", "ana@alfa.test", "editor")
     beta, _ = make_member(db, "beta", "bo@beta.test", "admin")
-    ok = client.get("/api/v1/_test/ctx", headers=login_headers(client, "ana@alfa.test", alfa.id))
+    ok = probe_client.get("/ctx", headers=login_headers(client, "ana@alfa.test", alfa.id))
     assert ok.json() == {"org": alfa.id, "role": "editor"}
-    denied = client.get("/api/v1/_test/ctx", headers=login_headers(client, "ana@alfa.test", beta.id))
+    denied = probe_client.get("/ctx", headers=login_headers(client, "ana@alfa.test", beta.id))
     assert denied.status_code == 403
 
 

@@ -12,3 +12,6 @@ frontend/dist/
 frontend/*.tsbuildinfo
 *.tsbuildinfo
 .DS_Store
+
+# Worktrees y estado local de Claude Code
+.claude/
