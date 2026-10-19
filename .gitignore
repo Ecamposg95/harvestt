@@ -1,0 +1,14 @@
+# Documentos personales (CV, evidencia): nunca al repo
+docs/private/
+
+.env
+storage/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+*.tsbuildinfo
+.DS_Store
