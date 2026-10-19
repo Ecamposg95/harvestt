@@ -30,3 +30,24 @@ HarvestT es una plataforma integral de hardware y software diseñada para revolu
 | José Israel Romero Flores | Diseño de circuitos eléctricos y tarjetas de control |
 | Leonardo Tonatiuh González García | Programación e interfaz gráfica |
 | Luis Antonio Hernandez Moha | Desarrollo de software y prototipos |
+
+## HarvestT Cortex (plataforma)
+
+Plataforma web para investigar, planificar y operar cultivos en ambientes controlados, con vitrina pública de prototipos. Especificación de producto: [`docs/HARVESTT_TASK_PACK.md`](docs/HARVESTT_TASK_PACK.md).
+
+**Stack:** FastAPI · SQLAlchemy · Alembic · PostgreSQL · React · TypeScript · Vite · Tailwind · three.js · Railway.
+
+### Desarrollo local
+
+```bash
+cp .env.example .env          # define SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD
+make setup                    # dependencias Python y frontend
+make dev                      # Postgres (Docker) + migraciones + seed
+make dev-api                  # API en http://localhost:8000 (docs en /api/docs)
+make dev-web                  # frontend en http://localhost:5173
+make test                     # pytest + tsc + vitest
+```
+
+### Despliegue
+
+Railway despliega automáticamente cada push a `main` usando el `Dockerfile`. Al arrancar, el contenedor aplica las migraciones (`alembic upgrade head`) y el seed idempotente. Los archivos de prototipos (STL e imágenes) se guardan en el bucket S3 de Railway.
