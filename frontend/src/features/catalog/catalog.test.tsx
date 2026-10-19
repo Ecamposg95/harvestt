@@ -1,0 +1,126 @@
+import { render, screen, waitFor } from '@testing-library/react'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { beforeEach, vi } from 'vitest'
+import { useAuth } from '@/store/auth'
+import * as api from './api'
+import { PlantDetailPage } from './PlantDetailPage'
+import { PlantsPage } from './PlantsPage'
+
+vi.mock('./api', () => ({
+  listPlants: vi.fn(),
+  listFamilies: vi.fn(),
+  getPlant: vi.fn(),
+  getSource: vi.fn(),
+}))
+
+const mocked = vi.mocked(api)
+
+const lettuce: api.SpeciesSummary = {
+  id: 's1',
+  scientific_name: 'Lactuca sativa L.',
+  authorship: 'L.',
+  family: 'Asteraceae',
+  common_names: [
+    { lang: 'es', name: 'lechuga' },
+    { lang: 'en', name: 'lettuce' },
+  ],
+}
+
+function setRole(role: 'viewer' | 'editor') {
+  const org = { id: 'o1', name: 'Alfa', slug: 'alfa' }
+  useAuth.setState({
+    token: 't',
+    organizationId: 'o1',
+    user: { id: 'u1', email: 'a@a.test', full_name: 'A', is_superadmin: false },
+    memberships: [{ organization: org, role }],
+  })
+}
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  setRole('viewer')
+})
+
+it('PlantsPage muestra tarjetas y envía la búsqueda desde la URL', async () => {
+  mocked.listFamilies.mockResolvedValue(['Asteraceae', 'Solanaceae'])
+  mocked.listPlants.mockResolvedValue({ items: [lettuce], total: 1, page: 1, page_size: 24 })
+
+  render(
+    <MemoryRouter initialEntries={['/app/plants?q=lechuga&family=Asteraceae']}>
+      <Routes>
+        <Route path="/app/plants" element={<PlantsPage />} />
+      </Routes>
+    </MemoryRouter>,
+  )
+
+  expect(await screen.findByText('Lactuca sativa')).toBeInTheDocument()
+  expect(screen.getByText('lechuga')).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: /Lactuca sativa/ })).toHaveAttribute('href', '/app/plants/s1')
+  expect(mocked.listPlants).toHaveBeenCalledWith({ q: 'lechuga', family: 'Asteraceae', page: 1, page_size: 24 })
+  expect(screen.getByRole('searchbox')).toHaveValue('lechuga')
+})
+
+it('PlantsPage muestra estado vacío sin coincidencias', async () => {
+  mocked.listFamilies.mockResolvedValue([])
+  mocked.listPlants.mockResolvedValue({ items: [], total: 0, page: 1, page_size: 24 })
+  render(
+    <MemoryRouter initialEntries={['/app/plants?q=zzz']}>
+      <PlantsPage />
+    </MemoryRouter>,
+  )
+  expect(await screen.findByText('Sin coincidencias')).toBeInTheDocument()
+})
+
+const detail: api.SpeciesDetail = {
+  ...lettuce,
+  summary: null,
+  external_ids: { gbif: { id: '7403263', source_id: 'src1', url: 'https://www.gbif.org/species/7403263' } },
+  cultivars: [],
+  sources: [
+    { id: 'src1', title: 'GBIF Backbone Taxonomy', publisher: 'GBIF', url: 'https://www.gbif.org/', license: 'CC BY 4.0', accessed_at: null, rights: null },
+  ],
+  trait_assertions: [
+    {
+      id: 'a1',
+      subject_type: 'species',
+      subject_id: 's1',
+      variable: 'ph',
+      value_min: null,
+      value_max: null,
+      unit: '[pH]',
+      growth_stage: 'unknown',
+      cultivation_system: 'unknown',
+      origin: 'missing',
+      review_status: 'unreviewed',
+      evidence_refs: [],
+      notes: null,
+      sources: [],
+    },
+  ],
+}
+
+function renderDetail() {
+  return render(
+    <MemoryRouter initialEntries={['/app/plants/s1']}>
+      <Routes>
+        <Route path="/app/plants/:id" element={<PlantDetailPage />} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+it('PlantDetailPage muestra valores faltantes como Desconocido y oculta acciones al viewer', async () => {
+  mocked.getPlant.mockResolvedValue(detail)
+  renderDetail()
+  expect(await screen.findByText('Desconocido')).toBeInTheDocument()
+  expect(screen.getByText('Sin evidencia')).toBeInTheDocument()
+  expect(screen.getByText('7403263')).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Añadir a proyecto' })).not.toBeInTheDocument()
+})
+
+it('PlantDetailPage ofrece "Añadir a proyecto" al editor', async () => {
+  setRole('editor')
+  mocked.getPlant.mockResolvedValue(detail)
+  renderDetail()
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Añadir a proyecto' })).toBeInTheDocument())
+})
