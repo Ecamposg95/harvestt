@@ -50,14 +50,38 @@ make test                     # pytest + tsc + vitest
 
 ### Despliegue
 
-Railway despliega automáticamente cada push a `main` usando el `Dockerfile`. Al arrancar, el contenedor aplica las migraciones (`alembic upgrade head`) y el seed idempotente. Los archivos de prototipos (STL e imágenes) se guardan en el bucket S3 de Railway.
+Railway despliega automáticamente cada push a `main` usando el `Dockerfile`. Al arrancar, el contenedor aplica las migraciones (`alembic upgrade head`, hoy hasta `0007`) y el seed idempotente. Los archivos de prototipos y medios de especie se guardan en el bucket S3 de Railway.
 
-### Estado: real / simulado / pendiente (hito visual V2)
+Variables opcionales: `SEED_DEMO_SIMULATION=1` crea el proyecto "Invernadero demostrativo" con sensores y reglas de ejemplo (apagado por defecto; producción no lo usa).
+
+### Datos de demostración
+
+Los prototipos de la demo (Invernadero Geodésico, Cultivador Delta y Germinador ECOS) se generan como STL procedurales con color y se cargan por la API, con sus puntos etiquetados:
+
+```bash
+HARVESTT_PASSWORD=... python -m scripts.demo.load_demo \
+  --base http://localhost:8080 --email admin@... --photos-dir RUTA_FOTOS [--replace]
+```
+
+- Idempotente por slug; `--replace` borra y recrea.
+- Las fotos no se versionan: el cargador las busca por nombre en `--photos-dir` (fotos del Cultivador Delta, render y lámina del geodésico).
+- Los modelos son representaciones ilustrativas hechas a partir de fotos y láminas del equipo, no planos de fabricación.
+- En un proyecto, Operaciones → "Preparar demostración" crea dos sensores y dos reglas demostrativas para lanzar corridas.
+
+### Estado: real / simulado / pendiente (hito visual V1–V4 y V6)
 
 | Elemento | Estado |
 |---|---|
 | Proyectos, ciclos, observaciones, actividad del inicio | Real (datos del tenant) |
 | Catálogo de especies | Real; rasgos sin evidencia se muestran como "Desconocido" |
-| Lecturas de temperatura y humedad en el inicio | Pendiente (V3: invernadero virtual, etiquetadas SIMULADO) |
-| Puntos etiquetados sobre modelos STL | Real: editor en el admin (máx. 12 por prototipo); en la página pública los callouts siguen la rotación y se atenúan detrás del modelo; en móvil, números con leyenda |
-| Studio 3D, impacto, grafo | Pendiente (V4–V6) |
+| Puntos etiquetados sobre modelos STL | Real: editor en el admin (máx. 12 por prototipo); callouts que siguen la rotación, se atenúan detrás del modelo y no se enciman; en móvil, números con leyenda |
+| Vitrina pública | Real: modelo 3D del prototipo destacado; STL con color por cara cuando el archivo lo trae |
+| Invernadero virtual: lecturas, gráficas, medidores, incidentes | **Simulado** (motor `didactic-v1`, determinista por semilla); siempre con la banda "Simulación didáctica, sin calibración agronómica" y la etiqueta SIMULADO; sin señal se muestra "Sin señal", nunca 0 |
+| Reglas de alerta del demo (30 °C, 45 %) | Umbrales de ejemplo, no agronómicos |
+| Escena 3D del invernadero y del Studio | **Ilustrativo**: forma y alturas ilustrativas; piso a partir del área registrada |
+| Plantas 3D procedurales (catálogo, ficha, Studio) | **Ilustrativo**: "Representación ilustrativa; no predice crecimiento" |
+| Layout del Studio (zonas y plantas) | Real (datos del tenant, con versión) |
+| Medios de especie (foto principal con callouts) | Real: solo superadmin; licencia y atribución obligatorias y visibles |
+| Grafo de conocimiento | Real: solo nodos y relaciones derivados de datos registrados; sin edición |
+| KPIs de impacto (V5) | Pendiente |
+| Telemetría física de dispositivos | Pendiente (fuera de este hito) |
