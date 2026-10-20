@@ -24,5 +24,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['src/test-setup.ts'],
+    // Las pruebas con import dinámico pueden pasar de 5 s cuando la máquina está cargada.
+    testTimeout: 15000,
   },
 })
