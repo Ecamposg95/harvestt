@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { AxiosError, AxiosHeaders } from 'axios'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, vi } from 'vitest'
@@ -118,9 +118,29 @@ it('ProjectDetailPage muestra conflicto de versión al guardar', async () => {
       </Routes>
     </MemoryRouter>,
   )
-  expect(await screen.findByText('Primera observación')).toBeInTheDocument()
-  fireEvent.click(screen.getByRole('button', { name: 'Editar' }))
+  fireEvent.click(await screen.findByRole('button', { name: 'Editar' }))
   fireEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
   await waitFor(() => expect(screen.getByText(/Otra persona modificó este proyecto/)).toBeInTheDocument())
   expect(mocked.updateProject).toHaveBeenCalledWith('p1', expect.objectContaining({ version: 1, name: 'Invernadero norte' }))
+})
+
+it('ProjectDetailPage separa Resumen, Bitácora, Ciclos y Operaciones en pestañas', async () => {
+  mocked.getProject.mockResolvedValue(project)
+  mocked.listObservations.mockResolvedValue({ items: [], total: 0, page: 1, page_size: 20 })
+  render(
+    <MemoryRouter initialEntries={['/app/projects/p1?tab=bitacora']}>
+      <Routes>
+        <Route path="/app/projects/:id" element={<ProjectDetailPage />} />
+      </Routes>
+    </MemoryRouter>,
+  )
+  const nav = await screen.findByRole('navigation', { name: 'Secciones del proyecto' })
+  const links = within(nav).getAllByRole('link')
+  expect(links.map((l) => l.textContent)).toEqual(['Resumen', 'Bitácora', 'Ciclos', 'Operaciones'])
+  expect(within(nav).getByRole('link', { name: 'Bitácora' })).toHaveAttribute('aria-current', 'page')
+  expect(within(nav).getByRole('link', { name: 'Operaciones' })).toHaveAttribute('href', '/app/projects/p1/operations')
+  expect(screen.getByRole('heading', { name: 'Bitácora' })).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Editar' })).toBeNull() // editar vive en Resumen
+  fireEvent.click(within(nav).getByRole('link', { name: 'Ciclos' }))
+  expect(await screen.findByText(/Sin ciclos de cultivo/)).toBeInTheDocument()
 })
