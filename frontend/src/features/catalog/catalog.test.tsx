@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, vi } from 'vitest'
+import type { PlantViewerProps } from '@/features/three/plants/types'
 import { useAuth } from '@/store/auth'
 import * as api from './api'
 import { PlantDetailPage } from './PlantDetailPage'
@@ -11,6 +12,18 @@ vi.mock('./api', () => ({
   listFamilies: vi.fn(),
   getPlant: vi.fn(),
   getSource: vi.fn(),
+}))
+
+vi.mock('@/features/three/plants/thumbnails', () => ({
+  renderPlantThumbnail: vi.fn(() => 'data:image/png;base64,iVBORw0KGgo='),
+}))
+
+vi.mock('@/features/three/plants/LazyPlantViewer', () => ({
+  PlantViewer: ({ kind, stage, label, callouts }: PlantViewerProps) => (
+    <div data-testid="plant-viewer" data-kind={kind} data-stage={stage} aria-label={label}>
+      {(callouts ?? []).map((c) => c.label).join('|')}
+    </div>
+  ),
 }))
 
 const mocked = vi.mocked(api)
@@ -130,4 +143,36 @@ it('la ficha muestra el nombre científico como titular display', async () => {
   renderDetail()
   const heading = await screen.findByRole('heading', { level: 1 })
   expect(heading.className).toContain('display')
+})
+
+it('sin imagen, la ficha muestra la planta procedural madura etiquetada como ilustrativa', async () => {
+  mocked.getPlant.mockResolvedValue(detail)
+  renderDetail()
+  const viewer = await screen.findByTestId('plant-viewer')
+  expect(viewer).toHaveAttribute('data-kind', 'lettuce')
+  expect(viewer).toHaveAttribute('data-stage', 'mature')
+  expect(viewer).toHaveTextContent('pH: Desconocido')
+  expect(screen.getByText('Ilustrativo')).toBeInTheDocument()
+  expect(screen.getByText(/Representación ilustrativa; no predice crecimiento/)).toBeInTheDocument()
+})
+
+it('una especie sin generador propio usa la forma genérica y lo dice', async () => {
+  mocked.getPlant.mockResolvedValue({ ...detail, scientific_name: 'Capsicum annuum L.' })
+  renderDetail()
+  expect(await screen.findByTestId('plant-viewer')).toHaveAttribute('data-kind', 'generic')
+  expect(screen.getByText(/Forma genérica/)).toBeInTheDocument()
+})
+
+it('las tarjetas muestran una miniatura procedural etiquetada como ilustrativa', async () => {
+  mocked.listFamilies.mockResolvedValue([])
+  mocked.listPlants.mockResolvedValue({ items: [lettuce], total: 1, page: 1, page_size: 24 })
+  render(
+    <MemoryRouter initialEntries={['/app/plants']}>
+      <PlantsPage />
+    </MemoryRouter>,
+  )
+  const img = await screen.findByRole('img', { name: 'Ilustración de Lactuca sativa L.' })
+  expect(img).toHaveAttribute('src', 'data:image/png;base64,iVBORw0KGgo=')
+  expect(screen.getByText('Ilustrativo')).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: /Lactuca sativa/ })).toHaveAttribute('href', '/app/plants/s1')
 })
