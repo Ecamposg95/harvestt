@@ -104,3 +104,64 @@ def latest(
     project = get_project(db, ctx, project_id)
     run = simulation.refresh_current_run(db, ctx, project, now)
     return service.latest_readings(db, ctx, project, run, simulation.sim_time(run) if run else None)
+
+
+# ---- Reglas ----
+
+
+@router.get("/{project_id}/alert-rules", response_model=list[AlertRuleOut])
+def list_rules(project_id: str, ctx: RequestContext = Depends(viewer), db: Session = Depends(get_db)):
+    return service.list_rules(db, ctx, get_project(db, ctx, project_id))
+
+
+@router.post("/{project_id}/alert-rules", response_model=AlertRuleOut, status_code=201)
+def create_rule(
+    project_id: str, data: AlertRuleCreate, ctx: RequestContext = Depends(editor), db: Session = Depends(get_db)
+):
+    return service.create_rule(db, ctx, get_project(db, ctx, project_id), data)
+
+
+@router.patch("/{project_id}/alert-rules/{rule_id}", response_model=AlertRuleOut)
+def update_rule(
+    project_id: str,
+    rule_id: str,
+    data: AlertRuleUpdate,
+    ctx: RequestContext = Depends(editor),
+    db: Session = Depends(get_db),
+):
+    return service.update_rule(db, ctx, get_project(db, ctx, project_id), rule_id, data)
+
+
+@router.delete("/{project_id}/alert-rules/{rule_id}", status_code=204)
+def delete_rule(project_id: str, rule_id: str, ctx: RequestContext = Depends(editor), db: Session = Depends(get_db)):
+    service.delete_rule(db, ctx, get_project(db, ctx, project_id), rule_id)
+    return Response(status_code=204)
+
+
+# ---- Incidentes ----
+
+
+@router.get("/{project_id}/alerts", response_model=list[IncidentOut])
+def list_alerts(
+    project_id: str,
+    status: Literal["open", "acknowledged", "closed"] | None = None,
+    run_id: str | None = Query(default=None, max_length=36),
+    ctx: RequestContext = Depends(viewer),
+    db: Session = Depends(get_db),
+    now: datetime = Depends(get_now),
+):
+    project = get_project(db, ctx, project_id)
+    simulation.refresh_current_run(db, ctx, project, now)
+    return service.list_incidents(db, ctx, project, status=status, run_id=run_id)
+
+
+@router.patch("/{project_id}/alerts/{incident_id}", response_model=IncidentOut)
+def acknowledge_alert(
+    project_id: str,
+    incident_id: str,
+    data: IncidentAction,
+    ctx: RequestContext = Depends(editor),
+    db: Session = Depends(get_db),
+):
+    return service.acknowledge_incident(db, ctx, get_project(db, ctx, project_id), incident_id)
+

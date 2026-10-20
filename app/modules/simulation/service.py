@@ -32,6 +32,7 @@ from app.modules.telemetry.models import (
     SOURCE_SIMULATED,
     Device,
 )
+from app.modules.telemetry import rules
 from app.modules.telemetry.service import active_devices, insert_readings
 
 RUN_RESOURCE = "simulation_run"
@@ -141,6 +142,7 @@ def materialize(db: Session, run_id: str, now: datetime, limit: int = MAX_STEPS_
                     )
             batch.append(item)
         insert_readings(db, rows)
+        rules.evaluate(db, run, batch, [d for _, d in devices])
         run.emitted_steps = end
     if run.emitted_steps >= run.total_steps and run.status in ACTIVE_STATUSES:
         run.status = RUN_COMPLETED
