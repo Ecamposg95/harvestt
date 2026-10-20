@@ -41,6 +41,7 @@ _TEXTS = {
     ("simulation_run", "resume"): "Simulación reanudada",
     ("simulation_run", "cancel"): "Simulación cancelada",
     ("incident", "acknowledge"): "Incidente reconocido",
+    ("studio_layout", "replace"): "Layout del Studio actualizado",
 }
 
 

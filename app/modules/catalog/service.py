@@ -4,8 +4,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import not_found
-from app.modules.catalog.models import SUBJECT_CULTIVAR, SUBJECT_SPECIES, Source, Species, TraitAssertion
-from app.modules.catalog.schemas import SourceOut, SpeciesDetail, TraitAssertionOut
+from app.modules.catalog.models import SUBJECT_CULTIVAR, SUBJECT_SPECIES, Source, Species, SpeciesMedia, TraitAssertion
+from app.modules.catalog.schemas import SourceOut, SpeciesDetail, SpeciesMediaOut, TraitAssertionOut
 
 
 def fold(text: str) -> str:
@@ -71,6 +71,34 @@ def _external_source_ids(external_ids: dict | None) -> list[str]:
     ]
 
 
+def active_media(db: Session, species_id: str) -> list[SpeciesMedia]:
+    stmt = (
+        select(SpeciesMedia)
+        .where(SpeciesMedia.species_id == species_id, SpeciesMedia.deleted_at.is_(None))
+        .order_by(SpeciesMedia.is_hero.desc(), SpeciesMedia.created_at)
+    )
+    return list(db.scalars(stmt))
+
+
+def media_out(media: SpeciesMedia) -> SpeciesMediaOut:
+    """Sin storage_key ni checksum; la URL es relativa al cliente de la API."""
+    return SpeciesMediaOut(
+        id=media.id,
+        species_id=media.species_id,
+        kind=media.kind,
+        content_type=media.content_type,
+        license=media.license,
+        attribution=media.attribution,
+        source_url=media.source_url,
+        is_hero=media.is_hero,
+        width=media.width,
+        height=media.height,
+        callouts=media.callouts or [],
+        url=f"/plants/{media.species_id}/media/{media.id}/file",
+        created_at=media.created_at,
+    )
+
+
 def species_detail(db: Session, species: Species) -> SpeciesDetail:
     cultivars = [c for c in species.cultivars if c.deleted_at is None]
     subject_filter = (TraitAssertion.subject_type == SUBJECT_SPECIES) & (TraitAssertion.subject_id == species.id)
@@ -115,4 +143,5 @@ def species_detail(db: Session, species: Species) -> SpeciesDetail:
         cultivars=cultivars,
         trait_assertions=assertion_out,
         sources=[sources[i] for i in unique_ids if i in sources],
+        media=[media_out(m) for m in active_media(db, species.id)],
     )

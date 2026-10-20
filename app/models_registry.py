@@ -6,3 +6,4 @@ from app.modules.projects import models as projects_models  # noqa: F401
 from app.modules.prototypes import models as prototypes_models  # noqa: F401
 from app.modules.simulation import models as simulation_models  # noqa: F401
 from app.modules.telemetry import models as telemetry_models  # noqa: F401
+from app.modules.studio import models as studio_models  # noqa: F401
