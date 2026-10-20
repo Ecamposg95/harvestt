@@ -8,6 +8,7 @@ import { PrototypePublicPage } from './PrototypePublicPage'
 import { RichText } from './shared'
 import { ShowcasePage } from './ShowcasePage'
 import { STATUS_ORDER, statusLabel, statusTone } from './status'
+import { PublicLayout } from '@/layouts/PublicLayout'
 
 vi.mock('./LazyStlViewer', () => ({
   StlViewer: ({ label }: { label: string }) => <div data-testid="stl-viewer">{label}</div>,
@@ -167,5 +168,22 @@ describe('Gallery', () => {
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
     expect(screen.queryByRole('dialog')).toBeNull()
     expect(trigger).toHaveFocus()
+  })
+})
+
+describe('PublicLayout', () => {
+  it('no fuerza el tema oscuro y ofrece navegación en píldoras', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <Routes>
+          <Route element={<PublicLayout />}>
+            <Route index element={<p>contenido</p>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    )
+    expect(container.firstElementChild!.className).not.toContain('dark')
+    expect(screen.getByRole('link', { name: 'Prototipos' }).className).toContain('rounded-full')
+    expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login')
   })
 })

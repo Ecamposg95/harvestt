@@ -86,19 +86,19 @@ export function AuthedImage({ path, alt, className, ...rest }: { path: string } 
 /** Marcador de posición para prototipos sin imagen principal: retícula técnica + iniciales. */
 export function HeroPlaceholder({ name, codename }: { name: string; codename?: string | null }) {
   return (
-    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-surface">
+    <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-br from-surface/80 to-lime/20">
       <div
         aria-hidden="true"
         className="absolute inset-0 opacity-60"
         style={{
           backgroundImage:
-            'linear-gradient(rgb(var(--c-border) / 0.6) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--c-border) / 0.6) 1px, transparent 1px)',
+            'linear-gradient(rgb(var(--c-fg) / 0.06) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--c-fg) / 0.06) 1px, transparent 1px)',
           backgroundSize: '32px 32px',
           maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',
           WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',
         }}
       />
-      <span aria-hidden="true" className="relative font-mono text-4xl font-medium uppercase tracking-[0.3em] text-accent/70 sm:text-6xl">
+      <span aria-hidden="true" className="relative font-extrabold text-4xl uppercase tracking-[0.3em] text-accent/60 sm:text-6xl">
         {(codename || name).slice(0, 3)}
       </span>
     </div>
