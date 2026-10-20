@@ -12,14 +12,15 @@ from app.core.errors import AppError, conflict, not_found, unprocessable
 from app.core.mixins import new_id, utcnow
 from app.core.storage import get_storage
 from app.core.tenant import get_scoped_or_404, scoped
-from app.modules.prototypes.models import KIND_IMAGE, Prototype, PrototypeAsset
-from app.modules.prototypes.schemas import AssetUpdate, PrototypeCreate, PrototypeUpdate
+from app.modules.prototypes.models import KIND_IMAGE, KIND_MODEL_STL, MAX_HOTSPOTS, Prototype, PrototypeAsset, PrototypeHotspot
+from app.modules.prototypes.schemas import AssetUpdate, HotspotCreate, HotspotUpdate, PrototypeCreate, PrototypeUpdate
 from app.modules.prototypes.validation import receive_upload
 
 log = logging.getLogger(__name__)
 
 RESOURCE = "prototype"
 ASSET_RESOURCE = "prototype_asset"
+HOTSPOT_RESOURCE = "prototype_hotspot"
 
 
 def slugify(text: str) -> str:
@@ -262,6 +263,93 @@ def delete_asset(db: Session, ctx: RequestContext, prototype_id: str, asset_id: 
         get_storage().delete(asset.storage_key)
     except Exception:  # el registro ya quedó borrado; un huérfano en storage no debe romper la respuesta
         log.exception("No se pudo borrar el objeto %s", asset.storage_key)
+
+
+# ---- Hotspots ----
+
+
+def active_hotspots(db: Session, prototype: Prototype) -> list[PrototypeHotspot]:
+    stmt = (
+        select(PrototypeHotspot)
+        .where(
+            PrototypeHotspot.prototype_id == prototype.id,
+            PrototypeHotspot.organization_id == prototype.organization_id,
+            PrototypeHotspot.deleted_at.is_(None),
+        )
+        .order_by(PrototypeHotspot.sort_order, PrototypeHotspot.created_at)
+    )
+    return list(db.scalars(stmt))
+
+
+def list_hotspots(db: Session, ctx: RequestContext, prototype_id: str) -> list[PrototypeHotspot]:
+    return active_hotspots(db, get_prototype(db, ctx, prototype_id))
+
+
+def _get_hotspot(db: Session, ctx: RequestContext, prototype: Prototype, hotspot_id: str) -> PrototypeHotspot:
+    hotspot = db.scalar(
+        scoped(PrototypeHotspot, ctx).where(
+            PrototypeHotspot.id == hotspot_id, PrototypeHotspot.prototype_id == prototype.id
+        )
+    )
+    if hotspot is None:
+        raise not_found("punto")
+    return hotspot
+
+
+def create_hotspot(db: Session, ctx: RequestContext, prototype_id: str, data: HotspotCreate) -> PrototypeHotspot:
+    proto = get_prototype(db, ctx, prototype_id)
+    asset = db.scalar(
+        scoped(PrototypeAsset, ctx).where(PrototypeAsset.id == data.asset_id, PrototypeAsset.prototype_id == proto.id)
+    )
+    if asset is None or asset.kind != KIND_MODEL_STL:
+        raise unprocessable("El punto debe pertenecer a un modelo STL de este prototipo", {"field": "asset_id"})
+    existing = active_hotspots(db, proto)
+    if len(existing) >= MAX_HOTSPOTS:
+        raise AppError(
+            422, "hotspot_limit", f"Máximo {MAX_HOTSPOTS} puntos por prototipo", {"max": MAX_HOTSPOTS}
+        )
+    sort_order = (
+        data.sort_order if data.sort_order is not None else max((h.sort_order for h in existing), default=-1) + 1
+    )
+    hotspot = PrototypeHotspot(
+        organization_id=ctx.organization_id,
+        prototype_id=proto.id,
+        asset_id=asset.id,
+        label=data.label,
+        description=data.description,
+        x=data.x,
+        y=data.y,
+        z=data.z,
+        sort_order=sort_order,
+    )
+    db.add(hotspot)
+    db.flush()
+    record(db, ctx, HOTSPOT_RESOURCE, hotspot.id, "create", {"prototype_id": proto.id, "asset_id": asset.id, "label": hotspot.label})
+    db.commit()
+    return hotspot
+
+
+def update_hotspot(
+    db: Session, ctx: RequestContext, prototype_id: str, hotspot_id: str, data: HotspotUpdate
+) -> PrototypeHotspot:
+    proto = get_prototype(db, ctx, prototype_id)
+    hotspot = _get_hotspot(db, ctx, proto, hotspot_id)
+    changes: dict = {}
+    for attr in ("label", "description", "x", "y", "z", "sort_order"):
+        if attr in data.model_fields_set and getattr(data, attr) is not None:
+            setattr(hotspot, attr, getattr(data, attr))
+            changes[attr] = getattr(data, attr)
+    record(db, ctx, HOTSPOT_RESOURCE, hotspot.id, "update", changes)
+    db.commit()
+    return hotspot
+
+
+def delete_hotspot(db: Session, ctx: RequestContext, prototype_id: str, hotspot_id: str) -> None:
+    proto = get_prototype(db, ctx, prototype_id)
+    hotspot = _get_hotspot(db, ctx, proto, hotspot_id)
+    hotspot.deleted_at = utcnow()
+    record(db, ctx, HOTSPOT_RESOURCE, hotspot.id, "delete", {"prototype_id": proto.id, "label": hotspot.label})
+    db.commit()
 
 
 # ---- Público ----

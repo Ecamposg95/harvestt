@@ -1,7 +1,7 @@
 # Modelos del módulo; se registran en app/models_registry.py
 from datetime import datetime
 
-from sqlalchemy import JSON, BigInteger, Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, BigInteger, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -59,4 +59,22 @@ class PrototypeAsset(UUIDMixin, TenantMixin, AuditMixin, Base):
     storage_key: Mapped[str] = mapped_column(String(500), nullable=False)
     caption: Mapped[str] = mapped_column(String(300), nullable=False, default="")
     is_public: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
+MAX_HOTSPOTS = 12
+
+
+class PrototypeHotspot(UUIDMixin, TenantMixin, AuditMixin, Base):
+    """Punto etiquetado sobre un STL. x, y, z en coordenadas crudas del archivo (antes de girar y centrar)."""
+
+    __tablename__ = "prototype_hotspots"
+
+    prototype_id: Mapped[str] = mapped_column(String(36), ForeignKey("prototypes.id"), nullable=False, index=True)
+    asset_id: Mapped[str] = mapped_column(String(36), ForeignKey("prototype_assets.id"), nullable=False, index=True)
+    label: Mapped[str] = mapped_column(String(60), nullable=False)
+    description: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    x: Mapped[float] = mapped_column(Float, nullable=False)
+    y: Mapped[float] = mapped_column(Float, nullable=False)
+    z: Mapped[float] = mapped_column(Float, nullable=False)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

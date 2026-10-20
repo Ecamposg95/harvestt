@@ -14,6 +14,9 @@ from app.modules.prototypes.models import PrototypeAsset
 from app.modules.prototypes.schemas import (
     AssetOut,
     AssetUpdate,
+    HotspotCreate,
+    HotspotOut,
+    HotspotUpdate,
     PrototypeCreate,
     PrototypeDetailOut,
     PrototypeOut,
@@ -111,6 +114,37 @@ def asset_file(prototype_id: str, asset_id: str, ctx: RequestContext = Depends(v
     proto = service.get_prototype(db, ctx, prototype_id)
     asset = service.get_asset(db, ctx, proto, asset_id)
     return _stream(asset, "private, no-store")
+
+
+@internal.get("/{prototype_id}/hotspots", response_model=list[HotspotOut])
+def list_hotspots(prototype_id: str, ctx: RequestContext = Depends(viewer), db: Session = Depends(get_db)):
+    return service.list_hotspots(db, ctx, prototype_id)
+
+
+@internal.post("/{prototype_id}/hotspots", response_model=HotspotOut, status_code=201)
+def create_hotspot(
+    prototype_id: str, data: HotspotCreate, ctx: RequestContext = Depends(editor), db: Session = Depends(get_db)
+):
+    return service.create_hotspot(db, ctx, prototype_id, data)
+
+
+@internal.patch("/{prototype_id}/hotspots/{hotspot_id}", response_model=HotspotOut)
+def update_hotspot(
+    prototype_id: str,
+    hotspot_id: str,
+    data: HotspotUpdate,
+    ctx: RequestContext = Depends(editor),
+    db: Session = Depends(get_db),
+):
+    return service.update_hotspot(db, ctx, prototype_id, hotspot_id, data)
+
+
+@internal.delete("/{prototype_id}/hotspots/{hotspot_id}", status_code=204)
+def delete_hotspot(
+    prototype_id: str, hotspot_id: str, ctx: RequestContext = Depends(editor), db: Session = Depends(get_db)
+):
+    service.delete_hotspot(db, ctx, prototype_id, hotspot_id)
+    return Response(status_code=204)
 
 
 # ---- Pública (sin autenticación, solo la organización PUBLIC_ORG_SLUG) ----
