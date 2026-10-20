@@ -1,12 +1,30 @@
-from fastapi import APIRouter, Depends, Response
+from datetime import datetime
+from typing import Literal
+
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.core.deps import RequestContext, require_role
 from app.modules.identity.models import ROLE_EDITOR, ROLE_VIEWER
 from app.modules.projects.service import get_project
+from app.modules.simulation import service as simulation
+from app.modules.simulation.clock import get_now
+from app.modules.simulation.engine import VariableLiteral
+from app.modules.simulation.models import RUN_COMPLETED
 from app.modules.telemetry import service
-from app.modules.telemetry.schemas import DeviceCreate, DeviceOut, DeviceUpdate
+from app.modules.telemetry.schemas import (
+    AlertRuleCreate,
+    AlertRuleOut,
+    AlertRuleUpdate,
+    DeviceCreate,
+    DeviceOut,
+    DeviceUpdate,
+    IncidentAction,
+    IncidentOut,
+    LatestOut,
+    ReadingsOut,
+)
 
 viewer = require_role(ROLE_VIEWER)
 editor = require_role(ROLE_EDITOR)
@@ -46,3 +64,43 @@ def delete_device(
 ):
     service.delete_device(db, ctx, get_project(db, ctx, project_id), device_id)
     return Response(status_code=204)
+
+
+# ---- Lecturas ----
+
+
+@router.get("/{project_id}/telemetry/readings", response_model=ReadingsOut)
+def readings(
+    project_id: str,
+    variable: VariableLiteral | None = None,
+    device_id: str | None = Query(default=None, max_length=36),
+    since: datetime | None = None,
+    until: datetime | None = None,
+    run_id: str | None = Query(default=None, max_length=36),
+    downsample: bool = True,
+    ctx: RequestContext = Depends(viewer),
+    db: Session = Depends(get_db),
+    now: datetime = Depends(get_now),
+):
+    project = get_project(db, ctx, project_id)
+    run = simulation.refresh_current_run(db, ctx, project, now)
+    if run_id is not None and (run is None or run.id != run_id):
+        run = simulation.get_run(db, ctx, project, run_id)
+        if run.status != RUN_COMPLETED:
+            simulation.materialize(db, run.id, now)
+            db.refresh(run)
+    return service.query_readings(
+        db, ctx, project, run, variable=variable, device_id=device_id, since=since, until=until, downsample=downsample
+    )
+
+
+@router.get("/{project_id}/telemetry/latest", response_model=LatestOut)
+def latest(
+    project_id: str,
+    ctx: RequestContext = Depends(viewer),
+    db: Session = Depends(get_db),
+    now: datetime = Depends(get_now),
+):
+    project = get_project(db, ctx, project_id)
+    run = simulation.refresh_current_run(db, ctx, project, now)
+    return service.latest_readings(db, ctx, project, run, simulation.sim_time(run) if run else None)

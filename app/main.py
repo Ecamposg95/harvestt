@@ -16,6 +16,7 @@ from app.modules.home.router import router as home_router
 from app.modules.identity.router import router as identity_router
 from app.modules.projects.router import router as projects_router
 from app.modules.prototypes.router import router as prototypes_router
+from app.modules.simulation.router import router as simulation_router
 from app.modules.telemetry.router import router as telemetry_router
 
 FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
@@ -56,6 +57,7 @@ def create_app() -> FastAPI:
         prototypes_router,
         home_router,
         telemetry_router,
+        simulation_router,
     ):
         api.include_router(router)
     app.include_router(api)

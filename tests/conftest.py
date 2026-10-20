@@ -62,3 +62,27 @@ def tenants(db, client):
             out[f"{slug}_{role}"] = login_headers(client, f"{role}@{slug}.test", org.id)
         out[f"{slug}_org"] = org
     return out
+
+
+class FrozenClock:
+    """Reloj que solo avanza cuando la prueba lo pide."""
+
+    def __init__(self):
+        from datetime import datetime, timezone
+
+        self.now = datetime(2026, 10, 20, 12, 0, tzinfo=timezone.utc)
+
+    def advance(self, seconds: float) -> None:
+        from datetime import timedelta
+
+        self.now += timedelta(seconds=seconds)
+
+
+@pytest.fixture
+def clock():
+    from app.modules.simulation.clock import get_now
+
+    frozen = FrozenClock()
+    app.dependency_overrides[get_now] = lambda: frozen.now
+    yield frozen
+    app.dependency_overrides.pop(get_now, None)
