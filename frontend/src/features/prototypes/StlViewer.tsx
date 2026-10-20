@@ -8,6 +8,7 @@ import { Callout } from '@/components/ui'
 import { placeModel, toModel } from '@/features/three/model'
 import type { ModelPoint, ViewerHotspot } from '@/features/three/types'
 import { useProjectedCallouts } from '@/features/three/useProjectedCallouts'
+import { webglAvailable } from '@/features/three/webgl'
 import { useTheme } from '@/store/theme'
 import { BinarySource, fetchBinary, formatBytes } from './api'
 import { isClick } from './pick'
@@ -29,15 +30,6 @@ type Phase = 'loading' | 'ready' | 'error' | 'nowebgl'
 const RESUME_AFTER_MS = 4000
 const CREASE_ANGLE = Math.PI / 6
 const SMOOTH_MAX_TRIANGLES = 1_500_000
-
-function webglAvailable(): boolean {
-  try {
-    const canvas = document.createElement('canvas')
-    return !!(window.WebGLRenderingContext && (canvas.getContext('webgl2') || canvas.getContext('webgl')))
-  } catch {
-    return false
-  }
-}
 
 /** Visor STL con three.js. Se carga de forma perezosa (ver LazyStlViewer) para no inflar el bundle principal. */
 export default function StlViewer({ url, authed, label = 'Modelo 3D', className = '', hotspots, onPick, chrome = true }: StlViewerProps) {
