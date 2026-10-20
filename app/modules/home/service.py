@@ -25,6 +25,7 @@ _TEXTS = {
     ("prototype_hotspot", "create"): "Punto agregado al modelo 3D: {name}",
     ("prototype_hotspot", "update"): "Punto del modelo 3D actualizado",
     ("prototype_hotspot", "delete"): "Punto del modelo 3D eliminado",
+    ("graph_edge", "create"): "Relación agregada al grafo",
 }
 
 
