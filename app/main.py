@@ -16,6 +16,7 @@ from app.modules.home.router import router as home_router
 from app.modules.identity.router import router as identity_router
 from app.modules.projects.router import router as projects_router
 from app.modules.prototypes.router import router as prototypes_router
+from app.modules.telemetry.router import router as telemetry_router
 
 FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 
@@ -48,7 +49,14 @@ def create_app() -> FastAPI:
             return JSONResponse({"status": "unavailable", "database": "down"}, status_code=503)
         return {"status": "ok", "database": "up"}
 
-    for router in (identity_router, catalog_router, projects_router, prototypes_router, home_router):
+    for router in (
+        identity_router,
+        catalog_router,
+        projects_router,
+        prototypes_router,
+        home_router,
+        telemetry_router,
+    ):
         api.include_router(router)
     app.include_router(api)
 
