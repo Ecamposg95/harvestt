@@ -9,6 +9,7 @@ import { PrototypeAdminDetailPage } from '@/features/prototypes/PrototypeAdminDe
 import { PrototypePublicPage } from '@/features/prototypes/PrototypePublicPage'
 import { PrototypesAdminPage } from '@/features/prototypes/PrototypesAdminPage'
 import { ShowcasePage } from '@/features/prototypes/ShowcasePage'
+import { StudioPage } from '@/features/studio/StudioPage'
 import { AppLayout } from '@/layouts/AppLayout'
 import { PublicLayout } from '@/layouts/PublicLayout'
 import { HomePage } from '@/features/home/HomePage'
@@ -49,6 +50,7 @@ export default function App() {
         <Route path="projects" element={<ProjectsPage />} />
         <Route path="projects/:id" element={<ProjectDetailPage />} />
         <Route path="projects/:id/operations" element={<OperationsPage />} />
+        <Route path="projects/:id/studio" element={<StudioPage />} />
         <Route path="prototypes" element={<PrototypesAdminPage />} />
         <Route path="prototypes/:id" element={<PrototypeAdminDetailPage />} />
         <Route
