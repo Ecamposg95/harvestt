@@ -3,7 +3,7 @@ import { readStorage, writeStorage } from './storage'
 
 type Theme = 'light' | 'dark'
 
-const initial = (readStorage('harvestt_theme') as Theme | null) ?? 'dark'
+const initial = (readStorage('harvestt_theme') as Theme | null) ?? 'light'
 
 function apply(theme: Theme) {
   document.documentElement.classList.toggle('dark', theme === 'dark')
