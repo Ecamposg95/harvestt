@@ -109,7 +109,8 @@ export function GraphCanvas({ data, selectedId, onSelect, fitKey }: GraphCanvasP
       return
     }
     s.needsFit = false
-    const to = fitView(s.nodes, s.width, s.height)
+    // Margen amplio: la leyenda y los botones flotan sobre los bordes del lienzo.
+    const to = fitView(s.nodes, s.width, s.height, 88)
     if (animate) animateTo(to)
     else {
       s.view = to
