@@ -94,7 +94,7 @@ export function connectionsOf(id: string, data: GraphData): Connection[] {
 }
 
 /** El nodo y sus vecinos directos. */
-export function neighborIds(id: string, edges: GraphEdge[]): Set<string> {
+export function neighborIds(id: string, edges: Array<Pick<GraphEdge, 'src' | 'dst'>>): Set<string> {
   const ids = new Set([id])
   for (const e of edges) {
     if (e.src === id) ids.add(e.dst)
