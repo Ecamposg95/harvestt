@@ -1,6 +1,7 @@
-export type IconName = 'home' | 'leaf' | 'folder' | 'cube' | 'globe' | 'sun' | 'moon' | 'logout' | 'chevron' | 'menu'
+export type IconName = 'home' | 'leaf' | 'folder' | 'cube' | 'globe' | 'sun' | 'moon' | 'logout' | 'chevron' | 'menu' | 'graph'
 
 const PATHS: Record<IconName, string> = {
+  graph: 'M4 6a2 2 0 1 0 4 0a2 2 0 1 0-4 0M16 7a2 2 0 1 0 4 0a2 2 0 1 0-4 0M10 18a2 2 0 1 0 4 0a2 2 0 1 0-4 0M8 6.2l8 .6M6.8 7.9l4.4 8.3M17.2 8.8l-4.4 7.4',
   home: 'M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z',
   leaf: 'M5 19c0-8 5-14 15-14 0 10-6 15-14 15M5 19l7-7',
   folder: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',

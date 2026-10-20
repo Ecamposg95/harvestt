@@ -74,3 +74,8 @@ it('en escritorio no es diálogo', async () => {
   await renderSidebar()
   expect(screen.queryByRole('dialog')).toBeNull()
 })
+
+it('incluye el grafo de conocimiento', async () => {
+  await renderSidebar()
+  expect(screen.getByRole('link', { name: 'Grafo' })).toHaveAttribute('href', '/app/graph')
+})

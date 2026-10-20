@@ -42,6 +42,7 @@ _TEXTS = {
     ("simulation_run", "cancel"): "Simulación cancelada",
     ("incident", "acknowledge"): "Incidente reconocido",
     ("studio_layout", "replace"): "Layout del Studio actualizado",
+    ("graph_edge", "create"): "Relación agregada al grafo",
 }
 
 
