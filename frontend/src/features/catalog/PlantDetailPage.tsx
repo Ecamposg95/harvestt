@@ -119,7 +119,7 @@ export function PlantDetailPage() {
               </div>
             )}
           </div>
-          <div className="w-full shrink-0 sm:w-[22rem]">
+          <div className="w-full shrink-0 sm:w-[24rem] lg:w-[34rem]">
             <PlantIllustration species={s} />
           </div>
         </div>

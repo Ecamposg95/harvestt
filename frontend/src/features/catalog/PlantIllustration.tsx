@@ -14,7 +14,7 @@ export function PlantIllustration({ species }: { species: SpeciesDetail }) {
         stage="mature"
         label={`Ilustración 3D de ${species.scientific_name}`}
         callouts={plantViewerCallouts(species.trait_assertions)}
-        className="h-72 w-full rounded-[22px] bg-gradient-to-b from-lime/15 to-transparent"
+        className="h-72 w-full rounded-[22px] lg:h-96 bg-gradient-to-b from-lime/15 to-transparent"
       />
       {/* Fondo opaco: un callout que pase por detrás no debe tapar la etiqueta. */}
       <div className="absolute left-3 top-3 z-10 rounded-full bg-surface">

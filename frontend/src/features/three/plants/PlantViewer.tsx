@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { Callout } from '@/components/ui'
 import { useTheme } from '@/store/theme'
+import { declutter } from '../projection'
 import { useProjectedCallouts } from '../useProjectedCallouts'
 import { webglAvailable } from '../webgl'
 import { createPlantObject, getPlantModel } from './model'
@@ -11,14 +12,6 @@ import type { PlantViewerCallout, PlantViewerProps } from './types'
 
 const SOIL = { light: 0x8a7457, dark: 0x4a3f31 }
 
-/** Espacio mínimo (px) para la línea y la etiqueta: si no cabe hacia afuera, el callout se voltea. */
-const LABEL_ROOM = 170
-
-function fitSide(side: 'left' | 'right', x: number, width: number): 'left' | 'right' {
-  if (side === 'left' && x < LABEL_ROOM) return 'right'
-  if (side === 'right' && width > 0 && width - x < LABEL_ROOM) return 'left'
-  return side
-}
 
 /** Degradado radial para el alphaMap del suelo: el disco se desvanece en el borde en vez de cortarse. */
 function radialFade(): THREE.CanvasTexture | null {
@@ -187,13 +180,14 @@ export default function PlantViewer({ kind, stage = 'mature', seed = 0, label, c
       <div ref={mountRef} className="absolute inset-0" role="img" aria-label={label} />
       {!noWebgl && projected.length > 0 && (
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          {projected.map((c) =>
+          {declutter(projected, mountRef.current?.clientHeight ?? 0, 26, mountRef.current?.clientWidth ?? 0).map((c) =>
             c.hidden ? null : (
               <Callout
                 key={c.key}
                 x={c.x}
                 y={c.y}
-                side={fitSide(c.side, c.x, mountRef.current?.clientWidth ?? 0)}
+                dy={c.dy}
+                side={c.side}
                 lineLength={24}
                 dimmed={c.dimmed}
                 label={c.label}
