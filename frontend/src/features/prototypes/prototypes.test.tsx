@@ -169,3 +169,51 @@ describe('Gallery', () => {
     expect(trigger).toHaveFocus()
   })
 })
+
+describe('PrototypePublicPage diseño 53', () => {
+  function renderAt(slug: string) {
+    render(
+      <MemoryRouter initialEntries={[`/prototipos/${slug}`]}>
+        <Routes>
+          <Route path="/prototipos/:slug" element={<PrototypePublicPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+  }
+
+  it('muestra el nombre como titular display, specs como chips y sin specs inventadas', async () => {
+    const detail: PublicPrototypeDetail = {
+      slug: 'germinador-ecos',
+      name: 'Germinador ECOS',
+      codename: 'ECOS',
+      purpose: 'Germinación doméstica automatizada',
+      summary: '',
+      status: 'in_construction',
+      published_at: null,
+      hero: null,
+      description: '',
+      specs: [
+        { label: 'Iluminación', value: 'LED' },
+        { label: 'Fotoperiodo', value: 'Configurable' },
+      ],
+      assets: [],
+    }
+    vi.spyOn(prototypesApi, 'publicDetail').mockResolvedValue(detail)
+    renderAt('germinador-ecos')
+    const h1 = await screen.findByRole('heading', { level: 1, name: /Germinador ECOS/ })
+    expect(h1.className).toContain('display')
+    const chips = screen.getByTestId('spec-chips')
+    expect(chips.children).toHaveLength(2)
+    expect(chips).toHaveTextContent('Iluminación')
+    expect(chips).toHaveTextContent('LED')
+  })
+
+  it('sin specs no muestra la fila de chips', async () => {
+    vi.spyOn(prototypesApi, 'publicDetail').mockResolvedValue({
+      slug: 'x', name: 'X', codename: null, purpose: '', summary: '', status: 'concept', published_at: null, hero: null, description: '', specs: [], assets: [],
+    } as PublicPrototypeDetail)
+    renderAt('x')
+    await screen.findByRole('heading', { level: 1, name: 'X' })
+    expect(screen.queryByTestId('spec-chips')).toBeNull()
+  })
+})
