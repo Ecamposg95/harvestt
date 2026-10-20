@@ -40,6 +40,8 @@ class Project(UUIDMixin, TenantMixin, AuditMixin, Base):
     system: Mapped[str] = mapped_column(String(30), nullable=False, default=SYSTEM_OTHER)
     location: Mapped[str | None] = mapped_column(String(300), nullable=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    # Versión del layout del Studio (independiente de `version` del proyecto). 0 = sin layout guardado.
+    layout_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 
 
 class CropCycle(UUIDMixin, TenantMixin, AuditMixin, Base):
