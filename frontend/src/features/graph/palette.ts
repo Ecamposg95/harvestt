@@ -17,7 +17,7 @@ export function graphPalette(dark: boolean): GraphPalette {
         node: {
           species: '#a6e22e',
           cultivar: '#5eead4',
-          trait: '#fbbf24',
+          trait: '#facc15',
           source: '#c4b5fd',
           project: '#7dd3fc',
           crop_cycle: '#f9a8d4',
@@ -33,7 +33,7 @@ export function graphPalette(dark: boolean): GraphPalette {
         node: {
           species: '#4d7c0f',
           cultivar: '#0f766e',
-          trait: '#b45309',
+          trait: '#a16207',
           source: '#6d28d9',
           project: '#0369a1',
           crop_cycle: '#be185d',

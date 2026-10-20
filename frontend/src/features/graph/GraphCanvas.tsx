@@ -50,6 +50,8 @@ interface Stage {
   needsFit: boolean
   /** Reencuadre único cuando la simulación se enfría, salvo que el usuario ya haya movido la vista. */
   autoFit: boolean
+  /** Encuadre final al terminar la simulación, si el usuario no movió la vista. */
+  fitOnEnd: boolean
   drag: Drag | null
 }
 
@@ -90,6 +92,7 @@ export function GraphCanvas({ data, selectedId, onSelect, fitKey }: GraphCanvasP
     fitKey: null,
     needsFit: false,
     autoFit: false,
+    fitOnEnd: false,
     drag: null,
   })
 
@@ -117,6 +120,7 @@ export function GraphCanvas({ data, selectedId, onSelect, fitKey }: GraphCanvasP
   const zoomBy = (factor: number) => {
     const s = stage.current
     s.autoFit = false
+    s.fitOnEnd = false
     animateTo(zoomAround(s.view, factor, s.width / 2, s.height / 2))
   }
 
@@ -136,6 +140,7 @@ export function GraphCanvas({ data, selectedId, onSelect, fitKey }: GraphCanvasP
     if (refit) {
       s.fitKey = fitKey
       s.autoFit = true
+      s.fitOnEnd = true
       fit(false)
     }
     return () => {
@@ -153,6 +158,7 @@ export function GraphCanvas({ data, selectedId, onSelect, fitKey }: GraphCanvasP
     const node = selectedId ? s.nodes.find((n) => n.id === selectedId) : undefined
     if (node && s.width) {
       s.autoFit = false
+      s.fitOnEnd = false
       animateTo(centerOn(node.x, node.y, s.width, s.height, Math.max(s.view.k, FOCUS_ZOOM)))
     }
   }, [selectedId, data])
@@ -188,6 +194,7 @@ export function GraphCanvas({ data, selectedId, onSelect, fitKey }: GraphCanvasP
       const rect = canvas.getBoundingClientRect()
       s.anim = null
       s.autoFit = false
+      s.fitOnEnd = false
       s.view = zoomAround(s.view, Math.exp(-e.deltaY * 0.0015), e.clientX - rect.left, e.clientY - rect.top)
       s.dirty = true
     }
@@ -203,6 +210,9 @@ export function GraphCanvas({ data, selectedId, onSelect, fitKey }: GraphCanvasP
           s.autoFit = false
           fit(true)
         }
+      } else if (s.fitOnEnd && !s.anim) {
+        s.fitOnEnd = false
+        fit(true)
       }
       if (s.anim) {
         const t = Math.min(1, (time - s.anim.start) / ANIM_MS)
@@ -274,6 +284,7 @@ export function GraphCanvas({ data, selectedId, onSelect, fitKey }: GraphCanvasP
     if (!isClick(d.start, p)) d.moved = true
     if (d.moved) {
       s.autoFit = false
+      s.fitOnEnd = false
       if (d.node) {
         const w = toWorld(s.view, p.x, p.y)
         d.node.fx = w.x
