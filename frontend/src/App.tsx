@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { ReactNode } from 'react'
+import { lazy, ReactNode, Suspense } from 'react'
 import { PlantDetailPage } from '@/features/catalog/PlantDetailPage'
 import { PlantsPage } from '@/features/catalog/PlantsPage'
 import { ProjectDetailPage } from '@/features/projects/ProjectDetailPage'
@@ -14,6 +14,10 @@ import { HomePage } from '@/features/home/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFound } from '@/pages/NotFound'
 import { useAuth } from '@/store/auth'
+import { Loading } from '@/components/ui'
+
+// d3-force vive solo en este chunk perezoso.
+const GraphPage = lazy(() => import('@/features/graph/GraphPage'))
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const token = useAuth((s) => s.token)
@@ -45,6 +49,14 @@ export default function App() {
         <Route path="projects/:id" element={<ProjectDetailPage />} />
         <Route path="prototypes" element={<PrototypesAdminPage />} />
         <Route path="prototypes/:id" element={<PrototypeAdminDetailPage />} />
+        <Route
+          path="graph"
+          element={
+            <Suspense fallback={<Loading label="Cargando grafo…" />}>
+              <GraphPage />
+            </Suspense>
+          }
+        />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

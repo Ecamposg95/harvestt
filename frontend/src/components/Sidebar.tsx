@@ -12,6 +12,7 @@ export const NAV_ITEMS: Array<{ to: string; label: string; icon: IconName; end?:
   { to: '/app/plants', label: 'Explorador vegetal', icon: 'leaf' },
   { to: '/app/projects', label: 'Proyectos', icon: 'folder' },
   { to: '/app/prototypes', label: 'Prototipos', icon: 'cube' },
+  { to: '/app/graph', label: 'Grafo', icon: 'graph' },
 ]
 
 function RailButton({ icon, label, expanded, onClick }: { icon: IconName; label: string; expanded: boolean; onClick: () => void }) {
