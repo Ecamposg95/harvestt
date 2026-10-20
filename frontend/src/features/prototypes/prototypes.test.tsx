@@ -127,6 +127,7 @@ describe('PrototypePublicPage', () => {
         { id: 'm1', kind: 'model_stl', filename: 'a.stl', content_type: 'model/stl', size_bytes: 10, caption: '', url: '/api/v1/public/assets/m1' },
         { id: 'i1', kind: 'image', filename: 'a.png', content_type: 'image/png', size_bytes: 10, caption: 'Frente', url: '/api/v1/public/assets/i1' },
       ],
+      hotspots: [],
     }
     vi.spyOn(prototypesApi, 'publicDetail').mockResolvedValue(detail)
     const { container } = renderPublic()
@@ -215,6 +216,7 @@ describe('PrototypePublicPage diseño 53', () => {
         { label: 'Fotoperiodo', value: 'Configurable' },
       ],
       assets: [],
+      hotspots: [],
     }
     vi.spyOn(prototypesApi, 'publicDetail').mockResolvedValue(detail)
     renderAt('germinador-ecos')
@@ -228,7 +230,7 @@ describe('PrototypePublicPage diseño 53', () => {
 
   it('sin specs no muestra la fila de chips', async () => {
     vi.spyOn(prototypesApi, 'publicDetail').mockResolvedValue({
-      slug: 'x', name: 'X', codename: null, purpose: '', summary: '', status: 'concept', published_at: null, hero: null, description: '', specs: [], assets: [],
+      slug: 'x', name: 'X', codename: null, purpose: '', summary: '', status: 'concept', published_at: null, hero: null, description: '', specs: [], assets: [], hotspots: [],
     } as PublicPrototypeDetail)
     renderAt('x')
     await screen.findByRole('heading', { level: 1, name: 'X' })

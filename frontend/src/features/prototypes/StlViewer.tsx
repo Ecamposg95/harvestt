@@ -3,13 +3,22 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import { errorMessage } from '@/api/client'
+import { Callout } from '@/components/ui'
+import { placeModel, toModel } from '@/features/three/model'
+import type { ModelPoint, ViewerHotspot } from '@/features/three/types'
+import { useProjectedCallouts } from '@/features/three/useProjectedCallouts'
 import { useTheme } from '@/store/theme'
 import { BinarySource, fetchBinary, formatBytes } from './api'
+import { isClick } from './pick'
 import { viewerPalette } from './viewerPalette'
 
 export interface StlViewerProps extends BinarySource {
   label?: string
   className?: string
+  /** Puntos a mostrar como callouts, en coordenadas crudas del STL. */
+  hotspots?: ViewerHotspot[]
+  /** Si se da, un clic sobre la malla (sin arrastre) devuelve el punto en coordenadas crudas. */
+  onPick?: (point: ModelPoint) => void
 }
 
 type Phase = 'loading' | 'ready' | 'error' | 'nowebgl'
@@ -26,7 +35,7 @@ function webglAvailable(): boolean {
 }
 
 /** Visor STL con three.js. Se carga de forma perezosa (ver LazyStlViewer) para no inflar el bundle principal. */
-export default function StlViewer({ url, authed, label = 'Modelo 3D', className = '' }: StlViewerProps) {
+export default function StlViewer({ url, authed, label = 'Modelo 3D', className = '', hotspots, onPick }: StlViewerProps) {
   const mountRef = useRef<HTMLDivElement>(null)
   const playingRef = useRef(true)
   const [playing, setPlaying] = useState(true)
@@ -43,6 +52,21 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
     darkRef.current = theme === 'dark'
     applyThemeRef.current?.(darkRef.current)
   }, [theme])
+
+  const { projected, projector } = useProjectedCallouts()
+  const onPickRef = useRef(onPick)
+  onPickRef.current = onPick
+  const pointsKey = JSON.stringify(hotspots ?? [])
+
+  useEffect(() => {
+    const list: ViewerHotspot[] = JSON.parse(pointsKey)
+    projector.setPoints(list.map((h, i) => ({ key: h.key, label: h.label, index: i + 1, x: h.x, y: h.y, z: h.z })))
+  }, [pointsKey, projector])
+
+  useEffect(() => {
+    const canvas = mountRef.current?.querySelector('canvas')
+    if (canvas) canvas.style.cursor = onPick ? 'crosshair' : ''
+  }, [onPick, phase])
 
   useEffect(() => {
     const mount = mountRef.current
@@ -87,6 +111,7 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
     scene.add(hemi)
     let material: THREE.MeshStandardMaterial | null = null
     let grid: THREE.GridHelper | null = null
+    let mesh: THREE.Mesh | null = null
 
     const GRID_DIVISIONS = 24
     const paintGrid = (g: THREE.GridHelper, center: number, line: number) => {
@@ -133,6 +158,25 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
     controls.addEventListener('start', onStart)
     controls.addEventListener('end', onEnd)
 
+    const pickRay = new THREE.Raycaster()
+    const pointer = new THREE.Vector2()
+    let downAt: { x: number; y: number } | null = null
+    const onPointerDown = (e: PointerEvent) => {
+      downAt = { x: e.clientX, y: e.clientY }
+    }
+    const onPointerUp = (e: PointerEvent) => {
+      const start = downAt
+      downAt = null
+      if (!mesh || !onPickRef.current || !isClick(start, { x: e.clientX, y: e.clientY })) return
+      const rect = renderer.domElement.getBoundingClientRect()
+      pointer.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1)
+      pickRay.setFromCamera(pointer, camera)
+      const hit = pickRay.intersectObject(mesh, false)[0]
+      if (hit) onPickRef.current(toModel(mesh, hit.point))
+    }
+    renderer.domElement.addEventListener('pointerdown', onPointerDown)
+    renderer.domElement.addEventListener('pointerup', onPointerUp)
+
     const disposables: Array<{ dispose: () => void }> = []
 
     const resize = () => {
@@ -148,8 +192,9 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
 
     const tick = () => {
       frame = requestAnimationFrame(tick)
-      controls.autoRotate = playingRef.current && !interacting && performance.now() >= resumeAt
+      controls.autoRotate = playingRef.current && !onPickRef.current && !interacting && performance.now() >= resumeAt
       controls.update()
+      if (mesh) projector.update(camera, mesh, mount.clientWidth || 1, mount.clientHeight || 1, performance.now())
       renderer.render(scene, camera)
     }
 
@@ -164,16 +209,13 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
           geometry.dispose()
           throw new Error('empty')
         }
-        geometry.rotateX(-Math.PI / 2) // STL suele ser Z-arriba; three usa Y-arriba
         geometry.computeVertexNormals()
-        geometry.center()
-        geometry.computeBoundingBox()
         geometry.computeBoundingSphere()
-        const radius = geometry.boundingSphere?.radius || 1
-        const floorY = geometry.boundingBox?.min.y ?? -radius
-
         material = new THREE.MeshStandardMaterial({ color: palette.mesh, metalness: 0.35, roughness: 0.45 })
-        const mesh = new THREE.Mesh(geometry, material)
+        const placed = placeModel(geometry, material)
+        mesh = placed.mesh
+        const radius = placed.radius
+        const floorY = placed.floorY
         scene.add(mesh)
         disposables.push(geometry, material)
 
@@ -200,6 +242,7 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
 
         // Por si el tema cambió mientras se descargaba el modelo.
         applyThemeRef.current?.(darkRef.current)
+        projector.invalidate()
         setPhase('ready')
         tick()
       })
@@ -221,6 +264,8 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
       observer.disconnect()
       controls.removeEventListener('start', onStart)
       controls.removeEventListener('end', onEnd)
+      renderer.domElement.removeEventListener('pointerdown', onPointerDown)
+      renderer.domElement.removeEventListener('pointerup', onPointerUp)
       controls.dispose()
       disposables.forEach((d) => d.dispose())
       scene.clear()
@@ -242,6 +287,31 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
       className={`relative overflow-hidden rounded-[22px] bg-gradient-to-b from-surface/60 to-bg-2/60 ${className}`}
     >
       <div ref={mountRef} className="absolute inset-0" role="img" aria-label={label} />
+
+      {phase === 'ready' && projected.length > 0 && (
+        <div
+          aria-hidden="true"
+          // En modo selección las etiquetas no deben tapar el clic sobre la malla.
+          className={`pointer-events-none absolute inset-0 ${onPick ? '[&_*]:!pointer-events-none' : ''}`}
+        >
+          {projected.map((c) => {
+            if (c.hidden) return null
+            const source = hotspots?.find((h) => h.key === c.key)
+            return (
+              <Callout
+                key={c.key}
+                x={c.x}
+                y={c.y}
+                side={c.side}
+                dimmed={c.dimmed}
+                label={c.label}
+                index={c.index}
+                title={source?.description || undefined}
+              />
+            )
+          })}
+        </div>
+      )}
 
       {phase === 'loading' && (
         <div role="status" className="absolute inset-0 flex flex-col items-center justify-center gap-3 font-sans text-xs text-muted">
@@ -276,7 +346,9 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
 
       {phase === 'ready' && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-3">
-          <span className="font-sans text-[10px] text-muted">Arrastra para girar · rueda para acercar</span>
+          <span className="font-sans text-[10px] text-muted">
+            {onPick ? 'Haz clic sobre el modelo para colocar el punto' : 'Arrastra para girar · rueda para acercar'}
+          </span>
           <button
             type="button"
             onClick={togglePlay}
