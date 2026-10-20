@@ -35,3 +35,28 @@ it('Gauge acota el valor al rango', () => {
   expect(screen.getByText('80')).toBeInTheDocument()
   expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '50')
 })
+
+it('LineChart dibuja un punto visible para una lectura aislada', () => {
+  const { container } = render(<LineChart ariaLabel="Humedad" data={[{ t: 'a', value: 5 }]} />)
+  expect(container.querySelectorAll('circle')).toHaveLength(1)
+})
+
+it('LineChart dibuja un punto por cada lectura aislada separada por huecos', () => {
+  const { container } = render(
+    <LineChart
+      ariaLabel="Humedad"
+      data={[{ t: 'a', value: 1 }, { t: 'b', value: null }, { t: 'c', value: 2 }]}
+    />,
+  )
+  expect(container.querySelectorAll('circle')).toHaveLength(2)
+})
+
+it('BarChart sin datos válidos muestra Sin lecturas', () => {
+  render(<BarChart ariaLabel="Temperatura" data={[{ label: 'a', value: null }]} />)
+  expect(screen.getByText('Sin lecturas')).toBeInTheDocument()
+})
+
+it('Gauge sin valor expone aria-valuetext Sin señal', () => {
+  render(<Gauge value={null} min={0} max={50} label="Temperatura" />)
+  expect(screen.getByRole('meter')).toHaveAttribute('aria-valuetext', 'Sin señal')
+})

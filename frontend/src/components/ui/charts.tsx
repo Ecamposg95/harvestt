@@ -1,5 +1,13 @@
 import { cx } from './cx'
 
+function NoData({ height, children }: { height: number; children: string }) {
+  return (
+    <div className="flex items-center justify-center text-sm font-semibold text-muted" style={{ height }}>
+      {children}
+    </div>
+  )
+}
+
 export function BarChart({
   data,
   highlightIndex,
@@ -11,6 +19,7 @@ export function BarChart({
   height?: number
   ariaLabel: string
 }) {
+  if (data.every((d) => d.value === null)) return <NoData height={height}>Sin lecturas</NoData>
   const max = Math.max(1, ...data.map((d) => d.value ?? 0))
   return (
     <div role="img" aria-label={ariaLabel} className="flex items-end gap-2" style={{ height }}>
@@ -31,24 +40,33 @@ export function BarChart({
   )
 }
 
-/** Un path SVG por tramo continuo; los null cortan la línea. */
-export function linePaths(values: Array<number | null>, width: number, height: number, min: number, max: number): string[] {
-  const span = max - min || 1
-  const step = values.length > 1 ? width / (values.length - 1) : 0
-  const paths: string[] = []
-  let current = ''
+type Point = [number, number]
+
+/** Tramos continuos de la serie como coordenadas; los null cortan la línea. */
+function lineTramos(values: Array<number | null>, width: number, height: number, min: number, max: number): Point[][] {
+  const span = max - min
+  const n = values.length
+  const tramos: Point[][] = []
+  let current: Point[] = []
   values.forEach((v, i) => {
     if (v === null) {
-      if (current) paths.push(current)
-      current = ''
+      if (current.length) tramos.push(current)
+      current = []
       return
     }
-    const x = (i * step).toFixed(1)
-    const y = (height - ((v - min) / span) * height).toFixed(1)
-    current += current ? ` L${x} ${y}` : `M${x} ${y}`
+    const x = n > 1 ? (i * width) / (n - 1) : width / 2
+    const y = span === 0 ? height / 2 : height - ((v - min) / span) * height
+    current.push([x, y])
   })
-  if (current) paths.push(current)
-  return paths
+  if (current.length) tramos.push(current)
+  return tramos
+}
+
+/** Un path SVG por tramo continuo; los null cortan la línea. */
+export function linePaths(values: Array<number | null>, width: number, height: number, min: number, max: number): string[] {
+  return lineTramos(values, width, height, min, max).map((pts) =>
+    pts.map(([x, y], j) => `${j === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' '),
+  )
 }
 
 export function LineChart({
@@ -64,22 +82,27 @@ export function LineChart({
 }) {
   const values = data.map((d) => d.value)
   const present = values.filter((v): v is number => v !== null)
-  if (present.length === 0) {
-    return (
-      <div className="flex items-center justify-center text-sm font-semibold text-muted" style={{ height }}>
-        Sin lecturas
-      </div>
-    )
-  }
+  if (present.length === 0) return <NoData height={height}>Sin lecturas</NoData>
   const min = Math.min(...present)
   const max = Math.max(...present)
   const W = 600
-  const paths = linePaths(values, W, height, min, max)
+  const tramos = lineTramos(values, W, height, min, max)
   return (
     <svg role="img" aria-label={ariaLabel} viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" className="w-full" style={{ height }}>
-      {paths.map((d, i) => (
-        <path key={i} d={d} fill="none" stroke="rgb(var(--c-accent))" strokeWidth={2.5} vectorEffect="non-scaling-stroke" />
-      ))}
+      {tramos.map((pts, i) =>
+        pts.length === 1 ? (
+          <circle key={i} cx={pts[0][0]} cy={pts[0][1]} r={4} fill="rgb(var(--c-accent))" />
+        ) : (
+          <path
+            key={i}
+            d={linePaths(values, W, height, min, max)[i]}
+            fill="none"
+            stroke="rgb(var(--c-accent))"
+            strokeWidth={2.5}
+            vectorEffect="non-scaling-stroke"
+          />
+        ),
+      )}
       <title>
         {ariaLabel}: {min}–{max}
         {unit ? ` ${unit}` : ''}
@@ -100,6 +123,7 @@ export function Gauge({ value, min, max, label, unit }: { value: number | null; 
       aria-valuemin={min}
       aria-valuemax={max}
       aria-valuenow={value === null ? undefined : clamped}
+      aria-valuetext={value === null ? 'Sin señal' : undefined}
       className="flex flex-col items-center"
     >
       <svg viewBox="0 0 100 56" className="w-full max-w-[160px]">
