@@ -207,7 +207,7 @@ def public_prototype(slug: str, db: Session = Depends(get_db)):
         raise not_found("prototipo")
     assets = service.public_assets(db, [proto.id])
     principal = next((a for a in assets if a.kind == "model_stl"), None)
-    hotspots = service.public_hotspots(db, principal.id) if principal else []
+    hotspots = service.public_hotspots(db, principal) if principal else []
     return PublicPrototypeDetail(
         **_summary_fields(proto, assets),
         description=proto.description,

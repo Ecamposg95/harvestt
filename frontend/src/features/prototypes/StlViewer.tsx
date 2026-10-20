@@ -162,7 +162,8 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
     const pointer = new THREE.Vector2()
     let downAt: { x: number; y: number } | null = null
     const onPointerDown = (e: PointerEvent) => {
-      downAt = { x: e.clientX, y: e.clientY }
+      // Solo el botón principal coloca puntos; clic derecho o central no.
+      downAt = e.button === 0 ? { x: e.clientX, y: e.clientY } : null
     }
     const onPointerUp = (e: PointerEvent) => {
       const start = downAt

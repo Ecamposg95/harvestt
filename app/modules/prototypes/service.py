@@ -344,6 +344,8 @@ def update_hotspot(
         if attr in data.model_fields_set and getattr(data, attr) is not None:
             setattr(hotspot, attr, getattr(data, attr))
             changes[attr] = getattr(data, attr)
+    if not changes:
+        return hotspot
     record(db, ctx, HOTSPOT_RESOURCE, hotspot.id, "update", changes)
     db.commit()
     return hotspot
@@ -418,11 +420,16 @@ def public_asset(db: Session, org_id: str, asset_id: str) -> PrototypeAsset | No
     )
 
 
-def public_hotspots(db: Session, asset_id: str) -> list[PrototypeHotspot]:
+def public_hotspots(db: Session, asset: PrototypeAsset) -> list[PrototypeHotspot]:
     """Puntos de un STL ya verificado como público por quien llama."""
     stmt = (
         select(PrototypeHotspot)
-        .where(PrototypeHotspot.asset_id == asset_id, PrototypeHotspot.deleted_at.is_(None))
+        .where(
+            PrototypeHotspot.asset_id == asset.id,
+            PrototypeHotspot.prototype_id == asset.prototype_id,
+            PrototypeHotspot.organization_id == asset.organization_id,
+            PrototypeHotspot.deleted_at.is_(None),
+        )
         .order_by(PrototypeHotspot.sort_order, PrototypeHotspot.created_at)
     )
     return list(db.scalars(stmt))

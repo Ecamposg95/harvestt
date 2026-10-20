@@ -220,3 +220,12 @@ def test_deleting_prototype_soft_deletes_hotspots(client, tenants, db):
 def test_activity_texts(operation, text):
     event = AuditEvent(resource_type="prototype_hotspot", resource_id="x", operation=operation, data={})
     assert activity_text(event) == text
+
+
+def test_empty_patch_does_not_audit(client, tenants, db):
+    h = tenants["alfa_editor"]
+    proto = create(client, h)
+    model = stl(client, h, proto["id"])
+    hid = add(client, h, proto["id"], point(model["id"])).json()["id"]
+    assert client.patch(f"{API}/prototypes/{proto['id']}/hotspots/{hid}", json={}, headers=h).status_code == 200
+    assert db.query(AuditEvent).filter_by(resource_type="prototype_hotspot", operation="update").count() == 0
