@@ -155,3 +155,18 @@ describe('declutter', () => {
     expect(Math.abs(ends[1] - ends[0])).toBeGreaterThanOrEqual(26)
   })
 })
+
+describe('declutter con ancho', () => {
+  const c = (key: string, x: number, side: 'left' | 'right', label = 'Sensor sur · 16.2 °C · 80.6 %') =>
+    ({ key, label, index: 1, x, y: 100, side, hidden: false, dimmed: false }) as const
+
+  it('pasa al otro lado la etiqueta que no cabe hacia afuera', () => {
+    const [out] = declutter([c('a', 60, 'left')], 400, 26, 500)
+    expect(out.side).toBe('right')
+  })
+
+  it('deja hacia afuera la que sí cabe', () => {
+    const [out] = declutter([c('a', 300, 'left')], 400, 26, 500)
+    expect(out.side).toBe('left')
+  })
+})

@@ -126,10 +126,11 @@ export interface PlacedCallout extends ProjectedCallout {
  * Separa verticalmente las etiquetas de cada lado para que queden al menos `gap` píxeles entre sí,
  * sin mover los puntos. Si la columna se sale por abajo, se recorre hacia arriba.
  */
-export function declutter(callouts: ProjectedCallout[], height: number, gap = 26): PlacedCallout[] {
+export function declutter(callouts: ProjectedCallout[], height: number, gap = 26, width = 0): PlacedCallout[] {
+  const fitted = width > 0 ? callouts.map((c) => fitSide(c, width)) : callouts
   const placed = new Map<string, number>()
   for (const side of ['left', 'right'] as const) {
-    const column = callouts.filter((c) => !c.hidden && c.side === side).sort((a, b) => a.y - b.y)
+    const column = fitted.filter((c) => !c.hidden && c.side === side).sort((a, b) => a.y - b.y)
     const ys = column.map((c) => c.y)
     for (let i = 1; i < ys.length; i++) ys[i] = Math.max(ys[i], ys[i - 1] + gap)
     const overflow = ys.length ? ys[ys.length - 1] - (height - gap / 2) : 0
@@ -141,5 +142,19 @@ export function declutter(callouts: ProjectedCallout[], height: number, gap = 26
     }
     column.forEach((c, i) => placed.set(c.key, ys[i] - c.y))
   }
-  return callouts.map((c) => ({ ...c, dy: placed.get(c.key) ?? 0 }))
+  return fitted.map((c) => ({ ...c, dy: placed.get(c.key) ?? 0 }))
+}
+
+/** Ancho aproximado de un callout: línea (44 px) + píldora de texto de 11 px, tope 220 px. */
+export function calloutWidth(label: string): number {
+  return 44 + Math.min(220, label.length * 6.4 + 26)
+}
+
+/** Prefiere la etiqueta hacia afuera; si no cabe en el visor, la pasa al lado con más espacio. */
+function fitSide(c: ProjectedCallout, width: number): ProjectedCallout {
+  const need = calloutWidth(c.label)
+  const room = { left: c.x, right: width - c.x }
+  if (room[c.side] >= need) return c
+  const other = c.side === 'left' ? 'right' : 'left'
+  return room[other] > room[c.side] ? { ...c, side: other } : c
 }

@@ -314,7 +314,7 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
           // En modo selección las etiquetas no deben tapar el clic sobre la malla.
           className={`pointer-events-none absolute inset-0 ${onPick ? '[&_*]:!pointer-events-none' : ''}`}
         >
-          {declutter(projected, mountRef.current?.clientHeight ?? 0).map((c) => {
+          {declutter(projected, mountRef.current?.clientHeight ?? 0, 26, mountRef.current?.clientWidth ?? 0).map((c) => {
             if (c.hidden) return null
             const source = hotspots?.find((h) => h.key === c.key)
             return (

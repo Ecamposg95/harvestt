@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { Callout } from '@/components/ui'
 import { buildGreenhouse, disposeGroup } from '@/features/three/greenhouse'
+import { declutter } from '@/features/three/projection'
 import { useProjectedCallouts } from '@/features/three/useProjectedCallouts'
 import { viewerPalette } from '@/features/prototypes/viewerPalette'
 import { useTheme } from '@/store/theme'
@@ -222,8 +223,10 @@ export default function GreenhouseViewer({ dims, devices, label = 'Invernadero v
       <div ref={mountRef} className="absolute inset-0" role="img" aria-label={label} />
       {phase === 'ready' && (
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          {projected.map((c) =>
-            c.hidden ? null : <Callout key={c.key} x={c.x} y={c.y} side={c.side} dimmed={c.dimmed} label={c.label} index={c.index} />,
+          {declutter(projected, mountRef.current?.clientHeight ?? 0, 26, mountRef.current?.clientWidth ?? 0).map((c) =>
+            c.hidden ? null : (
+              <Callout key={c.key} x={c.x} y={c.y} dy={c.dy} side={c.side} dimmed={c.dimmed} label={c.label} index={c.index} />
+            ),
           )}
         </div>
       )}
