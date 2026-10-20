@@ -98,7 +98,7 @@ export function Gallery({ images, title = 'Galería' }: { images: GalleryImage[]
           onKeyDown={onKeyDown}
           className="fixed inset-0 z-50 flex flex-col bg-black/90 backdrop-blur-sm"
         >
-          <div className="flex items-center justify-between gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-white/70">
+          <div className="flex items-center justify-between gap-3 px-4 py-3 text-xs font-semibold text-white/70">
             <span>
               {open + 1} / {images.length}
             </span>

@@ -1,3 +1,4 @@
+import { KeyboardEvent, useEffect, useRef } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { Icon, IconName } from '@/components/icons'
 import { Logo } from '@/components/Logo'
@@ -34,13 +35,50 @@ export function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; onClose:
   const { user, memberships, organizationId, setOrganization, logout } = useAuth()
   const navigate = useNavigate()
   const expanded = !collapsed || mobileOpen
+  const asideRef = useRef<HTMLElement>(null)
+
+  const focusables = () =>
+    Array.from(asideRef.current?.querySelectorAll<HTMLElement>('a[href], button, select') ?? []).filter(
+      (el) => !el.hasAttribute('disabled'),
+    )
+
+  useEffect(() => {
+    if (mobileOpen) focusables()[0]?.focus()
+  }, [mobileOpen])
+
+  // En móvil el cajón es modal: Esc lo cierra y Tab no sale de él.
+  const onKeyDown = (e: KeyboardEvent<HTMLElement>) => {
+    if (!mobileOpen) return
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      onClose()
+      return
+    }
+    if (e.key !== 'Tab') return
+    const items = focusables()
+    if (items.length === 0) return
+    const first = items[0]
+    const last = items[items.length - 1]
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
 
   return (
     <>
       {mobileOpen && <div data-testid="sidebar-overlay" className="fixed inset-0 z-30 bg-black/40 md:hidden" onClick={onClose} />}
       <aside
+        ref={asideRef}
+        onKeyDown={onKeyDown}
+        role={mobileOpen ? 'dialog' : undefined}
+        aria-modal={mobileOpen ? true : undefined}
+        aria-label={mobileOpen ? 'Menú' : undefined}
         className={cx(
-          'fixed inset-y-3 left-3 z-40 flex-col rounded-3xl bg-ink p-2.5 text-ink-fg transition-[width] duration-200 md:sticky md:top-3 md:flex md:h-[calc(100vh-1.5rem)]',
+          'fixed inset-y-3 left-3 z-40 flex-col rounded-3xl bg-ink p-2.5 text-ink-fg transition-[width] duration-200 dark:ring-1 dark:ring-white/10 md:sticky md:top-3 md:flex md:h-[calc(100vh-1.5rem)]',
           mobileOpen ? 'flex w-[232px]' : 'hidden',
           collapsed ? 'md:w-16' : 'md:w-[232px]',
         )}

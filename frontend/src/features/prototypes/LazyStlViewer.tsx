@@ -10,7 +10,7 @@ export function StlViewer(props: StlViewerProps) {
       fallback={
         <div
           role="status"
-          className={`flex items-center justify-center rounded-lg border border-border bg-surface font-mono text-xs uppercase tracking-widest text-muted ${props.className ?? ''}`}
+          className={`flex items-center justify-center rounded-[22px] border border-border bg-surface text-xs font-medium text-muted ${props.className ?? ''}`}
         >
           Preparando visor 3D…
         </div>

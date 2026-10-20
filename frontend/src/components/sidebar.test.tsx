@@ -51,3 +51,26 @@ it('en móvil abierto muestra overlay que cierra', async () => {
   fireEvent.click(screen.getByTestId('sidebar-overlay'))
   expect(onClose).toHaveBeenCalled()
 })
+
+it('en móvil abierto es un diálogo modal: foco dentro, Esc cierra y Tab no escapa', async () => {
+  const onClose = vi.fn()
+  await renderSidebar({ mobileOpen: true, onClose })
+  const dialog = screen.getByRole('dialog', { name: 'Menú' })
+  expect(dialog).toHaveAttribute('aria-modal', 'true')
+  const focusables = dialog.querySelectorAll<HTMLElement>('a[href], button')
+  const first = focusables[0]
+  const last = focusables[focusables.length - 1]
+  expect(first).toHaveFocus()
+  last.focus()
+  fireEvent.keyDown(last, { key: 'Tab' })
+  expect(first).toHaveFocus()
+  fireEvent.keyDown(first, { key: 'Tab', shiftKey: true })
+  expect(last).toHaveFocus()
+  fireEvent.keyDown(dialog, { key: 'Escape' })
+  expect(onClose).toHaveBeenCalled()
+})
+
+it('en escritorio no es diálogo', async () => {
+  await renderSidebar()
+  expect(screen.queryByRole('dialog')).toBeNull()
+})

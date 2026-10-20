@@ -22,3 +22,21 @@ it('cierra el cajón móvil al cruzar 768px', async () => {
   act(() => listener!({ matches: true }))
   expect(screen.queryByTestId('sidebar-overlay')).toBeNull()
 })
+
+it('devuelve el foco al botón de menú al cerrar el cajón', async () => {
+  window.matchMedia = vi.fn().mockImplementation(() => ({
+    matches: false,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+  })) as unknown as typeof window.matchMedia
+  const { AppLayout } = await import('./AppLayout')
+  render(
+    <MemoryRouter>
+      <AppLayout />
+    </MemoryRouter>,
+  )
+  const trigger = screen.getByRole('button', { name: 'Abrir menú' })
+  act(() => trigger.click())
+  act(() => screen.getByTestId('sidebar-overlay').click())
+  expect(trigger).toHaveFocus()
+})

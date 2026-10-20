@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { api } from '@/api/client'
 import { Icon } from '@/components/icons'
@@ -9,6 +9,11 @@ import { Membership, User, useAuth } from '@/store/auth'
 export function AppLayout() {
   const { user, setProfile } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const closeDrawer = useCallback(() => {
+    setMobileOpen(false)
+    menuButtonRef.current?.focus()
+  }, [])
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
@@ -30,10 +35,10 @@ export function AppLayout() {
 
   return (
     <div className="flex min-h-screen gap-3 p-3">
-      <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
+      <Sidebar mobileOpen={mobileOpen} onClose={closeDrawer} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="glass mb-3 flex h-14 items-center gap-3 px-3 md:hidden">
-          <button onClick={() => setMobileOpen(true)} className="rounded-full p-2 hover:bg-surface" aria-label="Abrir menú">
+          <button ref={menuButtonRef} onClick={() => setMobileOpen(true)} className="rounded-full p-2 hover:bg-surface" aria-label="Abrir menú">
             <Icon name="menu" />
           </button>
           <Logo withCortex dotClassName="h-5 w-5" />

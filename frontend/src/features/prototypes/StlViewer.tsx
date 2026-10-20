@@ -3,7 +3,9 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import { errorMessage } from '@/api/client'
+import { useTheme } from '@/store/theme'
 import { BinarySource, fetchBinary, formatBytes } from './api'
+import { viewerPalette } from './viewerPalette'
 
 export interface StlViewerProps extends BinarySource {
   label?: string
@@ -32,6 +34,15 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
   const [progress, setProgress] = useState<{ loaded: number; total?: number }>({ loaded: 0 })
   const [error, setError] = useState('')
   const [attempt, setAttempt] = useState(0)
+  const theme = useTheme((s) => s.theme)
+  const darkRef = useRef(theme === 'dark')
+  const applyThemeRef = useRef<((dark: boolean) => void) | null>(null)
+
+  // Recolorea la escena al cambiar de tema sin volver a descargar el modelo.
+  useEffect(() => {
+    darkRef.current = theme === 'dark'
+    applyThemeRef.current?.(darkRef.current)
+  }, [theme])
 
   useEffect(() => {
     const mount = mountRef.current
@@ -64,15 +75,39 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
     renderer.domElement.style.touchAction = 'none'
     mount.appendChild(renderer.domElement)
 
-    const dark = document.documentElement.classList.contains('dark')
-    const fogColor = dark ? 0x141813 : 0xe6ece2
+    const palette = viewerPalette(darkRef.current)
     const scene = new THREE.Scene()
-    scene.fog = new THREE.Fog(fogColor, 10, 40)
+    const fog = new THREE.Fog(palette.fog, 10, 40)
+    scene.fog = fog
     const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 1000)
     camera.position.set(3, 2, 4)
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.35))
-    scene.add(new THREE.HemisphereLight(0xffffff, dark ? 0x141813 : 0xcfdacb, 0.6))
+    const hemi = new THREE.HemisphereLight(0xffffff, palette.ground, 0.6)
+    scene.add(hemi)
+    let material: THREE.MeshStandardMaterial | null = null
+    let grid: THREE.GridHelper | null = null
+
+    const GRID_DIVISIONS = 24
+    const paintGrid = (g: THREE.GridHelper, center: number, line: number) => {
+      // GridHelper escribe 4 vértices por paso; el paso divisions/2 es la cruz central.
+      const colors = g.geometry.getAttribute('color') as THREE.BufferAttribute
+      const c = new THREE.Color(center)
+      const l = new THREE.Color(line)
+      for (let v = 0; v < colors.count; v++) {
+        const col = Math.floor(v / 4) === GRID_DIVISIONS / 2 ? c : l
+        colors.setXYZ(v, col.r, col.g, col.b)
+      }
+      colors.needsUpdate = true
+    }
+
+    applyThemeRef.current = (dark: boolean) => {
+      const p = viewerPalette(dark)
+      fog.color.setHex(p.fog)
+      hemi.groundColor.setHex(p.ground)
+      material?.color.setHex(p.mesh)
+      if (grid) paintGrid(grid, p.gridCenter, p.grid)
+    }
     const key = new THREE.DirectionalLight(0xffffff, 1.6)
     key.position.set(4, 6, 5)
     scene.add(key)
@@ -137,12 +172,12 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
         const radius = geometry.boundingSphere?.radius || 1
         const floorY = geometry.boundingBox?.min.y ?? -radius
 
-        const material = new THREE.MeshStandardMaterial({ color: dark ? 0x9aa898 : 0xd9dfd4, metalness: 0.35, roughness: 0.45 })
+        material = new THREE.MeshStandardMaterial({ color: palette.mesh, metalness: 0.35, roughness: 0.45 })
         const mesh = new THREE.Mesh(geometry, material)
         scene.add(mesh)
         disposables.push(geometry, material)
 
-        const grid = new THREE.GridHelper(radius * 6, 24, 0x4f7a12, dark ? 0x2a3229 : 0xc4d0c0)
+        grid = new THREE.GridHelper(radius * 6, GRID_DIVISIONS, palette.gridCenter, palette.grid)
         grid.position.y = floorY - radius * 0.02
         const gridMaterial = grid.material as THREE.Material
         gridMaterial.transparent = true
@@ -156,12 +191,15 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
         camera.near = distance / 100
         camera.far = distance * 20
         camera.updateProjectionMatrix()
-        scene.fog = new THREE.Fog(fogColor, distance * 1.5, distance * 4)
+        fog.near = distance * 1.5
+        fog.far = distance * 4
         controls.target.set(0, 0, 0)
         controls.minDistance = radius * 0.6
         controls.maxDistance = distance * 4
         controls.update()
 
+        // Por si el tema cambió mientras se descargaba el modelo.
+        applyThemeRef.current?.(darkRef.current)
         setPhase('ready')
         tick()
       })
@@ -177,6 +215,7 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
 
     return () => {
       disposed = true
+      applyThemeRef.current = null
       abort.abort()
       cancelAnimationFrame(frame)
       observer.disconnect()
