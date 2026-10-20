@@ -20,6 +20,8 @@ export interface StlViewerProps extends BinarySource {
   hotspots?: ViewerHotspot[]
   /** Si se da, un clic sobre la malla (sin arrastre) devuelve el punto en coordenadas crudas. */
   onPick?: (point: ModelPoint) => void
+  /** false oculta la barra de ayuda y el botón de giro (vista decorativa, no interactiva). */
+  chrome?: boolean
 }
 
 type Phase = 'loading' | 'ready' | 'error' | 'nowebgl'
@@ -38,7 +40,7 @@ function webglAvailable(): boolean {
 }
 
 /** Visor STL con three.js. Se carga de forma perezosa (ver LazyStlViewer) para no inflar el bundle principal. */
-export default function StlViewer({ url, authed, label = 'Modelo 3D', className = '', hotspots, onPick }: StlViewerProps) {
+export default function StlViewer({ url, authed, label = 'Modelo 3D', className = '', hotspots, onPick, chrome = true }: StlViewerProps) {
   const mountRef = useRef<HTMLDivElement>(null)
   const playingRef = useRef(true)
   const [playing, setPlaying] = useState(true)
@@ -356,7 +358,7 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
         </div>
       )}
 
-      {phase === 'ready' && (
+      {phase === 'ready' && chrome && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-3">
           <span className="font-sans text-[10px] text-muted">
             {onPick ? 'Haz clic sobre el modelo para colocar el punto' : 'Arrastra para girar · rueda para acercar'}

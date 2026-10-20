@@ -213,6 +213,8 @@ class PublicPrototypeSummary(BaseModel):
     status: str
     published_at: datetime | None
     hero: PublicAssetOut | None
+    # Primer STL público: permite mostrar el modelo 3D en la vitrina cuando no hay foto.
+    model: PublicAssetOut | None
 
 
 class PublicPrototypeDetail(PublicPrototypeSummary):

@@ -229,3 +229,22 @@ def test_empty_patch_does_not_audit(client, tenants, db):
     hid = add(client, h, proto["id"], point(model["id"])).json()["id"]
     assert client.patch(f"{API}/prototypes/{proto['id']}/hotspots/{hid}", json={}, headers=h).status_code == 200
     assert db.query(AuditEvent).filter_by(resource_type="prototype_hotspot", operation="update").count() == 0
+
+
+def test_activity_text_names_the_point():
+    event = AuditEvent(resource_type="prototype_hotspot", resource_id="x", operation="create", data={"label": "LED"})
+    assert activity_text(event) == "Punto agregado al modelo 3D: LED"
+
+
+def test_public_summary_exposes_first_public_model(client, tenants):
+    h = tenants["alfa_editor"]
+    with_model = create(client, h, name="Con modelo", slug="con-modelo", is_public=True)
+    stl(client, h, with_model["id"], "privado.stl", is_public=False)
+    principal = stl(client, h, with_model["id"], "principal.stl")
+    only_image = create(client, h, name="Solo foto", slug="solo-foto", is_public=True)
+    upload(client, h, only_image["id"], PNG, "f.png", is_public=True)
+    items = {p["slug"]: p for p in client.get(f"{API}/public/prototypes").json()}
+    assert items["con-modelo"]["model"]["id"] == principal["id"]
+    assert items["con-modelo"]["model"]["url"] == f"/api/v1/public/assets/{principal['id']}"
+    assert items["solo-foto"]["model"] is None
+    assert client.get(f"{API}/public/prototypes/con-modelo").json()["model"]["id"] == principal["id"]
