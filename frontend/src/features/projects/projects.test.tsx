@@ -124,7 +124,7 @@ it('ProjectDetailPage muestra conflicto de versión al guardar', async () => {
   expect(mocked.updateProject).toHaveBeenCalledWith('p1', expect.objectContaining({ version: 1, name: 'Invernadero norte' }))
 })
 
-it('ProjectDetailPage separa Resumen, Bitácora, Ciclos y Operaciones en pestañas', async () => {
+it('ProjectDetailPage separa Resumen, Bitácora, Ciclos, Operaciones y Studio en pestañas', async () => {
   mocked.getProject.mockResolvedValue(project)
   mocked.listObservations.mockResolvedValue({ items: [], total: 0, page: 1, page_size: 20 })
   render(
@@ -136,11 +136,24 @@ it('ProjectDetailPage separa Resumen, Bitácora, Ciclos y Operaciones en pestañ
   )
   const nav = await screen.findByRole('navigation', { name: 'Secciones del proyecto' })
   const links = within(nav).getAllByRole('link')
-  expect(links.map((l) => l.textContent)).toEqual(['Resumen', 'Bitácora', 'Ciclos', 'Operaciones'])
+  expect(links.map((l) => l.textContent)).toEqual(['Resumen', 'Bitácora', 'Ciclos', 'Operaciones', 'Studio'])
   expect(within(nav).getByRole('link', { name: 'Bitácora' })).toHaveAttribute('aria-current', 'page')
   expect(within(nav).getByRole('link', { name: 'Operaciones' })).toHaveAttribute('href', '/app/projects/p1/operations')
   expect(screen.getByRole('heading', { name: 'Bitácora' })).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Editar' })).toBeNull() // editar vive en Resumen
   fireEvent.click(within(nav).getByRole('link', { name: 'Ciclos' }))
   expect(await screen.findByText(/Sin ciclos de cultivo/)).toBeInTheDocument()
+})
+
+it('el detalle del proyecto enlaza al Studio', async () => {
+  mocked.getProject.mockResolvedValue(project)
+  mocked.listObservations.mockResolvedValue({ items: [], total: 0, page: 1, page_size: 20 })
+  render(
+    <MemoryRouter initialEntries={['/app/projects/p1']}>
+      <Routes>
+        <Route path="/app/projects/:id" element={<ProjectDetailPage />} />
+      </Routes>
+    </MemoryRouter>,
+  )
+  expect(await screen.findByRole('link', { name: 'Studio' })).toHaveAttribute('href', '/app/projects/p1/studio')
 })

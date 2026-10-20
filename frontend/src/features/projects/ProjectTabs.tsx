@@ -1,19 +1,21 @@
 import { Link } from 'react-router-dom'
 import { cx } from '@/components/ui'
 
-export type ProjectTab = 'resumen' | 'bitacora' | 'ciclos' | 'operaciones'
+export type ProjectTab = 'resumen' | 'bitacora' | 'ciclos' | 'operaciones' | 'studio'
 
 const TABS: Array<{ key: ProjectTab; label: string }> = [
   { key: 'resumen', label: 'Resumen' },
   { key: 'bitacora', label: 'Bitácora' },
   { key: 'ciclos', label: 'Ciclos' },
   { key: 'operaciones', label: 'Operaciones' },
+  { key: 'studio', label: 'Studio' },
 ]
 
 export function projectTabHref(projectId: string, tab: ProjectTab): string {
   const base = `/app/projects/${encodeURIComponent(projectId)}`
   if (tab === 'resumen') return base
   if (tab === 'operaciones') return `${base}/operations`
+  if (tab === 'studio') return `${base}/studio`
   return `${base}?tab=${tab}`
 }
 
