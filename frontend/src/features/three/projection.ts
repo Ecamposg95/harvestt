@@ -57,6 +57,11 @@ export class CalloutProjector {
 
   setPoints(points: CalloutPoint[]) {
     this.points = points
+    this.invalidate()
+  }
+
+  /** Fuerza a recalcular en el próximo update (p. ej. tras recargar el modelo con la cámara quieta). */
+  invalidate() {
     this.signature = ''
     this.occlusionDirty = true
     this.lastOcclusionAt = -Infinity

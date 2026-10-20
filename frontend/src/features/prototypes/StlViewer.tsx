@@ -242,6 +242,7 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
 
         // Por si el tema cambió mientras se descargaba el modelo.
         applyThemeRef.current?.(darkRef.current)
+        projector.invalidate()
         setPhase('ready')
         tick()
       })
@@ -288,7 +289,11 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
       <div ref={mountRef} className="absolute inset-0" role="img" aria-label={label} />
 
       {phase === 'ready' && projected.length > 0 && (
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div
+          aria-hidden="true"
+          // En modo selección las etiquetas no deben tapar el clic sobre la malla.
+          className={`pointer-events-none absolute inset-0 ${onPick ? '[&_*]:!pointer-events-none' : ''}`}
+        >
           {projected.map((c) => {
             if (c.hidden) return null
             const source = hotspots?.find((h) => h.key === c.key)

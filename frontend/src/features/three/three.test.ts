@@ -123,4 +123,14 @@ describe('CalloutProjector', () => {
     expect(projector.update(cam, box(), 200, 200, 2)).toBe(false)
     expect(publish).toHaveBeenCalledTimes(2)
   })
+
+  it('invalidate republica aunque la cámara siga quieta', () => {
+    const { projector, published, mesh } = setup()
+    const cam = camera()
+    projector.update(cam, mesh, 200, 200, 0)
+    expect(projector.update(cam, mesh, 200, 200, 10)).toBe(false)
+    projector.invalidate()
+    expect(projector.update(cam, mesh, 200, 200, 20)).toBe(true)
+    expect(published).toHaveLength(2)
+  })
 })
