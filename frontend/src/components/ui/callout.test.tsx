@@ -12,7 +12,8 @@ it('ancla el punto en x,y y muestra la etiqueta', () => {
 
 it('lado izquierdo invierte la dirección', () => {
   render(<Callout x={10} y={10} label="LED" side="left" />)
-  expect(screen.getByTestId('callout').className).toContain('flex-row-reverse')
+  expect(screen.getByTestId('callout').dataset.side).toBe('left')
+  expect(screen.getByText('LED').style.transform).toBe('translate(-100%, -50%)')
 })
 
 it('atenuado baja la opacidad', () => {
@@ -28,4 +29,10 @@ it('con índice muestra el número para móvil y oculta línea y etiqueta en pan
   expect(label.className).toContain('hidden')
   expect(label.className).toContain('sm:inline-block')
   expect(label).toHaveAttribute('title', 'Riego por goteo')
+})
+
+it('con dy baja la etiqueta y mantiene el punto en x,y', () => {
+  render(<Callout x={50} y={60} label="Bomba" dy={26} />)
+  expect(screen.getByTestId('callout').style.top).toBe('60px')
+  expect(screen.getByText('Bomba').style.top).toBe('26px')
 })

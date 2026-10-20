@@ -6,6 +6,7 @@ import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.j
 import { errorMessage } from '@/api/client'
 import { Callout } from '@/components/ui'
 import { placeModel, toModel } from '@/features/three/model'
+import { declutter } from '@/features/three/projection'
 import type { ModelPoint, ViewerHotspot } from '@/features/three/types'
 import { useProjectedCallouts } from '@/features/three/useProjectedCallouts'
 import { useTheme } from '@/store/theme'
@@ -135,7 +136,8 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
       const p = viewerPalette(dark)
       fog.color.setHex(p.fog)
       hemi.groundColor.setHex(p.ground)
-      material?.color.setHex(p.mesh)
+      // Un STL con color propio conserva sus colores; solo el gris genérico sigue al tema.
+      if (material && !material.vertexColors) material.color.setHex(p.mesh)
       if (grid) paintGrid(grid, p.gridCenter, p.grid)
     }
     const key = new THREE.DirectionalLight(0xffffff, 1.6)
@@ -225,7 +227,11 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
           raw.computeVertexNormals()
         }
         geometry.computeBoundingSphere()
-        material = new THREE.MeshStandardMaterial({ color: palette.mesh, metalness: 0.35, roughness: 0.45 })
+        // STLLoader ya entrega los colores por cara en espacio lineal.
+        const colored = (raw as THREE.BufferGeometry & { hasColors?: boolean }).hasColors === true
+        material = colored
+          ? new THREE.MeshStandardMaterial({ vertexColors: true, metalness: 0.15, roughness: 0.55 })
+          : new THREE.MeshStandardMaterial({ color: palette.mesh, metalness: 0.35, roughness: 0.45 })
         const placed = placeModel(geometry, material)
         mesh = placed.mesh
         const radius = placed.radius
@@ -242,7 +248,7 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
         disposables.push(grid.geometry, gridMaterial)
 
         const fov = (camera.fov * Math.PI) / 180
-        const distance = (radius / Math.sin(fov / 2)) * 1.15
+        const distance = (radius / Math.sin(fov / 2)) * 0.95
         camera.position.copy(new THREE.Vector3(1, 0.6, 1.2).normalize().multiplyScalar(distance))
         camera.near = distance / 100
         camera.far = distance * 20
@@ -308,7 +314,7 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
           // En modo selección las etiquetas no deben tapar el clic sobre la malla.
           className={`pointer-events-none absolute inset-0 ${onPick ? '[&_*]:!pointer-events-none' : ''}`}
         >
-          {projected.map((c) => {
+          {declutter(projected, mountRef.current?.clientHeight ?? 0).map((c) => {
             if (c.hidden) return null
             const source = hotspots?.find((h) => h.key === c.key)
             return (
@@ -318,6 +324,7 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
                 y={c.y}
                 side={c.side}
                 dimmed={c.dimmed}
+                dy={c.dy}
                 label={c.label}
                 index={c.index}
                 title={source?.description || undefined}

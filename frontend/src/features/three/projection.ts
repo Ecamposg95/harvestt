@@ -116,3 +116,30 @@ export class CalloutProjector {
     return true
   }
 }
+
+export interface PlacedCallout extends ProjectedCallout {
+  /** Desplazamiento vertical de la etiqueta respecto del punto, para que no se encimen. */
+  dy: number
+}
+
+/**
+ * Separa verticalmente las etiquetas de cada lado para que queden al menos `gap` píxeles entre sí,
+ * sin mover los puntos. Si la columna se sale por abajo, se recorre hacia arriba.
+ */
+export function declutter(callouts: ProjectedCallout[], height: number, gap = 26): PlacedCallout[] {
+  const placed = new Map<string, number>()
+  for (const side of ['left', 'right'] as const) {
+    const column = callouts.filter((c) => !c.hidden && c.side === side).sort((a, b) => a.y - b.y)
+    const ys = column.map((c) => c.y)
+    for (let i = 1; i < ys.length; i++) ys[i] = Math.max(ys[i], ys[i - 1] + gap)
+    const overflow = ys.length ? ys[ys.length - 1] - (height - gap / 2) : 0
+    if (overflow > 0) {
+      for (let i = ys.length - 1; i >= 0; i--) {
+        ys[i] -= overflow
+        if (i > 0) ys[i - 1] = Math.min(ys[i - 1], ys[i] - gap)
+      }
+    }
+    column.forEach((c, i) => placed.set(c.key, ys[i] - c.y))
+  }
+  return callouts.map((c) => ({ ...c, dy: placed.get(c.key) ?? 0 }))
+}

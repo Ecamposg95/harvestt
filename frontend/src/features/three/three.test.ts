@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { describe, expect, it, vi } from 'vitest'
 import { placeModel, toModel, toWorld } from './model'
-import { CalloutProjector, isOccluded, OCCLUSION_INTERVAL_MS, projectToScreen, ProjectedCallout } from './projection'
+import { CalloutProjector, declutter, isOccluded, OCCLUSION_INTERVAL_MS, projectToScreen, ProjectedCallout } from './projection'
 
 function camera(z = 10) {
   const cam = new THREE.PerspectiveCamera(50, 1, 0.1, 100)
@@ -132,5 +132,26 @@ describe('CalloutProjector', () => {
     projector.invalidate()
     expect(projector.update(cam, mesh, 200, 200, 20)).toBe(true)
     expect(published).toHaveLength(2)
+  })
+})
+
+describe('declutter', () => {
+  const c = (key: string, y: number, side: 'left' | 'right' = 'right') =>
+    ({ key, label: key, index: 1, x: 300, y, side, hidden: false, dimmed: false }) as const
+
+  it('separa etiquetas cercanas del mismo lado y deja intactas las lejanas', () => {
+    const out = declutter([c('a', 100), c('b', 104), c('c', 300), c('d', 102, 'left')], 400, 26)
+    const by = Object.fromEntries(out.map((o) => [o.key, o]))
+    expect(by.a.dy).toBe(0)
+    expect(by.b.y + by.b.dy).toBe(126)
+    expect(by.c.dy).toBe(0)
+    expect(by.d.dy).toBe(0) // otro lado: no compite
+  })
+
+  it('si la columna se sale por abajo la recorre hacia arriba', () => {
+    const out = declutter([c('a', 390), c('b', 392)], 400, 26)
+    const ends = out.map((o) => o.y + o.dy)
+    expect(Math.max(...ends)).toBeLessThanOrEqual(400 - 13)
+    expect(Math.abs(ends[1] - ends[0])).toBeGreaterThanOrEqual(26)
   })
 })
