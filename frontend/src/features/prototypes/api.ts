@@ -69,6 +69,33 @@ export interface AssetUpdateInput {
   sort_order?: number
 }
 
+export const MAX_HOTSPOTS = 12
+
+export interface Hotspot {
+  id: string
+  prototype_id: string
+  asset_id: string
+  label: string
+  description: string
+  x: number
+  y: number
+  z: number
+  sort_order: number
+  created_at: string
+}
+
+export interface HotspotCreateInput {
+  asset_id: string
+  label: string
+  description?: string
+  x: number
+  y: number
+  z: number
+  sort_order?: number
+}
+
+export type HotspotUpdateInput = Partial<Pick<Hotspot, 'label' | 'description' | 'x' | 'y' | 'z' | 'sort_order'>>
+
 // ---- Público ----
 
 export interface PublicAsset {
@@ -79,6 +106,15 @@ export interface PublicAsset {
   size_bytes: number
   caption: string
   url: string
+}
+
+export interface PublicHotspot {
+  label: string
+  description: string
+  x: number
+  y: number
+  z: number
+  sort_order: number
 }
 
 export interface PublicPrototypeSummary {
@@ -96,6 +132,7 @@ export interface PublicPrototypeDetail extends PublicPrototypeSummary {
   description: string
   specs: Spec[]
   assets: PublicAsset[]
+  hotspots: PublicHotspot[]
 }
 
 export const prototypesApi = {
@@ -132,6 +169,12 @@ export const prototypesApi = {
   updateAsset: (id: string, assetId: string, data: AssetUpdateInput) =>
     api.patch<Asset>(`/prototypes/${id}/assets/${assetId}`, data).then((r) => r.data),
   removeAsset: (id: string, assetId: string) => api.delete(`/prototypes/${id}/assets/${assetId}`),
+  listHotspots: (id: string) => api.get<Hotspot[]>(`/prototypes/${id}/hotspots`).then((r) => r.data),
+  createHotspot: (id: string, data: HotspotCreateInput) =>
+    api.post<Hotspot>(`/prototypes/${id}/hotspots`, data).then((r) => r.data),
+  updateHotspot: (id: string, hotspotId: string, data: HotspotUpdateInput) =>
+    api.patch<Hotspot>(`/prototypes/${id}/hotspots/${hotspotId}`, data).then((r) => r.data),
+  removeHotspot: (id: string, hotspotId: string) => api.delete(`/prototypes/${id}/hotspots/${hotspotId}`),
 }
 
 /** Ruta interna (relativa al cliente `api`) para descargar un archivo privado. */
