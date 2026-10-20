@@ -77,6 +77,11 @@ function Detail({ data }: { data: PublicPrototypeDetail }) {
   const images = data.assets.filter((a) => a.kind === 'image')
   const [modelId, setModelId] = useState(models[0]?.id ?? null)
   const model = models.find((m) => m.id === modelId) ?? models[0]
+  // Los puntos públicos pertenecen al STL principal (el primero); otros modelos se ven sin callouts.
+  const showHotspots = model !== undefined && model.id === models[0]?.id && data.hotspots.length > 0
+  const viewerHotspots = showHotspots
+    ? data.hotspots.map((h, i) => ({ key: `h${i}`, label: h.label, description: h.description, x: h.x, y: h.y, z: h.z }))
+    : undefined
 
   const [first, ...restName] = data.name.trim().split(/\s+/)
   const chips = data.specs.slice(0, 4)
@@ -118,9 +123,25 @@ function Detail({ data }: { data: PublicPrototypeDetail }) {
                   key={model.id}
                   url={model.url}
                   label={`Modelo 3D de ${data.name}${model.caption ? `: ${model.caption}` : ''}`}
+                  hotspots={viewerHotspots}
                   className="h-[52vh] min-h-[320px] w-full rounded-[22px]"
                 />
               </div>
+              {showHotspots && (
+                <ol aria-label="Puntos del modelo" className="mt-4 space-y-2 sm:sr-only">
+                  {data.hotspots.map((h, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-lime text-[10px] font-bold text-ink">
+                        {i + 1}
+                      </span>
+                      <span>
+                        <span className="font-semibold">{h.label}</span>
+                        {h.description && <span className="text-muted"> — {h.description}</span>}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
               {models.length > 1 && (
                 <div role="group" aria-label="Modelos 3D" className="mt-4 flex flex-wrap gap-2">
                   {models.map((m, i) => (

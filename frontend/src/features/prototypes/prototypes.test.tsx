@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AxiosError, AxiosHeaders } from 'axios'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -11,7 +11,12 @@ import { STATUS_ORDER, statusLabel, statusTone } from './status'
 import { PublicLayout } from '@/layouts/PublicLayout'
 
 vi.mock('./LazyStlViewer', () => ({
-  StlViewer: ({ label }: { label: string }) => <div data-testid="stl-viewer">{label}</div>,
+  StlViewer: ({ label, hotspots }: { label: string; hotspots?: { label: string }[] }) => (
+    <div data-testid="stl-viewer">
+      {label}
+      <span data-testid="viewer-points">{(hotspots ?? []).map((h) => h.label).join('|')}</span>
+    </div>
+  ),
 }))
 
 function notFound() {
@@ -235,5 +240,64 @@ describe('PrototypePublicPage diseño 53', () => {
     renderAt('x')
     await screen.findByRole('heading', { level: 1, name: 'X' })
     expect(screen.queryByTestId('spec-chips')).toBeNull()
+  })
+})
+
+describe('PrototypePublicPage hotspots', () => {
+  const base: PublicPrototypeDetail = {
+    slug: 'ecos',
+    name: 'Germinador ECOS',
+    codename: null,
+    purpose: '',
+    summary: '',
+    status: 'testing',
+    published_at: null,
+    hero: null,
+    description: '',
+    specs: [],
+    assets: [
+      { id: 'm1', kind: 'model_stl', filename: 'a.stl', content_type: 'model/stl', size_bytes: 1, caption: 'Principal', url: '/a' },
+      { id: 'm2', kind: 'model_stl', filename: 'b.stl', content_type: 'model/stl', size_bytes: 1, caption: 'Tapa', url: '/b' },
+    ],
+    hotspots: [
+      { label: 'LED espectro completo', description: 'Luz para germinar', x: 0, y: 0, z: 1, sort_order: 0 },
+      { label: 'Sensor de humedad', description: '', x: 1, y: 0, z: 0, sort_order: 1 },
+    ],
+  }
+
+  function renderEcos(detail: PublicPrototypeDetail) {
+    vi.spyOn(prototypesApi, 'publicDetail').mockResolvedValue(detail)
+    render(
+      <MemoryRouter initialEntries={['/prototipos/ecos']}>
+        <Routes>
+          <Route path="/prototipos/:slug" element={<PrototypePublicPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+  }
+
+  it('pasa los puntos al visor del modelo principal y muestra la leyenda numerada', async () => {
+    renderEcos(base)
+    await screen.findByRole('heading', { level: 1 })
+    expect(screen.getByTestId('viewer-points')).toHaveTextContent('LED espectro completo|Sensor de humedad')
+    const legend = screen.getByRole('list', { name: 'Puntos del modelo' })
+    const items = within(legend).getAllByRole('listitem')
+    expect(items).toHaveLength(2)
+    expect(items[0]).toHaveTextContent('1')
+    expect(items[0]).toHaveTextContent('LED espectro completo')
+    expect(items[0]).toHaveTextContent('Luz para germinar')
+  })
+
+  it('al cambiar a otro modelo quita puntos y leyenda', async () => {
+    renderEcos(base)
+    fireEvent.click(await screen.findByRole('button', { name: 'Tapa' }))
+    expect(screen.getByTestId('viewer-points').textContent).toBe('')
+    expect(screen.queryByRole('list', { name: 'Puntos del modelo' })).toBeNull()
+  })
+
+  it('sin puntos no hay leyenda', async () => {
+    renderEcos({ ...base, hotspots: [] })
+    await screen.findByRole('heading', { level: 1 })
+    expect(screen.queryByRole('list', { name: 'Puntos del modelo' })).toBeNull()
   })
 })
