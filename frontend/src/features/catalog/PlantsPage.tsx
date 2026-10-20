@@ -5,6 +5,7 @@ import { Badge, Button, Card, Empty, ErrorState, Forbidden, Input, Loading, Page
 import { listFamilies, listPlants, Page, SpeciesSummary } from './api'
 import { namesFor } from './labels'
 import { Pagination } from './Pagination'
+import { PlantThumb } from './PlantThumb'
 import { ScientificName } from './ScientificName'
 
 const PAGE_SIZE = 24
@@ -135,6 +136,7 @@ export function PlantsPage() {
                     className="block h-full rounded-lg focus-visible:outline-offset-4"
                   >
                     <Card className="flex h-full flex-col gap-3 p-5 transition-transform hover:-translate-y-0.5">
+                      <PlantThumb speciesId={s.id} scientificName={s.scientific_name} />
                       <h2 className="text-base font-medium">
                         <ScientificName name={s.scientific_name} authorship={s.authorship} />
                       </h2>
