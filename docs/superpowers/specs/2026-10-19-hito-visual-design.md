@@ -36,18 +36,26 @@ Se reemplazan los tokens de `frontend/src/styles/index.css` (se conserva el esqu
 |---|---|---|
 | `--c-bg` (inicio degradado) | `#e6ece2` | `#141813` |
 | `--c-bg-2` (fin degradado, nuevo) | `#cfdacb` | `#1d231c` |
-| `--c-surface` (vidrio) | `255 255 255` usado a 52 % | `255 255 255` a 6 % |
+| `--c-surface` (vidrio) | `255 255 255` usado a 52 % | `33 40 32` a 0.7 de alfa (no blanco al 6 %) |
 | `--c-fg` | `#1d241c` | `#e6ece2` |
-| `--c-muted` | `#5d6a5b` | `#9aa898` |
-| `--c-accent` (verde legible para texto, bordes y foco) | `#4f7a12` | `#b9ec5a` |
+| `--c-muted` | `#505c4e` | `#9aa898` |
+| `--c-accent` (verde legible para texto, bordes y foco) | `#446a0e` | `#b9ec5a` |
 | `--c-lime` (nuevo, solo rellenos: barra activa, chip resaltado, ítem activo del riel) | `#a6e22e` | `#a6e22e` |
 | `--c-ink` (nuevo, oscuro sólido: riel, CTA) | `#262b25` | `#0d100c` |
 | `--c-danger`, `--c-warning` | se mantienen ajustados al fondo | ídem |
+
+Nota: `--c-muted` y `--c-accent` claros ajustados para contraste AA sobre bg-2.
 
 - Tipografía: Manrope (400–800) self-hosted vía `@fontsource/manrope`; se retira IBM Plex. `font-mono` queda para valores técnicos (IDs, unidades) con la pila del sistema.
 - Forma: radios 20–28 px en tarjetas, píldora (`rounded-full`) en botones y chips, sombra suave verdosa, `backdrop-blur` en vidrio con degradación a fondo sólido si el navegador no soporta blur.
 - Titulares de display: Manrope 800, mayúsculas, `letter-spacing` negativo; tamaño fluido (`clamp`) para que el título público de 64 px baje a ~40 px en móvil.
 - El tema claro es el predeterminado; el selector claro/oscuro existente (`store/theme.ts`) se mantiene.
+
+### Diferido a fases siguientes
+
+- Pestañas en píldora en `/app/projects/:id` (llegan con Operaciones/Studio en V3/V4).
+- Hook `useProjectedCallouts` (V2).
+- Nombres `pill-*`/`GlassCard`: se conservaron `primary/secondary` y `Card` para no tocar llamadores.
 
 ### 3.2 Componentes (`frontend/src/components/ui/`)
 
