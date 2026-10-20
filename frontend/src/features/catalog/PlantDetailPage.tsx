@@ -2,7 +2,7 @@ import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { errorMessage, errorStatus } from '@/api/client'
 import { Button, Card, Empty, ErrorState, Forbidden, Loading, OriginBadge } from '@/components/ui'
-import { useHasRole } from '@/store/auth'
+import { useAuth, useHasRole } from '@/store/auth'
 import { ExternalId, getPlant, Source, SpeciesDetail } from './api'
 import { AddToProjectDialog } from './AddToProjectDialog'
 import {
@@ -14,8 +14,10 @@ import {
   UNIT_LABELS,
   VARIABLE_LABELS,
 } from './labels'
+import { MediaAdmin } from './MediaAdmin'
 import { PlantIllustration } from './PlantIllustration'
 import { ScientificName } from './ScientificName'
+import { SpeciesHero } from './SpeciesHero'
 import { formatAssertionValue } from './traitCallouts'
 
 type State =
@@ -58,6 +60,7 @@ function SourceLine({ source }: { source: Source }) {
 export function PlantDetailPage() {
   const { id = '' } = useParams()
   const canEdit = useHasRole('editor')
+  const isSuperadmin = useAuth((st) => st.user?.is_superadmin ?? false)
   const [state, setState] = useState<State>({ status: 'loading' })
   const [adding, setAdding] = useState(false)
 
@@ -95,6 +98,7 @@ export function PlantDetailPage() {
   }
 
   const s = state.data
+  const heroMedia = s.media.find((m) => m.is_hero)
   const sourcesById = Object.fromEntries(s.sources.map((src) => [src.id, src]))
   const externalIds = Object.entries(s.external_ids ?? {})
   const langs = Array.from(new Set(s.common_names.map((n) => n.lang)))
@@ -120,7 +124,7 @@ export function PlantDetailPage() {
             )}
           </div>
           <div className="w-full shrink-0 sm:w-[24rem] lg:w-[34rem]">
-            <PlantIllustration species={s} />
+            {heroMedia ? <SpeciesHero species={s} media={heroMedia} /> : <PlantIllustration species={s} />}
           </div>
         </div>
       </Card>
@@ -273,6 +277,7 @@ export function PlantDetailPage() {
               )}
             </Section>
           </Card>
+          {isSuperadmin && <MediaAdmin species={s} onChanged={() => load()} />}
         </div>
       </div>
 
