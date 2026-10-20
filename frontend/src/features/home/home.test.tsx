@@ -7,6 +7,7 @@ import { HomePage } from './HomePage'
 const base: HomeData = {
   recent_project: null,
   counts: { projects: 0, crop_cycles: 0, observations: 0, sources_cited: 0 },
+  readings: [],
   activity: [],
 }
 
@@ -33,6 +34,7 @@ it('con proyecto muestra héroe, conteos reales y actividad', async () => {
   vi.spyOn(homeApi, 'get').mockResolvedValue({
     recent_project: { id: 'p1', name: 'Demo lechuga', system: 'hydroponic', area_m2: 12, species: ['Lactuca sativa L.'] },
     counts: { projects: 1, crop_cycles: 1, observations: 3, sources_cited: 0 },
+    readings: [],
     activity: [{ id: 'a1', text: 'Proyecto creado: Demo lechuga', resource_type: 'project', resource_id: 'p1', created_at: '2026-10-20T10:00:00Z' }],
   })
   renderPage()
@@ -48,4 +50,22 @@ it('error muestra reintento', async () => {
   vi.spyOn(homeApi, 'get').mockRejectedValue(new Error('x'))
   renderPage()
   await waitFor(() => expect(screen.getByRole('button', { name: 'Reintentar' })).toBeInTheDocument())
+})
+
+it('muestra las últimas lecturas simuladas con su badge y "Sin señal" si se perdió', async () => {
+  vi.spyOn(homeApi, 'get').mockResolvedValue({
+    ...base,
+    recent_project: { id: 'p1', name: 'Invernadero demostrativo', system: 'other', area_m2: null, species: [] },
+    readings: [
+      { variable: 'air_temperature', value: 24.34, unit: 'Cel', observed_at: '2026-10-20T12:00:00Z', stale: false, device_name: 'Sensor norte', origin: 'simulated' },
+      { variable: 'relative_humidity', value: null, unit: '%', observed_at: '2026-10-20T11:50:00Z', stale: true, device_name: 'Sensor norte', origin: 'simulated' },
+    ],
+  })
+  renderPage()
+  await waitFor(() => expect(screen.getByText('24.3')).toBeInTheDocument())
+  expect(screen.getByText('°C')).toBeInTheDocument()
+  expect(screen.getByText('Simulado')).toHaveAttribute('title', expect.stringContaining('simulación'))
+  const humidity = screen.getByText('Humedad relativa').closest('div')!
+  expect(humidity).toHaveTextContent('Sin señal')
+  expect(humidity).not.toHaveTextContent('%') // sin señal no se muestra 0 ni el último valor
 })

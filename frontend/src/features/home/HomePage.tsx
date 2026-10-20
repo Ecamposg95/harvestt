@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom'
 import { errorMessage } from '@/api/client'
 import { BarChart, Card, ErrorState, Loading, StatTile } from '@/components/ui'
 import { formatDate } from '@/features/catalog/labels'
+import { formatReading, unitLabel } from '@/features/operations/format'
 import type { CultivationSystem } from '@/features/projects/api'
 import { SYSTEM_LABELS } from '@/features/projects/labels'
 import { useAuth } from '@/store/auth'
-import { HomeData, homeApi } from './api'
+import { HomeData, homeApi, HomeReading } from './api'
 
 type State = { phase: 'loading' } | { phase: 'error'; message: string } | { phase: 'ready'; data: HomeData }
 
@@ -20,6 +21,12 @@ function GreenhouseArt() {
       ))}
     </svg>
   )
+}
+
+function ReadingTile({ label, reading }: { label: string; reading?: HomeReading }) {
+  if (!reading) return <StatTile label={label} value={null} emptyText="Sin lecturas" />
+  if (reading.stale || reading.value === null) return <StatTile label={label} value={null} emptyText="Sin señal" />
+  return <StatTile label={label} value={formatReading(reading.value)} unit={unitLabel(reading.unit)} origin={reading.origin} />
 }
 
 export function HomePage() {
@@ -37,7 +44,8 @@ export function HomePage() {
 
   if (state.phase === 'loading') return <Loading />
   if (state.phase === 'error') return <ErrorState message={state.message} onRetry={load} />
-  const { recent_project: p, counts, activity } = state.data
+  const { recent_project: p, counts, activity, readings } = state.data
+  const reading = (variable: HomeReading['variable']) => readings.find((r) => r.variable === variable)
 
   return (
     <div className="space-y-3">
@@ -73,8 +81,8 @@ export function HomePage() {
       </Card>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile label="Temperatura del aire" value={null} emptyText="Sin lecturas" />
-        <StatTile label="Humedad relativa" value={null} emptyText="Sin lecturas" />
+        <ReadingTile label="Temperatura del aire" reading={reading('air_temperature')} />
+        <ReadingTile label="Humedad relativa" reading={reading('relative_humidity')} />
         <StatTile label="Observaciones" value={counts.observations} />
         <StatTile label="Fuentes citadas" value={counts.sources_cited} />
       </div>
