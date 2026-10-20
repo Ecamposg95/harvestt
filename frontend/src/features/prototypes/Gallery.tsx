@@ -74,7 +74,7 @@ export function Gallery({ images, title = 'Galería' }: { images: GalleryImage[]
               }}
               type="button"
               onClick={() => setOpen(i)}
-              className="group block w-full overflow-hidden rounded-md border border-border bg-surface text-left"
+              className="group glass block w-full overflow-hidden text-left"
               aria-label={`Ampliar imagen ${i + 1} de ${images.length}${img.caption ? `: ${img.caption}` : ''}`}
             >
               <img
@@ -106,7 +106,7 @@ export function Gallery({ images, title = 'Galería' }: { images: GalleryImage[]
               ref={closeRef}
               type="button"
               onClick={close}
-              className="rounded-md border border-white/20 px-3 py-1.5 text-white hover:bg-white/10"
+              className="rounded-full border border-white/20 px-3 py-1.5 text-white hover:bg-white/10"
             >
               Cerrar
             </button>
@@ -124,7 +124,7 @@ export function Gallery({ images, title = 'Galería' }: { images: GalleryImage[]
               type="button"
               onClick={() => step(-1)}
               disabled={images.length < 2}
-              className="rounded-md border border-white/20 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-white hover:bg-white/10 disabled:opacity-30"
+              className="rounded-full border border-white/20 px-3 py-1.5 text-xs uppercase tracking-wider text-white hover:bg-white/10 disabled:opacity-30"
             >
               ← Anterior
             </button>
@@ -133,7 +133,7 @@ export function Gallery({ images, title = 'Galería' }: { images: GalleryImage[]
               type="button"
               onClick={() => step(1)}
               disabled={images.length < 2}
-              className="rounded-md border border-white/20 px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-white hover:bg-white/10 disabled:opacity-30"
+              className="rounded-full border border-white/20 px-3 py-1.5 text-xs uppercase tracking-wider text-white hover:bg-white/10 disabled:opacity-30"
             >
               Siguiente →
             </button>

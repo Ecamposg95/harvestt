@@ -69,7 +69,7 @@ export function AddToProjectDialog({ species, onClose }: Props) {
             </Button>
             <Link
               to={`/app/projects/${created.id}`}
-              className="inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-fg hover:bg-accent/90"
+              className="inline-flex items-center rounded-full bg-ink px-4 py-2 text-sm font-medium text-ink-fg hover:bg-ink/90"
             >
               Ir al proyecto
             </Link>

@@ -78,7 +78,7 @@ export function ObservationLog({ projectId, cycles, canEdit }: Props) {
   return (
     <div className="space-y-6">
       {canEdit && (
-        <form onSubmit={submit} className="space-y-4 rounded-lg border border-border bg-raised/40 p-4" noValidate>
+        <form onSubmit={submit} className="space-y-4 glass p-4" noValidate>
           <Field label="Observación" error={errors.content}>
             {(id, d) => (
               <Textarea
@@ -148,7 +148,7 @@ export function ObservationLog({ projectId, cycles, canEdit }: Props) {
         <>
           <ol className="space-y-3" aria-label="Observaciones">
             {items.map((o) => (
-              <li key={o.id} className="rounded-lg border border-border p-4">
+              <li key={o.id} className="glass p-4">
                 <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-muted">
                   <Badge tone={o.kind === 'incident' ? 'warning' : 'neutral'}>{OBSERVATION_KIND_LABELS[o.kind] ?? o.kind}</Badge>
                   <time dateTime={o.observed_at} className="font-mono">
