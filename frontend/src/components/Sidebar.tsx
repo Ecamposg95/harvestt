@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { Icon, IconName } from '@/components/icons'
+import { Logo } from '@/components/Logo'
 import { cx } from '@/components/ui'
 import { useAuth } from '@/store/auth'
 import { useSidebar } from '@/store/sidebar'
@@ -45,12 +46,7 @@ export function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; onClose:
         )}
       >
         <NavLink to="/app" onClick={onClose} className="mb-6 flex h-11 items-center gap-2 px-2.5" aria-label="HarvestT Cortex">
-          <span className="h-6 w-6 shrink-0 rounded-full bg-lime" />
-          {expanded && (
-            <span className="truncate font-extrabold tracking-tight">
-              HarvestT <span className="font-medium text-ink-fg/60">Cortex</span>
-            </span>
-          )}
+          {expanded ? <Logo withCortex cortexClassName="text-ink-fg/60" /> : <Logo compact />}
         </NavLink>
         <nav aria-label="Principal" className="flex flex-1 flex-col gap-1">
           {NAV_ITEMS.map((item) => (

@@ -112,7 +112,7 @@ export function PlantDetailPage() {
         <div className="flex items-start justify-between gap-6">
           <div>
             {s.family && <p className="eyebrow">{s.family}</p>}
-            <h1 className="display mt-2 text-4xl">
+            <h1 className="display mt-2 text-4xl normal-case">
               <ScientificName name={s.scientific_name} authorship={s.authorship} />
             </h1>
             <p className="mt-2 text-sm text-muted">

@@ -2,12 +2,23 @@ import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { api } from '@/api/client'
 import { Icon } from '@/components/icons'
+import { Logo } from '@/components/Logo'
 import { Sidebar } from '@/components/Sidebar'
 import { Membership, User, useAuth } from '@/store/auth'
 
 export function AppLayout() {
   const { user, setProfile } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
+    const mq = window.matchMedia('(min-width: 768px)')
+    const onChange = (e: MediaQueryListEvent) => {
+      if (e.matches) setMobileOpen(false)
+    }
+    mq.addEventListener?.('change', onChange)
+    return () => mq.removeEventListener?.('change', onChange)
+  }, [])
 
   useEffect(() => {
     if (user) return
@@ -25,9 +36,7 @@ export function AppLayout() {
           <button onClick={() => setMobileOpen(true)} className="rounded-full p-2 hover:bg-surface" aria-label="Abrir menú">
             <Icon name="menu" />
           </button>
-          <span className="font-extrabold tracking-tight">
-            HarvestT <span className="font-medium text-muted">Cortex</span>
-          </span>
+          <Logo withCortex dotClassName="h-5 w-5" />
         </header>
         <main className="mx-auto w-full max-w-7xl flex-1 px-1 py-4 sm:px-4">
           <Outlet />

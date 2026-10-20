@@ -5,10 +5,10 @@ export type Tone = 'neutral' | 'accent' | 'lime' | 'warning' | 'danger'
 
 const tones: Record<Tone, string> = {
   neutral: 'bg-fg/5 text-muted',
-  accent: 'bg-accent/12 text-accent',
-  lime: 'bg-lime/45 text-fg',
-  warning: 'bg-warning/12 text-warning',
-  danger: 'bg-danger/12 text-danger',
+  accent: 'bg-accent/15 text-accent',
+  lime: 'bg-lime text-ink',
+  warning: 'bg-warning/15 text-warning',
+  danger: 'bg-danger/15 text-danger',
 }
 
 export function Badge({

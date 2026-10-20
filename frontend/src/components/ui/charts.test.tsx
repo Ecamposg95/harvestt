@@ -10,6 +10,13 @@ it('BarChart no dibuja barra para null', () => {
   expect(container.querySelectorAll('[data-gap]')).toHaveLength(1)
 })
 
+it('BarChart dibuja el 0 como línea base plana, distinta del hueco', () => {
+  const { container } = render(<BarChart ariaLabel="Conteo" data={[{ label: 'a', value: 0 }, { label: 'b', value: 3 }, { label: 'c', value: null }]} />)
+  expect(container.querySelectorAll('[data-zero]')).toHaveLength(1)
+  expect(container.querySelectorAll('[data-bar]')).toHaveLength(1)
+  expect(container.querySelectorAll('[data-gap]')).toHaveLength(1)
+})
+
 it('linePaths corta la línea en los huecos', () => {
   const paths = linePaths([1, 2, null, null, 3, 4], 100, 50, 0, 5)
   expect(paths).toHaveLength(2)

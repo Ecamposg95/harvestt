@@ -1,4 +1,5 @@
 import { Link, Outlet } from 'react-router-dom'
+import { Logo } from '@/components/Logo'
 import { useAuth } from '@/store/auth'
 
 export function PublicLayout() {
@@ -6,10 +7,9 @@ export function PublicLayout() {
   return (
     <div className="min-h-screen text-fg">
       <header className="fixed inset-x-0 top-0 z-30 px-3 pt-3">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-2 sm:px-4">
-          <Link to="/" aria-label="Inicio" className="flex items-center gap-2 font-extrabold tracking-tight">
-            <span className="h-5 w-5 rounded-full bg-lime" />
-            HarvestT
+        <div className="glass mx-auto flex h-14 max-w-7xl items-center justify-between !rounded-full px-4 sm:px-5">
+          <Link to="/" aria-label="Inicio" className="flex items-center">
+            <Logo dotClassName="h-5 w-5" />
           </Link>
           <nav className="flex items-center gap-2 text-sm">
             <Link to="/" className="glass !rounded-full px-4 py-2 font-semibold">

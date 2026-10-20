@@ -26,6 +26,8 @@ export function BarChart({
       {data.map((d, i) =>
         d.value === null ? (
           <span key={i} data-gap className="flex-1 self-end border-b-2 border-dashed border-border" title={`${d.label}: sin dato`} />
+        ) : d.value === 0 ? (
+          <span key={i} data-zero title={`${d.label}: 0`} className="h-0.5 flex-1 self-end rounded-full bg-fg/25" />
         ) : (
           <span
             key={i}

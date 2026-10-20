@@ -1,18 +1,26 @@
-export function Logo({ className = '' }: { className?: string }) {
+import { cx } from './ui/cx'
+
+/** Marca V1: punto lime + "HarvestT" [+ "Cortex"]. `compact` deja solo el punto. */
+export function Logo({
+  className,
+  dotClassName = 'h-6 w-6',
+  cortexClassName = 'text-muted',
+  withCortex = false,
+  compact = false,
+}: {
+  className?: string
+  dotClassName?: string
+  cortexClassName?: string
+  withCortex?: boolean
+  compact?: boolean
+}) {
+  const dot = <span aria-hidden="true" className={cx('shrink-0 rounded-full bg-lime', dotClassName)} />
+  if (compact) return dot
   return (
-    <span className={`inline-flex items-center gap-2 font-semibold tracking-tight ${className}`}>
-      <svg viewBox="0 0 32 32" className="h-6 w-6" aria-hidden="true">
-        <path
-          d="M16 25V13m0 0c0-4 3-7 7-7 0 4-3 7-7 7Zm0 4c0-3-2.5-5.5-6-5.5 0 3 2.5 5.5 6 5.5Z"
-          stroke="currentColor"
-          strokeWidth="2"
-          fill="none"
-          strokeLinecap="round"
-          className="text-accent"
-        />
-      </svg>
-      <span>
-        HarvestT <span className="font-light text-muted">Cortex</span>
+    <span className={cx('inline-flex items-center gap-2 font-extrabold tracking-tight', className)}>
+      {dot}
+      <span className="truncate">
+        HarvestT{withCortex && <> <span className={cx('font-medium', cortexClassName)}>Cortex</span></>}
       </span>
     </span>
   )

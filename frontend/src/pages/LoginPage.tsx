@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { api, errorMessage } from '@/api/client'
+import { Logo } from '@/components/Logo'
 import { Button, Card, Field, Input } from '@/components/ui'
 import { Membership, User, useAuth } from '@/store/auth'
 
@@ -38,7 +39,7 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-sm p-8">
         <div className="mb-8">
-          <span className="mb-4 block h-8 w-8 rounded-full bg-lime" />
+          <Logo compact dotClassName="mb-4 block h-8 w-8" />
           <h1 className="display text-3xl">HarvestT Cortex</h1>
           <p className="mt-1 text-sm text-muted">Inicia sesión para continuar</p>
         </div>
