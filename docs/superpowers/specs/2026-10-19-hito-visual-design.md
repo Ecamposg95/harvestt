@@ -39,8 +39,8 @@ Se reemplazan los tokens de `frontend/src/styles/index.css` (se conserva el esqu
 | `--c-surface` (vidrio) | `255 255 255` usado a 52 % | `255 255 255` a 6 % |
 | `--c-fg` | `#1d241c` | `#e6ece2` |
 | `--c-muted` | `#5d6a5b` | `#9aa898` |
-| `--c-accent` | `#a6e22e` (lima) | `#a6e22e` |
-| `--c-accent-ink` (nuevo, texto verde sobre claro) | `#4f7a12` | `#b9ec5a` |
+| `--c-accent` (verde legible para texto, bordes y foco) | `#4f7a12` | `#b9ec5a` |
+| `--c-lime` (nuevo, solo rellenos: barra activa, chip resaltado, ítem activo del riel) | `#a6e22e` | `#a6e22e` |
 | `--c-ink` (nuevo, oscuro sólido: riel, CTA) | `#262b25` | `#0d100c` |
 | `--c-danger`, `--c-warning` | se mantienen ajustados al fondo | ídem |
 
@@ -64,7 +64,7 @@ Se reescriben `Button` (variantes `pill-dark`, `pill-glass`, `ghost`), `Card` �
 | Ruta | Cambio |
 |---|---|
 | `/` (vitrina) | Fondo salvia, nav con píldoras, héroe con titular grande, tarjetas de prototipo en vidrio con imagen héroe y estado |
-| `/prototipos/:slug` | Layout de la 53: título enorme con nombre en `accent-ink`, propósito, CTA, visor STL en tarjeta de vidrio, fila de chips de specs (campos existentes del prototipo; sin specs inventadas), galería |
+| `/prototipos/:slug` | Layout de la 53: título enorme con nombre en `accent`, propósito, CTA, visor STL en tarjeta de vidrio, fila de chips de specs (campos existentes del prototipo; sin specs inventadas), galería |
 | `/login` | Tarjeta de vidrio centrada sobre degradado |
 | `/app` | Layout de la 43: héroe con proyecto más reciente (nombre, especie, sistema, área si existe), tiles de lecturas (antes de V3: "Sin lecturas"), conteos reales (observaciones, ciclos, fuentes citadas), actividad reciente desde `AuditEvent` del tenant |
 | `/app/plants`, `/app/plants/:id` | Tarjetas de vidrio, afirmaciones con `OriginBadge`; ficha con héroe preparado para V4 (placeholder con nombre científico mientras no haya medio) |
