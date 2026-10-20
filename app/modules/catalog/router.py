@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, File, Form, Query, Request, Response, UploadFile
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
-from app.core.deps import RequestContext, get_context
-from app.modules.catalog import service
-from app.modules.catalog.schemas import Page, SourceOut, SpeciesDetail, SpeciesSummary
+from app.core.deps import RequestContext, get_context, require_superadmin
+from app.core.storage import get_storage
+from app.modules.catalog import media, service
+from app.modules.catalog.schemas import Page, SourceOut, SpeciesDetail, SpeciesMediaOut, SpeciesSummary
+from app.modules.identity.models import User
 
 router = APIRouter(tags=["catalog"])
 
@@ -37,3 +40,46 @@ def get_plant(species_id: str, _: RequestContext = Depends(get_context), db: Ses
 @router.get("/sources/{source_id}", response_model=SourceOut)
 def get_source(source_id: str, _: RequestContext = Depends(get_context), db: Session = Depends(get_db)):
     return service.get_source_or_404(db, source_id)
+
+
+@router.post("/plants/{species_id}/media", response_model=SpeciesMediaOut, status_code=201)
+def upload_media(
+    species_id: str,
+    file: UploadFile = File(...),
+    kind: str = Form(default="photo"),
+    license: str = Form(default=""),
+    attribution: str = Form(default=""),
+    source_url: str = Form(default=""),
+    is_hero: bool = Form(default=False),
+    callouts: str = Form(default="[]"),
+    user: User = Depends(require_superadmin),
+    db: Session = Depends(get_db),
+):
+    meta = media.parse_meta(kind, license, attribution, source_url, is_hero, callouts)
+    return service.media_out(media.create_media(db, user, species_id, file.file, file.filename, meta))
+
+
+@router.delete("/plants/{species_id}/media/{media_id}", status_code=204)
+def delete_media(
+    species_id: str, media_id: str, user: User = Depends(require_superadmin), db: Session = Depends(get_db)
+):
+    media.delete_media(db, user, species_id, media_id)
+    return Response(status_code=204)
+
+
+@router.get("/plants/{species_id}/media/{media_id}/file")
+def media_file(
+    species_id: str,
+    media_id: str,
+    request: Request,
+    _: RequestContext = Depends(get_context),
+    db: Session = Depends(get_db),
+):
+    item = media.get_media_or_404(db, species_id, media_id)
+    etag = f'"{item.checksum_sha256}"'
+    headers = {"Cache-Control": "private, max-age=86400", "ETag": etag, "X-Content-Type-Options": "nosniff"}
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304, headers=headers)
+    headers["Content-Length"] = str(item.size_bytes)
+    headers["Content-Disposition"] = f'inline; filename="{item.filename}"'
+    return StreamingResponse(get_storage().open(item.storage_key), media_type=item.content_type, headers=headers)

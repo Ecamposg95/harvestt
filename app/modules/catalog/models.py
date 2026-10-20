@@ -1,7 +1,7 @@
 """Catálogo vegetal global (sin tenant). Lectura para cualquier miembro; escritura solo superadmin."""
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, Float, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import JSON, BigInteger, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
@@ -92,3 +92,29 @@ class TraitAssertion(UUIDMixin, AuditMixin, Base):
     # [{"source_id": "...", "locator": "p. 12"}]
     evidence_refs: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+MEDIA_KINDS = ("photo", "render")
+MAX_MEDIA_CALLOUTS = 12
+
+
+class SpeciesMedia(UUIDMixin, AuditMixin, Base):
+    """Imagen global de una especie. La sube un superadmin con licencia verificada; nunca se descarga sola."""
+
+    __tablename__ = "species_media"
+
+    species_id: Mapped[str] = mapped_column(String(36), ForeignKey("species.id"), nullable=False, index=True)
+    storage_key: Mapped[str] = mapped_column(String(500), nullable=False)
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    checksum_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    kind: Mapped[str] = mapped_column(String(20), nullable=False, default="photo")
+    license: Mapped[str] = mapped_column(String(120), nullable=False)
+    attribution: Mapped[str] = mapped_column(String(300), nullable=False)
+    source_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    is_hero: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    width: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    height: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # [{"trait_variable": "ph", "x": 0.25, "y": 0.75}] con x, y en 0..1 sobre la imagen
+    callouts: Mapped[list] = mapped_column(JSON, nullable=False, default=list)

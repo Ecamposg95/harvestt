@@ -51,8 +51,29 @@ def upgrade() -> None:
         *_timestamps(),
     )
 
+    op.create_table(
+        "species_media",
+        sa.Column("id", sa.String(36), primary_key=True),
+        sa.Column("species_id", sa.String(36), sa.ForeignKey("species.id"), nullable=False, index=True),
+        sa.Column("storage_key", sa.String(500), nullable=False),
+        sa.Column("filename", sa.String(255), nullable=False),
+        sa.Column("content_type", sa.String(100), nullable=False),
+        sa.Column("size_bytes", sa.BigInteger(), nullable=False),
+        sa.Column("checksum_sha256", sa.String(64), nullable=False),
+        sa.Column("kind", sa.String(20), nullable=False),
+        sa.Column("license", sa.String(120), nullable=False),
+        sa.Column("attribution", sa.String(300), nullable=False),
+        sa.Column("source_url", sa.String(500), nullable=True),
+        sa.Column("is_hero", sa.Boolean(), nullable=False),
+        sa.Column("width", sa.Integer(), nullable=True),
+        sa.Column("height", sa.Integer(), nullable=True),
+        sa.Column("callouts", sa.JSON(), nullable=False),
+        *_timestamps(),
+    )
+
 
 def downgrade() -> None:
+    op.drop_table("species_media")
     op.drop_table("studio_placements")
     op.drop_table("studio_zones")
     op.drop_column("projects", "layout_version")
