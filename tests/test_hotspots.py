@@ -142,3 +142,81 @@ def test_tenant_isolation(client, tenants):
     # Un hotspot no se alcanza a través de otro prototipo de la misma org
     other = create(client, h, name="Otro")
     assert client.patch(f"{API}/prototypes/{other['id']}/hotspots/{hid}", json={"label": "X"}, headers=h).status_code == 404
+
+# ---- Público, cascadas y actividad ----
+
+from app.modules.home.service import activity_text  # noqa: E402
+
+
+def _walk_keys(obj):
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            yield k
+            yield from _walk_keys(v)
+    elif isinstance(obj, list):
+        for item in obj:
+            yield from _walk_keys(item)
+
+
+def test_public_detail_has_hotspots_of_principal_public_stl(client, tenants):
+    h = tenants["alfa_editor"]
+    proto = create(client, h, name="Germinador ECOS", slug="ecos", is_public=True)
+    private_stl = stl(client, h, proto["id"], "interno.stl", is_public=False)
+    principal = stl(client, h, proto["id"], "principal.stl")
+    second = stl(client, h, proto["id"], "segundo.stl")
+    add(client, h, proto["id"], point(private_stl["id"], label="Secreto"))
+    add(client, h, proto["id"], point(principal["id"], label="LED", description="Espectro completo", sort_order=2))
+    add(client, h, proto["id"], point(principal["id"], label="Sensor", sort_order=1))
+    add(client, h, proto["id"], point(second["id"], label="Del segundo"))
+
+    res = client.get(f"{API}/public/prototypes/ecos")
+    assert res.status_code == 200
+    hotspots = res.json()["hotspots"]
+    assert [p["label"] for p in hotspots] == ["Sensor", "LED"]
+    assert hotspots[1] == {"label": "LED", "description": "Espectro completo", "x": 1.5, "y": -2.0, "z": 30.25, "sort_order": 2}
+    keys = set(_walk_keys(hotspots))
+    assert keys == {"label", "description", "x", "y", "z", "sort_order"}
+    assert "Secreto" not in res.text and "Del segundo" not in res.text
+
+
+def test_public_detail_without_stl_has_empty_hotspots(client, tenants):
+    create(client, tenants["alfa_editor"], name="Sin modelo", slug="sin-modelo", is_public=True)
+    assert client.get(f"{API}/public/prototypes/sin-modelo").json()["hotspots"] == []
+
+
+def test_deleting_stl_soft_deletes_its_hotspots(client, tenants):
+    h = tenants["alfa_editor"]
+    proto = create(client, h, slug="p", is_public=True)
+    a = stl(client, h, proto["id"], "a.stl")
+    b = stl(client, h, proto["id"], "b.stl")
+    for i in range(6):
+        add(client, h, proto["id"], point(a["id"], label=f"A{i}"))
+        add(client, h, proto["id"], point(b["id"], label=f"B{i}"))
+    assert client.delete(f"{API}/prototypes/{proto['id']}/assets/{a['id']}", headers=h).status_code == 204
+    labels = [p["label"] for p in client.get(f"{API}/prototypes/{proto['id']}/hotspots", headers=h).json()]
+    assert labels and all(lbl.startswith("B") for lbl in labels)
+    # Los 6 de A ya no cuentan para el límite
+    assert add(client, h, proto["id"], point(b["id"], label="nuevo")).status_code == 201
+    # b pasó a ser el STL principal público
+    assert {p["label"] for p in client.get(f"{API}/public/prototypes/p").json()["hotspots"]} == set(labels) | {"nuevo"}
+
+
+def test_deleting_prototype_soft_deletes_hotspots(client, tenants, db):
+    from app.modules.prototypes.models import PrototypeHotspot
+
+    h = tenants["alfa_editor"]
+    proto = create(client, h)
+    model = stl(client, h, proto["id"])
+    hid = add(client, h, proto["id"], point(model["id"])).json()["id"]
+    assert client.delete(f"{API}/prototypes/{proto['id']}", headers=h).status_code == 204
+    db.expire_all()
+    assert db.get(PrototypeHotspot, hid).deleted_at is not None
+
+
+@pytest.mark.parametrize(
+    "operation,text",
+    [("create", "Punto agregado al modelo 3D"), ("update", "Punto del modelo 3D actualizado"), ("delete", "Punto del modelo 3D eliminado")],
+)
+def test_activity_texts(operation, text):
+    event = AuditEvent(resource_type="prototype_hotspot", resource_id="x", operation=operation, data={})
+    assert activity_text(event) == text

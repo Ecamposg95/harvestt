@@ -22,6 +22,7 @@ from app.modules.prototypes.schemas import (
     PrototypeOut,
     PrototypeUpdate,
     PublicAssetOut,
+    PublicHotspotOut,
     PublicPrototypeDetail,
     PublicPrototypeSummary,
 )
@@ -205,11 +206,17 @@ def public_prototype(slug: str, db: Session = Depends(get_db)):
     if proto is None:
         raise not_found("prototipo")
     assets = service.public_assets(db, [proto.id])
+    principal = next((a for a in assets if a.kind == "model_stl"), None)
+    hotspots = service.public_hotspots(db, principal.id) if principal else []
     return PublicPrototypeDetail(
         **_summary_fields(proto, assets),
         description=proto.description,
         specs=proto.specs or [],
         assets=[_public_asset_out(a) for a in assets],
+        hotspots=[
+            PublicHotspotOut(label=h.label, description=h.description, x=h.x, y=h.y, z=h.z, sort_order=h.sort_order)
+            for h in hotspots
+        ],
     )
 
 

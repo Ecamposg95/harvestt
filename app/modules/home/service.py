@@ -22,6 +22,9 @@ _TEXTS = {
     ("prototype_asset", "create"): "Archivo de prototipo agregado",
     ("prototype_asset", "update"): "Archivo de prototipo actualizado",
     ("prototype_asset", "delete"): "Archivo de prototipo eliminado",
+    ("prototype_hotspot", "create"): "Punto agregado al modelo 3D",
+    ("prototype_hotspot", "update"): "Punto del modelo 3D actualizado",
+    ("prototype_hotspot", "delete"): "Punto del modelo 3D eliminado",
 }
 
 

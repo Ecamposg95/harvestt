@@ -163,6 +163,8 @@ def delete_prototype(db: Session, ctx: RequestContext, prototype_id: str) -> Non
     proto.slug = f"{old_slug[:80]}--borrado-{proto.id[:8]}"
     for asset in list_assets(db, proto):
         asset.deleted_at = now
+    for hotspot in active_hotspots(db, proto):
+        hotspot.deleted_at = now
     record(db, ctx, RESOURCE, proto.id, "delete", {"slug": old_slug})
     db.commit()
 
@@ -254,6 +256,9 @@ def delete_asset(db: Session, ctx: RequestContext, prototype_id: str, asset_id: 
     proto = get_prototype(db, ctx, prototype_id)
     asset = get_asset(db, ctx, proto, asset_id)
     asset.deleted_at = utcnow()
+    for hotspot in active_hotspots(db, proto):
+        if hotspot.asset_id == asset.id:
+            hotspot.deleted_at = asset.deleted_at
     if proto.hero_asset_id == asset.id:
         proto.hero_asset_id = None
         proto.version += 1
@@ -411,3 +416,13 @@ def public_asset(db: Session, org_id: str, asset_id: str) -> PrototypeAsset | No
             Prototype.deleted_at.is_(None),
         )
     )
+
+
+def public_hotspots(db: Session, asset_id: str) -> list[PrototypeHotspot]:
+    """Puntos de un STL ya verificado como público por quien llama."""
+    stmt = (
+        select(PrototypeHotspot)
+        .where(PrototypeHotspot.asset_id == asset_id, PrototypeHotspot.deleted_at.is_(None))
+        .order_by(PrototypeHotspot.sort_order, PrototypeHotspot.created_at)
+    )
+    return list(db.scalars(stmt))

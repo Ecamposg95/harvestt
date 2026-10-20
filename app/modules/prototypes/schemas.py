@@ -195,6 +195,15 @@ class PublicAssetOut(BaseModel):
     url: str
 
 
+class PublicHotspotOut(BaseModel):
+    label: str
+    description: str
+    x: float
+    y: float
+    z: float
+    sort_order: int
+
+
 class PublicPrototypeSummary(BaseModel):
     slug: str
     name: str
@@ -210,3 +219,4 @@ class PublicPrototypeDetail(PublicPrototypeSummary):
     description: str
     specs: list[Spec]
     assets: list[PublicAssetOut]
+    hotspots: list[PublicHotspotOut]
