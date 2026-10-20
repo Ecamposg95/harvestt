@@ -51,3 +51,13 @@ make test                     # pytest + tsc + vitest
 ### Despliegue
 
 Railway despliega automáticamente cada push a `main` usando el `Dockerfile`. Al arrancar, el contenedor aplica las migraciones (`alembic upgrade head`) y el seed idempotente. Los archivos de prototipos (STL e imágenes) se guardan en el bucket S3 de Railway.
+
+### Estado: real / simulado / pendiente (hito visual V1)
+
+| Elemento | Estado |
+|---|---|
+| Proyectos, ciclos, observaciones, actividad del inicio | Real (datos del tenant) |
+| Catálogo de especies | Real; rasgos sin evidencia se muestran como "Desconocido" |
+| Lecturas de temperatura y humedad en el inicio | Pendiente (V3: invernadero virtual, etiquetadas SIMULADO) |
+| Callouts sobre modelos STL | Pendiente (V2) |
+| Studio 3D, impacto, grafo | Pendiente (V4–V6) |
