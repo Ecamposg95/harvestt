@@ -28,7 +28,7 @@ import {
   prototypesApi,
   Spec,
 } from './api'
-import { StlViewer } from './LazyStlViewer'
+import { ModelPreview } from './HotspotEditor'
 import { AuthedImage, StatusBadge } from './shared'
 import { STATUS_ORDER, statusLabel } from './status'
 
@@ -466,19 +466,7 @@ function AssetsPanel({ data, canEdit, refresh }: { data: PrototypeDetail; canEdi
     <>
       {canEdit && <UploadCard prototypeId={data.id} onUploaded={refresh} />}
 
-      {preview && (
-        <Card className="space-y-3 p-4">
-          <h2 className="eyebrow">Vista previa 3D</h2>
-          <StlViewer
-            key={preview.id}
-            url={internalFilePath(data.id, preview.id)}
-            authed
-            label={`Modelo 3D ${preview.filename}`}
-            className="h-72 w-full"
-          />
-          <p className="truncate text-xs text-muted">{preview.caption || preview.filename}</p>
-        </Card>
-      )}
+      {preview && <ModelPreview prototypeId={data.id} asset={preview} canEdit={canEdit} />}
 
       <Card className="p-4">
         <h2 className="mb-3 eyebrow">Archivos ({data.assets.length})</h2>
