@@ -18,6 +18,8 @@ _TEXTS = {
     ("prototype", "create"): "Prototipo creado: {name}",
     ("prototype", "update"): "Prototipo actualizado",
     ("prototype", "delete"): "Prototipo eliminado",
+    ("observation", "create"): "Observación registrada",
+    ("prototype_asset", "create"): "Archivo de prototipo agregado",
     ("prototype_asset", "update"): "Archivo de prototipo actualizado",
     ("prototype_asset", "delete"): "Archivo de prototipo eliminado",
 }

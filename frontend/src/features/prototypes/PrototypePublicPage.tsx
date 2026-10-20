@@ -78,7 +78,7 @@ function Detail({ data }: { data: PublicPrototypeDetail }) {
   const [modelId, setModelId] = useState(models[0]?.id ?? null)
   const model = models.find((m) => m.id === modelId) ?? models[0]
 
-  const [first, ...restName] = data.name.split(' ')
+  const [first, ...restName] = data.name.trim().split(/\s+/)
   const chips = data.specs.slice(0, 4)
 
   return (
@@ -92,7 +92,7 @@ function Detail({ data }: { data: PublicPrototypeDetail }) {
             {data.codename && <span className="eyebrow text-accent">{data.codename}</span>}
             <StatusBadge status={data.status} />
           </div>
-          <h1 className="display mt-4 break-words text-[clamp(2.75rem,8vw,5.5rem)]">
+          <h1 className="display mt-4 break-words text-[clamp(2.75rem,8vw,5.5rem)] lg:text-[clamp(2.75rem,4.6vw,4.25rem)]">
             {first}
             {restName.length > 0 && (
               <>
@@ -158,11 +158,11 @@ function Detail({ data }: { data: PublicPrototypeDetail }) {
       {chips.length > 0 && (
         <div data-testid="spec-chips" className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 sm:px-6 lg:grid-cols-4">
           {chips.map((s, i) => (
-            <div key={i} className={`glass p-4 ${i === 1 ? '!bg-lime/40' : ''}`}>
-              <p className="eyebrow truncate">{s.label}</p>
+            <div key={i} className={`glass p-4 ${i === 1 ? '!bg-lime text-ink' : ''}`}>
+              <p className={`eyebrow truncate ${i === 1 ? '!text-ink/70' : ''}`}>{s.label}</p>
               <p className="mt-1 break-words text-lg font-bold">
                 {s.value}
-                {s.unit && <span className="ml-1 text-sm text-muted">{s.unit}</span>}
+                {s.unit && <span className={`ml-1 text-sm ${i === 1 ? 'text-ink/70' : 'text-muted'}`}>{s.unit}</span>}
               </p>
             </div>
           ))}

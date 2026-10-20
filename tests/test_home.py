@@ -39,6 +39,7 @@ def test_home_counts_recent_and_activity(client, tenants, db):
     texts = [a["text"] for a in body["activity"]]
     assert "Proyecto creado: Demo lechuga" in texts
     assert "Ciclo de cultivo iniciado" in texts
+    assert "Observación registrada" in texts
 
 
 def test_home_isolated_between_tenants(client, tenants, db):
