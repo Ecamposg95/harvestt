@@ -227,7 +227,7 @@ export function generateBasil(stage: PlantStage, rand: Rand): PlantParts {
       out.leaf.push(leaf)
     }
   }
-  out.anchors.push(tipAnchor(out.leaf[0]))
+  out.anchors.push(tipAnchor(out.leaf[2 * Math.floor(pairs / 2)])) // un par a media altura
   if (s === 2) {
     const up = new THREE.Vector3(0, 1, 0)
     flowerSpike(new THREE.Vector3(0, height, 0), up, 0.06, 0.0045, out)
@@ -289,6 +289,6 @@ export function generateGeneric(stage: PlantStage, rand: Rand): PlantParts {
     leaf.translate(0, height * (0.25 + 0.7 * t), 0)
     out.leaf.push(leaf)
   }
-  out.anchors.push(tipAnchor(out.leaf[0]))
+  out.anchors.push(tipAnchor(out.leaf[Math.floor(count / 2)])) // una hoja a media altura
   return out
 }

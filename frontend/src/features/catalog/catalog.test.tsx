@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, vi } from 'vitest'
+import type { PlantViewerProps } from '@/features/three/plants/types'
 import { useAuth } from '@/store/auth'
 import * as api from './api'
 import { PlantDetailPage } from './PlantDetailPage'
@@ -11,6 +12,14 @@ vi.mock('./api', () => ({
   listFamilies: vi.fn(),
   getPlant: vi.fn(),
   getSource: vi.fn(),
+}))
+
+vi.mock('@/features/three/plants/LazyPlantViewer', () => ({
+  PlantViewer: ({ kind, stage, label, callouts }: PlantViewerProps) => (
+    <div data-testid="plant-viewer" data-kind={kind} data-stage={stage} aria-label={label}>
+      {(callouts ?? []).map((c) => c.label).join('|')}
+    </div>
+  ),
 }))
 
 const mocked = vi.mocked(api)
@@ -130,4 +139,22 @@ it('la ficha muestra el nombre científico como titular display', async () => {
   renderDetail()
   const heading = await screen.findByRole('heading', { level: 1 })
   expect(heading.className).toContain('display')
+})
+
+it('sin imagen, la ficha muestra la planta procedural madura etiquetada como ilustrativa', async () => {
+  mocked.getPlant.mockResolvedValue(detail)
+  renderDetail()
+  const viewer = await screen.findByTestId('plant-viewer')
+  expect(viewer).toHaveAttribute('data-kind', 'lettuce')
+  expect(viewer).toHaveAttribute('data-stage', 'mature')
+  expect(viewer).toHaveTextContent('pH: Desconocido')
+  expect(screen.getByText('Ilustrativo')).toBeInTheDocument()
+  expect(screen.getByText(/Representación ilustrativa; no predice crecimiento/)).toBeInTheDocument()
+})
+
+it('una especie sin generador propio usa la forma genérica y lo dice', async () => {
+  mocked.getPlant.mockResolvedValue({ ...detail, scientific_name: 'Capsicum annuum L.' })
+  renderDetail()
+  expect(await screen.findByTestId('plant-viewer')).toHaveAttribute('data-kind', 'generic')
+  expect(screen.getByText(/Forma genérica/)).toBeInTheDocument()
 })

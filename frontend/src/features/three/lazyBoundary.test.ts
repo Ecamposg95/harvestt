@@ -61,6 +61,7 @@ const main = reachable('/src/main.tsx')
 // [envoltorio que sí entra al bundle principal, implementación que solo entra por import() dinámico]
 const LAZY_PAIRS: Array<[string, string]> = [
   ['/src/features/prototypes/LazyStlViewer.tsx', '/src/features/prototypes/StlViewer.tsx'],
+  ['/src/features/three/plants/LazyPlantViewer.tsx', '/src/features/three/plants/PlantViewer.tsx'],
 ]
 
 describe('frontera del chunk de three', () => {

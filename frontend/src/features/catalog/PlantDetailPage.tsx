@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { errorMessage, errorStatus } from '@/api/client'
 import { Button, Card, Empty, ErrorState, Forbidden, Loading, OriginBadge } from '@/components/ui'
 import { useHasRole } from '@/store/auth'
-import { ExternalId, getPlant, Source, SpeciesDetail, TraitAssertion } from './api'
+import { ExternalId, getPlant, Source, SpeciesDetail } from './api'
 import { AddToProjectDialog } from './AddToProjectDialog'
 import {
   CONTEXT_LABELS,
@@ -14,7 +14,9 @@ import {
   UNIT_LABELS,
   VARIABLE_LABELS,
 } from './labels'
+import { PlantIllustration } from './PlantIllustration'
 import { ScientificName } from './ScientificName'
+import { formatAssertionValue } from './traitCallouts'
 
 type State =
   | { status: 'loading' }
@@ -22,14 +24,6 @@ type State =
   | { status: 'ready'; data: SpeciesDetail }
 
 const EXTERNAL_LABELS: Record<string, string> = { gbif: 'GBIF' }
-
-function formatValue(a: TraitAssertion): string | null {
-  const { value_min: min, value_max: max } = a
-  if (min == null && max == null) return null
-  const fmt = (n: number) => n.toLocaleString('es-MX', { maximumFractionDigits: 2 })
-  if (min != null && max != null) return min === max ? fmt(min) : `${fmt(min)} – ${fmt(max)}`
-  return min != null ? `≥ ${fmt(min)}` : `≤ ${fmt(max as number)}`
-}
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -109,8 +103,8 @@ export function PlantDetailPage() {
     <>
       {back}
       <Card className="relative mb-8 overflow-hidden p-6 sm:p-8">
-        <div className="flex items-start justify-between gap-6">
-          <div>
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
             {s.family && <p className="eyebrow">{s.family}</p>}
             <h1 className="display mt-2 text-4xl normal-case">
               <ScientificName name={s.scientific_name} authorship={s.authorship} />
@@ -125,11 +119,8 @@ export function PlantDetailPage() {
               </div>
             )}
           </div>
-          <div
-            aria-hidden="true"
-            className="hidden h-40 w-40 shrink-0 items-center justify-center rounded-full bg-lime/30 text-6xl font-semibold text-ink sm:flex"
-          >
-            {s.scientific_name.charAt(0).toUpperCase()}
+          <div className="w-full shrink-0 sm:w-[22rem]">
+            <PlantIllustration species={s} />
           </div>
         </div>
       </Card>
@@ -228,7 +219,7 @@ export function PlantDetailPage() {
                     </thead>
                     <tbody>
                       {s.trait_assertions.map((a) => {
-                        const value = formatValue(a)
+                        const value = formatAssertionValue(a)
                         return (
                           <tr key={a.id} className="border-b border-border/60 align-top last:border-0">
                             <td className="px-5 py-3 font-medium">{label(VARIABLE_LABELS, a.variable)}</td>
