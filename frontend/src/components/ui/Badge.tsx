@@ -1,20 +1,32 @@
 import { ReactNode } from 'react'
 import { cx } from './cx'
 
-type Tone = 'neutral' | 'accent' | 'warning' | 'danger'
+export type Tone = 'neutral' | 'accent' | 'lime' | 'warning' | 'danger'
 
 const tones: Record<Tone, string> = {
-  neutral: 'border-border text-muted',
-  accent: 'border-accent/40 bg-accent/10 text-accent',
-  warning: 'border-warning/40 bg-warning/10 text-warning',
-  danger: 'border-danger/40 bg-danger/10 text-danger',
+  neutral: 'bg-fg/5 text-muted',
+  accent: 'bg-accent/12 text-accent',
+  lime: 'bg-lime/45 text-fg',
+  warning: 'bg-warning/12 text-warning',
+  danger: 'bg-danger/12 text-danger',
 }
 
-export function Badge({ tone = 'neutral', children, className }: { tone?: Tone; children: ReactNode; className?: string }) {
+export function Badge({
+  tone = 'neutral',
+  children,
+  className,
+  title,
+}: {
+  tone?: Tone
+  children: ReactNode
+  className?: string
+  title?: string
+}) {
   return (
     <span
+      title={title}
       className={cx(
-        'inline-flex items-center rounded-full border px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-wider',
+        'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em]',
         tones[tone],
         className,
       )}

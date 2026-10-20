@@ -12,7 +12,7 @@ export function Loading({ label = 'Cargando…' }: { label?: string }) {
 
 export function Empty({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border px-6 py-14 text-center">
+    <div className="glass flex flex-col items-center gap-2 px-6 py-14 text-center">
       <p className="font-medium text-fg">{title}</p>
       {description && <p className="max-w-md text-sm text-muted">{description}</p>}
       {action && <div className="mt-3">{action}</div>}
@@ -22,7 +22,7 @@ export function Empty({ title, description, action }: { title: string; descripti
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
-    <div role="alert" className="flex flex-col items-start gap-3 rounded-lg border border-danger/40 bg-danger/5 p-5">
+    <div role="alert" className="glass flex flex-col items-start gap-3 border-danger/30 p-5">
       <p className="text-sm text-danger">{message}</p>
       {onRetry && (
         <Button variant="secondary" onClick={onRetry}>
