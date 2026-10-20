@@ -8,6 +8,8 @@ import { PlantDetailPage } from './PlantDetailPage'
 import { PlantsPage } from './PlantsPage'
 
 vi.mock('./api', () => ({
+  uploadSpeciesMedia: vi.fn(),
+  deleteSpeciesMedia: vi.fn(),
   listPlants: vi.fn(),
   listFamilies: vi.fn(),
   getPlant: vi.fn(),
@@ -89,6 +91,7 @@ const detail: api.SpeciesDetail = {
   summary: null,
   external_ids: { gbif: { id: '7403263', source_id: 'src1', url: 'https://www.gbif.org/species/7403263' } },
   cultivars: [],
+  media: [],
   sources: [
     { id: 'src1', title: 'GBIF Backbone Taxonomy', publisher: 'GBIF', url: 'https://www.gbif.org/', license: 'CC BY 4.0', accessed_at: null, rights: null },
   ],
