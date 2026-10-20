@@ -1,7 +1,7 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { errorMessage, errorStatus } from '@/api/client'
-import { Badge, Button, Card, Empty, ErrorState, Forbidden, Loading } from '@/components/ui'
+import { Button, Card, Empty, ErrorState, Forbidden, Loading, OriginBadge } from '@/components/ui'
 import { useHasRole } from '@/store/auth'
 import { ExternalId, getPlant, Source, SpeciesDetail, TraitAssertion } from './api'
 import { AddToProjectDialog } from './AddToProjectDialog'
@@ -10,7 +10,6 @@ import {
   formatDate,
   label,
   LANG_LABELS,
-  ORIGIN_LABELS,
   REVIEW_LABELS,
   UNIT_LABELS,
   VARIABLE_LABELS,
@@ -30,11 +29,6 @@ function formatValue(a: TraitAssertion): string | null {
   const fmt = (n: number) => n.toLocaleString('es-MX', { maximumFractionDigits: 2 })
   if (min != null && max != null) return min === max ? fmt(min) : `${fmt(min)} – ${fmt(max)}`
   return min != null ? `≥ ${fmt(min)}` : `≤ ${fmt(max as number)}`
-}
-
-function OriginBadge({ origin }: { origin: string }) {
-  const tone = origin === 'missing' ? 'warning' : origin === 'measured' || origin === 'sourced' ? 'accent' : 'neutral'
-  return <Badge tone={tone}>{label(ORIGIN_LABELS, origin)}</Badge>
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {

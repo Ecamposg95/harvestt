@@ -112,8 +112,8 @@ function renderDetail() {
 it('PlantDetailPage muestra valores faltantes como Desconocido y oculta acciones al viewer', async () => {
   mocked.getPlant.mockResolvedValue(detail)
   renderDetail()
-  expect(await screen.findByText('Desconocido')).toBeInTheDocument()
-  expect(screen.getByText('Sin evidencia')).toBeInTheDocument()
+  // El valor faltante y el OriginBadge "Desconocido" coinciden en texto
+  expect((await screen.findAllByText('Desconocido')).length).toBeGreaterThanOrEqual(2)
   expect(screen.getByText('7403263')).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Añadir a proyecto' })).not.toBeInTheDocument()
 })

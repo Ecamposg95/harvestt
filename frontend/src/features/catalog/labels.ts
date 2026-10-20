@@ -1,14 +1,5 @@
 import type { CommonName } from './api'
 
-export const ORIGIN_LABELS: Record<string, string> = {
-  measured: 'Medido',
-  sourced: 'Con fuente',
-  derived: 'Derivado',
-  simulated: 'Simulado',
-  illustrative: 'Ilustrativo',
-  missing: 'Sin evidencia',
-}
-
 export const REVIEW_LABELS: Record<string, string> = {
   unreviewed: 'Sin revisar',
   in_review: 'En revisión',
