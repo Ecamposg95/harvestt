@@ -126,6 +126,8 @@ export interface PublicPrototypeSummary {
   status: PrototypeStatus
   published_at: string | null
   hero: PublicAsset | null
+  /** Primer STL público, o null. */
+  model: PublicAsset | null
 }
 
 export interface PublicPrototypeDetail extends PublicPrototypeSummary {

@@ -174,6 +174,11 @@ def _hero(proto, assets: list[PrototypeAsset]) -> PublicAssetOut | None:
     return _public_asset_out(hero) if hero else None
 
 
+def _model(assets: list[PrototypeAsset]) -> PublicAssetOut | None:
+    model = next((a for a in assets if a.kind == "model_stl"), None)
+    return _public_asset_out(model) if model else None
+
+
 def _summary_fields(proto, assets: list[PrototypeAsset]) -> dict:
     return {
         "slug": proto.slug,
@@ -184,6 +189,7 @@ def _summary_fields(proto, assets: list[PrototypeAsset]) -> dict:
         "status": proto.status,
         "published_at": proto.published_at,
         "hero": _hero(proto, assets),
+        "model": _model(assets),
     }
 
 

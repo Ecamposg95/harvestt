@@ -22,7 +22,7 @@ _TEXTS = {
     ("prototype_asset", "create"): "Archivo de prototipo agregado",
     ("prototype_asset", "update"): "Archivo de prototipo actualizado",
     ("prototype_asset", "delete"): "Archivo de prototipo eliminado",
-    ("prototype_hotspot", "create"): "Punto agregado al modelo 3D",
+    ("prototype_hotspot", "create"): "Punto agregado al modelo 3D: {name}",
     ("prototype_hotspot", "update"): "Punto del modelo 3D actualizado",
     ("prototype_hotspot", "delete"): "Punto del modelo 3D eliminado",
 }
@@ -32,7 +32,8 @@ def activity_text(event: AuditEvent) -> str:
     template = _TEXTS.get((event.resource_type, event.operation))
     if template is None:
         return "Cambio registrado"
-    name = (event.data or {}).get("name")
+    data = event.data or {}
+    name = data.get("name") or data.get("label")
     if "{name}" in template:
         return template.format(name=name) if name else template.split(":")[0]
     return template

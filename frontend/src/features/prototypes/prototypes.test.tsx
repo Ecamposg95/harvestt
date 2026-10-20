@@ -74,6 +74,7 @@ describe('ShowcasePage', () => {
         status: 'in_construction',
         published_at: null,
         hero: null,
+        model: null,
       },
     ])
     render(
@@ -84,6 +85,37 @@ describe('ShowcasePage', () => {
     const title = await screen.findByRole('heading', { name: 'Germinador G1' })
     expect(title.closest('a')).toHaveAttribute('href', '/prototipos/g1')
     expect(screen.getByText('En construcción')).toBeInTheDocument()
+  })
+
+  it('muestra en el héroe el modelo 3D del prototipo destacado y lo usa en la tarjeta sin foto', async () => {
+    const model = { id: 'm1', kind: 'model_stl' as const, filename: 'a.stl', content_type: 'model/stl', size_bytes: 1, caption: '', url: '/m1' }
+    vi.spyOn(prototypesApi, 'publicList').mockResolvedValue([
+      { slug: 'ecos', name: 'Germinador ECOS', codename: 'ECOS', purpose: '', summary: '', status: 'testing', published_at: null, hero: null, model },
+    ])
+    render(
+      <MemoryRouter>
+        <ShowcasePage />
+      </MemoryRouter>,
+    )
+    const featured = await screen.findByRole('region', { name: 'Prototipo destacado' })
+    expect(within(featured).getByTestId('stl-viewer')).toBeInTheDocument()
+    expect(within(featured).getByRole('link', { name: /Explorar Germinador ECOS/ })).toHaveAttribute('href', '/prototipos/ecos')
+    expect(screen.getAllByTestId('stl-viewer')).toHaveLength(2)
+  })
+
+  it('con foto la tarjeta usa la imagen y sin modelo no hay destacado', async () => {
+    const hero = { id: 'i1', kind: 'image' as const, filename: 'a.png', content_type: 'image/png', size_bytes: 1, caption: 'Frente', url: '/i1' }
+    vi.spyOn(prototypesApi, 'publicList').mockResolvedValue([
+      { slug: 'g1', name: 'G1', codename: null, purpose: '', summary: '', status: 'testing', published_at: null, hero, model: null },
+    ])
+    render(
+      <MemoryRouter>
+        <ShowcasePage />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByRole('img', { name: 'Frente' })).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Prototipo destacado' })).toBeNull()
+    expect(screen.queryByTestId('stl-viewer')).toBeNull()
   })
 
   it('muestra error con reintento', async () => {
@@ -126,6 +158,7 @@ describe('PrototypePublicPage', () => {
       status: 'testing',
       published_at: null,
       hero: null,
+        model: null,
       description: 'Primer párrafo.\n\nSegundo <b>párrafo</b>.',
       specs: [{ label: 'Bandejas', value: '4', unit: null }],
       assets: [
@@ -215,6 +248,7 @@ describe('PrototypePublicPage diseño 53', () => {
       status: 'in_construction',
       published_at: null,
       hero: null,
+        model: null,
       description: '',
       specs: [
         { label: 'Iluminación', value: 'LED' },
@@ -235,7 +269,7 @@ describe('PrototypePublicPage diseño 53', () => {
 
   it('sin specs no muestra la fila de chips', async () => {
     vi.spyOn(prototypesApi, 'publicDetail').mockResolvedValue({
-      slug: 'x', name: 'X', codename: null, purpose: '', summary: '', status: 'concept', published_at: null, hero: null, description: '', specs: [], assets: [], hotspots: [],
+      slug: 'x', name: 'X', codename: null, purpose: '', summary: '', status: 'concept', published_at: null, hero: null, model: null, description: '', specs: [], assets: [], hotspots: [],
     } as PublicPrototypeDetail)
     renderAt('x')
     await screen.findByRole('heading', { level: 1, name: 'X' })
@@ -253,6 +287,7 @@ describe('PrototypePublicPage hotspots', () => {
     status: 'testing',
     published_at: null,
     hero: null,
+        model: null,
     description: '',
     specs: [],
     assets: [
