@@ -44,19 +44,19 @@ export function PrototypePublicPage() {
   if (state.phase === 'loading') {
     return (
       <div role="status" aria-label="Cargando prototipo" className="mx-auto max-w-7xl space-y-6 px-4 py-16 sm:px-6">
-        <div className="h-4 w-40 animate-pulse rounded bg-surface" />
-        <div className="h-16 w-2/3 animate-pulse rounded bg-surface" />
-        <div className="aspect-[16/9] w-full animate-pulse rounded-lg bg-surface" />
+        <div className="h-4 w-40 animate-pulse rounded-full bg-surface" />
+        <div className="h-16 w-2/3 animate-pulse rounded-full bg-surface" />
+        <div className="glass aspect-[16/9] w-full animate-pulse" />
       </div>
     )
   }
   if (state.phase === 'notfound') {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center gap-4 px-4 text-center">
-        <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted">404</p>
-        <h1 className="text-3xl font-semibold">Prototipo no encontrado</h1>
+        <p className="eyebrow">404</p>
+        <h1 className="display text-3xl">Prototipo no encontrado</h1>
         <p className="text-muted">No existe o todavía no se ha publicado.</p>
-        <Link to="/" className="mt-2 font-mono text-xs uppercase tracking-[0.25em] text-accent hover:underline">
+        <Link to="/" className="eyebrow mt-2 !text-accent hover:underline">
           ← Volver a la vitrina
         </Link>
       </div>
@@ -78,67 +78,100 @@ function Detail({ data }: { data: PublicPrototypeDetail }) {
   const [modelId, setModelId] = useState(models[0]?.id ?? null)
   const model = models.find((m) => m.id === modelId) ?? models[0]
 
+  const [first, ...restName] = data.name.split(' ')
+  const chips = data.specs.slice(0, 4)
+
   return (
     <article className="overflow-x-hidden">
-      <header className="mx-auto max-w-7xl px-4 pb-10 pt-12 sm:px-6 sm:pt-20">
-        <Link to="/" className="font-mono text-xs uppercase tracking-[0.25em] text-muted hover:text-accent">
-          ← Prototipos
-        </Link>
-        <div className="mt-10 flex flex-wrap items-center gap-4">
-          {data.codename && (
-            <span className="font-mono text-xs uppercase tracking-[0.3em] text-accent">{data.codename}</span>
+      <header className="mx-auto grid max-w-7xl gap-8 px-4 pb-8 pt-6 sm:px-6 lg:grid-cols-12 lg:items-center">
+        <div className="min-w-0 lg:col-span-5">
+          <Link to="/" className="eyebrow hover:text-accent">
+            ← Prototipos
+          </Link>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            {data.codename && <span className="eyebrow text-accent">{data.codename}</span>}
+            <StatusBadge status={data.status} />
+          </div>
+          <h1 className="display mt-4 break-words text-[clamp(2.75rem,8vw,5.5rem)]">
+            {first}
+            {restName.length > 0 && (
+              <>
+                {' '}
+                <br />
+                <span className="text-accent">{restName.join(' ')}</span>
+              </>
+            )}
+          </h1>
+          {data.purpose && <p className="mt-5 max-w-md text-base text-muted sm:text-lg">{data.purpose}</p>}
+          {images.length > 0 && (
+            <a href="#galeria" className="mt-6 inline-flex rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-ink-fg">
+              Ver galería
+            </a>
           )}
-          <StatusBadge status={data.status} />
         </div>
-        <h1 className="mt-4 break-words text-5xl font-semibold tracking-tight sm:text-7xl lg:text-8xl">{data.name}</h1>
-        {data.purpose && <p className="mt-6 max-w-3xl text-lg font-light text-muted sm:text-2xl">{data.purpose}</p>}
+
+        <section aria-label="Vista principal" className="min-w-0 lg:col-span-7">
+          {model ? (
+            <div>
+              <div className="glass overflow-hidden p-2">
+                <StlViewer
+                  key={model.id}
+                  url={model.url}
+                  label={`Modelo 3D de ${data.name}${model.caption ? `: ${model.caption}` : ''}`}
+                  className="h-[52vh] min-h-[320px] w-full rounded-[22px]"
+                />
+              </div>
+              {models.length > 1 && (
+                <div role="group" aria-label="Modelos 3D" className="mt-4 flex flex-wrap gap-2">
+                  {models.map((m, i) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      aria-pressed={m.id === model.id}
+                      onClick={() => setModelId(m.id)}
+                      className={cx(
+                        'rounded-full px-3 py-1.5 text-xs font-semibold transition-colors',
+                        m.id === model.id ? 'bg-ink text-ink-fg' : 'glass !rounded-full text-muted hover:text-fg',
+                      )}
+                    >
+                      {m.caption || `Modelo ${i + 1}`}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {models.length === 1 && model.caption && <p className="eyebrow mt-3">{model.caption}</p>}
+            </div>
+          ) : (
+            <div className="glass aspect-[4/3] overflow-hidden p-2">
+              <div className="h-full w-full overflow-hidden rounded-[22px]">
+                {data.hero ? (
+                  <img src={data.hero.url} alt={data.hero.caption || data.name} className="h-full w-full object-cover" />
+                ) : (
+                  <HeroPlaceholder name={data.name} codename={data.codename} />
+                )}
+              </div>
+            </div>
+          )}
+        </section>
       </header>
 
-      <section aria-label="Vista principal" className="mx-auto max-w-7xl px-4 sm:px-6">
-        {model ? (
-          <div>
-            <StlViewer
-              key={model.id}
-              url={model.url}
-              label={`Modelo 3D de ${data.name}${model.caption ? `: ${model.caption}` : ''}`}
-              className="h-[60vh] min-h-[320px] w-full"
-            />
-            {models.length > 1 && (
-              <div role="group" aria-label="Modelos 3D" className="mt-4 flex flex-wrap gap-2">
-                {models.map((m, i) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    aria-pressed={m.id === model.id}
-                    onClick={() => setModelId(m.id)}
-                    className={cx(
-                      'rounded-md border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors',
-                      m.id === model.id ? 'border-accent text-accent' : 'border-border text-muted hover:text-fg',
-                    )}
-                  >
-                    {m.caption || `Modelo ${i + 1}`}
-                  </button>
-                ))}
-              </div>
-            )}
-            {models.length === 1 && model.caption && (
-              <p className="mt-3 font-mono text-xs uppercase tracking-wider text-muted">{model.caption}</p>
-            )}
-          </div>
-        ) : (
-          <div className="aspect-[16/9] overflow-hidden rounded-lg border border-border">
-            {data.hero ? (
-              <img src={data.hero.url} alt={data.hero.caption || data.name} className="h-full w-full object-cover" />
-            ) : (
-              <HeroPlaceholder name={data.name} codename={data.codename} />
-            )}
-          </div>
-        )}
-      </section>
+      {chips.length > 0 && (
+        <div data-testid="spec-chips" className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 sm:px-6 lg:grid-cols-4">
+          {chips.map((s, i) => (
+            <div key={i} className={`glass p-4 ${i === 1 ? '!bg-lime/40' : ''}`}>
+              <p className="eyebrow truncate">{s.label}</p>
+              <p className="mt-1 break-words text-lg font-bold">
+                {s.value}
+                {s.unit && <span className="ml-1 text-sm text-muted">{s.unit}</span>}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-12">
         <section className="min-w-0 lg:col-span-7" aria-labelledby="descripcion">
-          <h2 id="descripcion" className="font-mono text-xs uppercase tracking-[0.3em] text-muted">
+          <h2 id="descripcion" className="eyebrow">
             Descripción
           </h2>
           {data.summary && <p className="mt-6 text-xl font-light leading-relaxed">{data.summary}</p>}
@@ -150,16 +183,16 @@ function Detail({ data }: { data: PublicPrototypeDetail }) {
         </section>
 
         <section className="min-w-0 lg:col-span-5" aria-labelledby="especificaciones">
-          <h2 id="especificaciones" className="font-mono text-xs uppercase tracking-[0.3em] text-muted">
+          <h2 id="especificaciones" className="eyebrow">
             Especificaciones
           </h2>
           {data.specs.length === 0 ? (
             <p className="mt-6 text-sm text-muted">Especificaciones por definir.</p>
           ) : (
-            <table className="mt-6 w-full border-collapse text-sm">
+            <table className="glass mt-6 w-full border-collapse overflow-hidden text-sm">
               <tbody>
                 {data.specs.map((s, i) => (
-                  <tr key={i} className="border-t border-border last:border-b">
+                  <tr key={i} className="border-t border-border/50 first:border-t-0">
                     <th scope="row" className="py-4 pr-4 text-left font-mono text-xs font-normal uppercase tracking-wider text-muted">
                       {s.label}
                     </th>
@@ -177,7 +210,7 @@ function Detail({ data }: { data: PublicPrototypeDetail }) {
 
       {images.length > 0 && (
         <section aria-labelledby="galeria" className="mx-auto max-w-7xl px-4 pb-24 sm:px-6">
-          <h2 id="galeria" className="mb-6 font-mono text-xs uppercase tracking-[0.3em] text-muted">
+          <h2 id="galeria" className="eyebrow mb-6">
             Galería
           </h2>
           <Gallery title={data.name} images={images.map((a) => ({ id: a.id, src: a.url, caption: a.caption }))} />

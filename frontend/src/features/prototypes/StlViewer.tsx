@@ -64,17 +64,19 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
     renderer.domElement.style.touchAction = 'none'
     mount.appendChild(renderer.domElement)
 
+    const dark = document.documentElement.classList.contains('dark')
+    const fogColor = dark ? 0x141813 : 0xe6ece2
     const scene = new THREE.Scene()
-    scene.fog = new THREE.Fog(0x0b0f0e, 10, 40)
+    scene.fog = new THREE.Fog(fogColor, 10, 40)
     const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 1000)
     camera.position.set(3, 2, 4)
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.35))
-    scene.add(new THREE.HemisphereLight(0xdfe8e4, 0x0b0f0e, 0.45))
+    scene.add(new THREE.HemisphereLight(0xffffff, dark ? 0x141813 : 0xcfdacb, 0.6))
     const key = new THREE.DirectionalLight(0xffffff, 1.6)
     key.position.set(4, 6, 5)
     scene.add(key)
-    const rim = new THREE.DirectionalLight(0x34d399, 1.1)
+    const rim = new THREE.DirectionalLight(0xa6e22e, 0.8)
     rim.position.set(-5, 3, -6)
     scene.add(rim)
 
@@ -135,12 +137,12 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
         const radius = geometry.boundingSphere?.radius || 1
         const floorY = geometry.boundingBox?.min.y ?? -radius
 
-        const material = new THREE.MeshStandardMaterial({ color: 0x4a5250, metalness: 0.65, roughness: 0.38 })
+        const material = new THREE.MeshStandardMaterial({ color: dark ? 0x9aa898 : 0xd9dfd4, metalness: 0.35, roughness: 0.45 })
         const mesh = new THREE.Mesh(geometry, material)
         scene.add(mesh)
         disposables.push(geometry, material)
 
-        const grid = new THREE.GridHelper(radius * 6, 24, 0x34d399, 0x28322f)
+        const grid = new THREE.GridHelper(radius * 6, 24, 0x4f7a12, dark ? 0x2a3229 : 0xc4d0c0)
         grid.position.y = floorY - radius * 0.02
         const gridMaterial = grid.material as THREE.Material
         gridMaterial.transparent = true
@@ -154,7 +156,7 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
         camera.near = distance / 100
         camera.far = distance * 20
         camera.updateProjectionMatrix()
-        scene.fog = new THREE.Fog(0x0b0f0e, distance * 1.5, distance * 4)
+        scene.fog = new THREE.Fog(fogColor, distance * 1.5, distance * 4)
         controls.target.set(0, 0, 0)
         controls.minDistance = radius * 0.6
         controls.maxDistance = distance * 4
@@ -198,12 +200,12 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
 
   return (
     <div
-      className={`relative overflow-hidden rounded-lg border border-border bg-[radial-gradient(ellipse_at_center,rgb(var(--c-raised))_0%,rgb(var(--c-bg))_75%)] ${className}`}
+      className={`relative overflow-hidden rounded-[22px] bg-gradient-to-b from-surface/60 to-bg-2/60 ${className}`}
     >
       <div ref={mountRef} className="absolute inset-0" role="img" aria-label={label} />
 
       {phase === 'loading' && (
-        <div role="status" className="absolute inset-0 flex flex-col items-center justify-center gap-3 font-mono text-xs uppercase tracking-widest text-muted">
+        <div role="status" className="absolute inset-0 flex flex-col items-center justify-center gap-3 font-sans text-xs text-muted">
           <span className="h-5 w-5 animate-spin rounded-full border-2 border-accent border-t-transparent" />
           <span>Cargando modelo {pct !== null ? `${pct}%` : progress.loaded ? formatBytes(progress.loaded) : ''}</span>
           {pct !== null && (
@@ -220,7 +222,7 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
           <button
             type="button"
             onClick={() => setAttempt((n) => n + 1)}
-            className="rounded-md border border-border px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-fg hover:bg-raised"
+            className="glass !rounded-full px-3 py-1.5 text-[11px] font-semibold"
           >
             Reintentar
           </button>
@@ -235,12 +237,12 @@ export default function StlViewer({ url, authed, label = 'Modelo 3D', className 
 
       {phase === 'ready' && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-3">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Arrastra para girar · rueda para acercar</span>
+          <span className="font-sans text-[10px] text-muted">Arrastra para girar · rueda para acercar</span>
           <button
             type="button"
             onClick={togglePlay}
             aria-pressed={!playing}
-            className="pointer-events-auto rounded-md border border-border bg-bg/70 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-fg backdrop-blur hover:border-accent/60"
+            className="glass pointer-events-auto !rounded-full px-3 py-1.5 text-[11px] font-semibold"
           >
             {playing ? 'Pausar giro' : 'Reanudar giro'}
           </button>
