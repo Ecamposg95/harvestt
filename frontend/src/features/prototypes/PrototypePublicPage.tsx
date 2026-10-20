@@ -193,10 +193,10 @@ function Detail({ data }: { data: PublicPrototypeDetail }) {
               <tbody>
                 {data.specs.map((s, i) => (
                   <tr key={i} className="border-t border-border/50 first:border-t-0">
-                    <th scope="row" className="py-4 pr-4 text-left font-mono text-xs font-normal uppercase tracking-wider text-muted">
+                    <th scope="row" className="eyebrow px-5 py-4 text-left font-normal">
                       {s.label}
                     </th>
-                    <td className="break-words py-4 text-right text-fg">
+                    <td className="break-words px-5 py-4 text-right text-fg">
                       {s.value}
                       {s.unit && <span className="ml-1 text-muted">{s.unit}</span>}
                     </td>

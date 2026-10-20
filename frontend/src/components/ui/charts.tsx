@@ -25,17 +25,22 @@ export function BarChart({
     <div role="img" aria-label={ariaLabel} className="flex items-end gap-2" style={{ height }}>
       {data.map((d, i) =>
         d.value === null ? (
-          <span key={i} data-gap className="flex-1 self-end border-b-2 border-dashed border-border" title={`${d.label}: sin dato`} />
+          <span key={i} className="flex flex-1 items-end justify-center self-end">
+            <span data-gap className="w-full max-w-[36px] border-b-2 border-dashed border-border" title={`${d.label}: sin dato`} />
+          </span>
         ) : d.value === 0 ? (
-          <span key={i} data-zero title={`${d.label}: 0`} className="h-0.5 flex-1 self-end rounded-full bg-fg/25" />
+          <span key={i} className="flex flex-1 items-end justify-center self-end">
+            <span data-zero title={`${d.label}: 0`} className="h-0.5 w-full max-w-[36px] rounded-full bg-fg/25" />
+          </span>
         ) : (
-          <span
-            key={i}
-            data-bar
-            title={`${d.label}: ${d.value}`}
-            className={cx('flex-1 rounded-full', i === highlightIndex ? 'bg-lime' : 'bg-fg/15')}
-            style={{ height: `${Math.max(6, (d.value / max) * 100)}%` }}
-          />
+          <span key={i} className="flex h-full flex-1 items-end justify-center">
+            <span
+              data-bar
+              title={`${d.label}: ${d.value}`}
+              className={cx('w-full max-w-[36px] rounded-full', i === highlightIndex ? 'bg-lime' : 'bg-fg/15')}
+              style={{ height: `${Math.max(6, (d.value / max) * 100)}%` }}
+            />
+          </span>
         ),
       )}
     </div>

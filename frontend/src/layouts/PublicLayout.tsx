@@ -11,11 +11,11 @@ export function PublicLayout() {
           <Link to="/" aria-label="Inicio" className="flex items-center">
             <Logo dotClassName="h-5 w-5" />
           </Link>
-          <nav className="flex items-center gap-2 text-sm">
-            <Link to="/" className="glass !rounded-full px-4 py-2 font-semibold">
+          <nav className="flex items-center gap-1.5 text-xs sm:gap-2 sm:text-sm">
+            <Link to="/" className="glass whitespace-nowrap !rounded-full px-3 py-1.5 font-semibold sm:px-4 sm:py-2">
               Prototipos
             </Link>
-            <Link to={token ? '/app' : '/login'} className="rounded-full bg-ink px-4 py-2 font-semibold text-ink-fg">
+            <Link to={token ? '/app' : '/login'} className="whitespace-nowrap rounded-full bg-ink px-3 py-1.5 font-semibold text-ink-fg sm:px-4 sm:py-2">
               {token ? 'Plataforma' : 'Iniciar sesión'}
             </Link>
           </nav>
