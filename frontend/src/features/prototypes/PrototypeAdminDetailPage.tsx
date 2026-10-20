@@ -225,6 +225,7 @@ function Editor({
         ← Prototipos
       </Link>
       <PageHeader
+        eyebrow="Laboratorio"
         title={data.name}
         description={data.codename ? `Nombre clave: ${data.codename}` : `/${data.slug}`}
         actions={
@@ -233,7 +234,7 @@ function Editor({
               href={`/prototipos/${data.slug}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center rounded-md border border-border px-4 py-2 text-sm hover:bg-raised"
+              className="inline-flex items-center rounded-full border border-border px-4 py-2 text-sm hover:bg-raised"
             >
               Ver en vitrina ↗
             </a>
@@ -250,7 +251,7 @@ function Editor({
         <form onSubmit={save} className="min-w-0 space-y-6 lg:col-span-3" noValidate>
           <fieldset disabled={!canEdit || saving} className="space-y-6">
             <Card className="space-y-4 p-5">
-              <h2 className="font-mono text-xs uppercase tracking-wider text-muted">Ficha</h2>
+              <h2 className="eyebrow">Ficha</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Nombre">
                   {(id) => <Input id={id} value={form.name} onChange={(e) => set('name', e.target.value)} maxLength={200} />}
@@ -354,7 +355,7 @@ function Editor({
           )}
 
           {canEdit && (
-            <Card className="flex flex-col gap-3 border-danger/30 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <Card className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-sm font-medium">Eliminar prototipo</h2>
                 <p className="text-xs text-muted">Se oculta de la plataforma y de la vitrina junto con sus archivos.</p>
@@ -390,7 +391,7 @@ function SpecsEditor({ rows, onChange }: { rows: SpecRow[]; onChange: (rows: Spe
   return (
     <Card className="space-y-4 p-5">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-mono text-xs uppercase tracking-wider text-muted">Especificaciones</h2>
+        <h2 className="eyebrow">Especificaciones</h2>
         <Button type="button" variant="secondary" onClick={() => onChange([...rows, { key: ++rowKey, label: '', value: '', unit: '' }])}>
           Añadir fila
         </Button>
@@ -467,7 +468,7 @@ function AssetsPanel({ data, canEdit, refresh }: { data: PrototypeDetail; canEdi
 
       {preview && (
         <Card className="space-y-3 p-4">
-          <h2 className="font-mono text-xs uppercase tracking-wider text-muted">Vista previa 3D</h2>
+          <h2 className="eyebrow">Vista previa 3D</h2>
           <StlViewer
             key={preview.id}
             url={internalFilePath(data.id, preview.id)}
@@ -480,7 +481,7 @@ function AssetsPanel({ data, canEdit, refresh }: { data: PrototypeDetail; canEdi
       )}
 
       <Card className="p-4">
-        <h2 className="mb-3 font-mono text-xs uppercase tracking-wider text-muted">Archivos ({data.assets.length})</h2>
+        <h2 className="mb-3 eyebrow">Archivos ({data.assets.length})</h2>
         {actionError && (
           <p role="alert" className="mb-3 text-sm text-danger">
             {actionError}
@@ -661,7 +662,7 @@ function UploadCard({ prototypeId, onUploaded }: { prototypeId: string; onUpload
   return (
     <Card className="p-4">
       <form onSubmit={submit} className="space-y-3" noValidate>
-        <h2 className="font-mono text-xs uppercase tracking-wider text-muted">Subir archivo</h2>
+        <h2 className="eyebrow">Subir archivo</h2>
         <Field label="Archivo" hint="Imágenes PNG/JPG/WEBP hasta 15 MB · STL hasta 100 MB">
           {(id, d) => (
             <input

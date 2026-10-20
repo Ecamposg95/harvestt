@@ -37,6 +37,7 @@ export function PrototypesAdminPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Laboratorio"
         title="Prototipos"
         description="Hardware en desarrollo. Lo marcado como público aparece en la vitrina."
         actions={
@@ -63,11 +64,11 @@ export function PrototypesAdminPage() {
           {state.items.map((p) => (
             <li key={p.id}>
               <Link to={`/app/prototypes/${p.id}`} className="block">
-                <Card className="flex flex-col gap-3 p-4 transition-colors hover:border-accent/50 sm:flex-row sm:items-center sm:justify-between">
+                <Card className="flex flex-col gap-3 p-4 transition-transform hover:-translate-y-0.5 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="truncate font-medium">{p.name}</h2>
-                      {p.codename && <span className="font-mono text-xs uppercase tracking-wider text-muted">{p.codename}</span>}
+                      {p.codename && <span className="eyebrow">{p.codename}</span>}
                     </div>
                     {p.purpose && <p className="mt-1 truncate text-sm text-muted">{p.purpose}</p>}
                   </div>

@@ -118,7 +118,7 @@ export function ProjectDetailPage() {
       {back}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight">{p.name}</h1>
+          <h1 className="display text-3xl">{p.name}</h1>
           <p className="mt-1 text-xs text-muted">
             Versión <span className="font-mono">{p.version}</span> · Actualizado {formatDateTime(p.updated_at)}
           </p>
@@ -135,7 +135,7 @@ export function ProjectDetailPage() {
           <Card className="p-5">
             {editing ? (
               <>
-                <h2 className="mb-4 font-mono text-xs uppercase tracking-wider text-muted">Editar proyecto</h2>
+                <h2 className="mb-4 eyebrow">Editar proyecto</h2>
                 <ProjectForm
                   key={p.version}
                   initial={toFormValues(p)}
@@ -163,21 +163,21 @@ export function ProjectDetailPage() {
             ) : (
               <dl className="space-y-4 text-sm">
                 <div>
-                  <dt className="font-mono text-xs uppercase tracking-wider text-muted">Objetivos</dt>
+                  <dt className="eyebrow">Objetivos</dt>
                   <dd className="mt-1 whitespace-pre-wrap">{p.objectives || <span className="text-muted">Sin objetivos registrados</span>}</dd>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <dt className="font-mono text-xs uppercase tracking-wider text-muted">Sistema</dt>
+                    <dt className="eyebrow">Sistema</dt>
                     <dd className="mt-1">{SYSTEM_LABELS[p.system] ?? p.system}</dd>
                   </div>
                   <div>
-                    <dt className="font-mono text-xs uppercase tracking-wider text-muted">Área</dt>
+                    <dt className="eyebrow">Área</dt>
                     <dd className="mt-1 font-mono">{formatArea(p.area_m2)}</dd>
                   </div>
                 </div>
                 <div>
-                  <dt className="font-mono text-xs uppercase tracking-wider text-muted">Ubicación</dt>
+                  <dt className="eyebrow">Ubicación</dt>
                   <dd className="mt-1">{p.location || <span className="text-muted">Sin especificar</span>}</dd>
                 </div>
               </dl>
@@ -186,7 +186,7 @@ export function ProjectDetailPage() {
 
           <Card className="p-5">
             <div className="mb-3 flex items-center justify-between gap-2">
-              <h2 className="font-mono text-xs uppercase tracking-wider text-muted">Cultivos</h2>
+              <h2 className="eyebrow">Cultivos</h2>
               {canEdit && (
                 <Link to="/app/plants" className="text-sm font-medium text-accent hover:underline">
                   Añadir desde el catálogo
@@ -218,7 +218,7 @@ export function ProjectDetailPage() {
         </div>
 
         <Card className="p-5 lg:col-span-2">
-          <h2 className="mb-4 font-mono text-xs uppercase tracking-wider text-muted">Bitácora</h2>
+          <h2 className="mb-4 eyebrow">Bitácora</h2>
           <ObservationLog projectId={p.id} cycles={p.crop_cycles} canEdit={canEdit} />
         </Card>
       </div>

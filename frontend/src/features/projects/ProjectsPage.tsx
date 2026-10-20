@@ -75,6 +75,7 @@ export function ProjectsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Espacio de trabajo"
         title="Proyectos"
         description="Proyectos de cultivo de tu organización: objetivos, ciclos y bitácora."
         actions={
@@ -117,7 +118,7 @@ export function ProjectsPage() {
               {state.data.items.map((p) => (
                 <li key={p.id}>
                   <Link to={`/app/projects/${p.id}`} className="block rounded-lg">
-                    <Card className="flex flex-col gap-2 p-4 transition-colors hover:border-accent/50 sm:flex-row sm:items-center sm:justify-between">
+                    <Card className="flex flex-col gap-2 p-4 transition-transform hover:-translate-y-0.5 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0">
                         <h2 className="truncate font-medium">{p.name}</h2>
                         <p className="truncate text-sm text-muted">{p.objectives || 'Sin objetivos registrados'}</p>

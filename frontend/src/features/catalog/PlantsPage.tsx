@@ -67,6 +67,7 @@ export function PlantsPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Catálogo"
         title="Explorador vegetal"
         description="Especies del catálogo global con identidad taxonómica trazable y evidencia con procedencia."
       />
@@ -133,7 +134,7 @@ export function PlantsPage() {
                     to={`/app/plants/${s.id}`}
                     className="block h-full rounded-lg focus-visible:outline-offset-4"
                   >
-                    <Card className="flex h-full flex-col gap-3 p-5 transition-colors hover:border-accent/50">
+                    <Card className="flex h-full flex-col gap-3 p-5 transition-transform hover:-translate-y-0.5">
                       <h2 className="text-base font-medium">
                         <ScientificName name={s.scientific_name} authorship={s.authorship} />
                       </h2>

@@ -34,7 +34,7 @@ function formatValue(a: TraitAssertion): string | null {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-3">
-      <h2 className="font-mono text-xs uppercase tracking-wider text-muted">{title}</h2>
+      <h2 className="eyebrow">{title}</h2>
       {children}
     </section>
   )
@@ -108,18 +108,31 @@ export function PlantDetailPage() {
   return (
     <>
       {back}
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            <ScientificName name={s.scientific_name} authorship={s.authorship} />
-          </h1>
-          <p className="mt-1 text-sm text-muted">
-            {s.common_names.filter((n) => n.lang === 'es').map((n) => n.name).join(', ') || 'Sin nombre común registrado'}
-            {s.family && <> · Familia {s.family}</>}
-          </p>
+      <Card className="relative mb-8 overflow-hidden p-6 sm:p-8">
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            {s.family && <p className="eyebrow">{s.family}</p>}
+            <h1 className="display mt-2 text-4xl">
+              <ScientificName name={s.scientific_name} authorship={s.authorship} />
+            </h1>
+            <p className="mt-2 text-sm text-muted">
+              {s.common_names.filter((n) => n.lang === 'es').map((n) => n.name).join(', ') || 'Sin nombre común registrado'}
+              {s.family && <> · Familia {s.family}</>}
+            </p>
+            {canEdit && (
+              <div className="mt-4">
+                <Button onClick={() => setAdding(true)}>Añadir a proyecto</Button>
+              </div>
+            )}
+          </div>
+          <div
+            aria-hidden="true"
+            className="hidden h-40 w-40 shrink-0 items-center justify-center rounded-full bg-lime/30 text-6xl font-semibold text-ink sm:flex"
+          >
+            {s.scientific_name.charAt(0).toUpperCase()}
+          </div>
         </div>
-        {canEdit && <Button onClick={() => setAdding(true)}>Añadir a proyecto</Button>}
-      </div>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="space-y-6 p-5 lg:col-span-1">
@@ -204,7 +217,7 @@ export function PlantDetailPage() {
                 <div className="-mx-5 overflow-x-auto">
                   <table className="w-full min-w-[640px] text-left text-sm">
                     <thead>
-                      <tr className="border-b border-border font-mono text-[11px] uppercase tracking-wider text-muted">
+                      <tr className="border-b border-border eyebrow">
                         <th scope="col" className="px-5 py-2 font-normal">Variable</th>
                         <th scope="col" className="px-2 py-2 font-normal">Valor</th>
                         <th scope="col" className="px-2 py-2 font-normal">Contexto</th>

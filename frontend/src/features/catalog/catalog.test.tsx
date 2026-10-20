@@ -124,3 +124,10 @@ it('PlantDetailPage ofrece "Añadir a proyecto" al editor', async () => {
   renderDetail()
   await waitFor(() => expect(screen.getByRole('button', { name: 'Añadir a proyecto' })).toBeInTheDocument())
 })
+
+it('la ficha muestra el nombre científico como titular display', async () => {
+  mocked.getPlant.mockResolvedValue(detail)
+  renderDetail()
+  const heading = await screen.findByRole('heading', { level: 1 })
+  expect(heading.className).toContain('display')
+})

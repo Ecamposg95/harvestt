@@ -28,13 +28,13 @@ export function Dialog({ title, onClose, children }: Props) {
   }, [])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 backdrop-blur-sm p-4 sm:items-center" onClick={onClose}>
       <div
         ref={panel}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-md rounded-lg border border-border bg-surface p-6 shadow-xl"
+        className="glass w-full max-w-md p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
