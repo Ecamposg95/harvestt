@@ -13,10 +13,12 @@ from app.modules.simulation.clock import get_now
 from app.modules.simulation.engine import VariableLiteral
 from app.modules.simulation.models import RUN_COMPLETED
 from app.modules.telemetry import service
+from app.modules.telemetry.demo import ensure_demo_setup
 from app.modules.telemetry.schemas import (
     AlertRuleCreate,
     AlertRuleOut,
     AlertRuleUpdate,
+    DemoSetupOut,
     DeviceCreate,
     DeviceOut,
     DeviceUpdate,
@@ -165,3 +167,18 @@ def acknowledge_alert(
 ):
     return service.acknowledge_incident(db, ctx, get_project(db, ctx, project_id), incident_id)
 
+
+# ---- Demostración ----
+
+
+@router.post("/{project_id}/simulation/demo", response_model=DemoSetupOut)
+def demo_setup(project_id: str, ctx: RequestContext = Depends(editor), db: Session = Depends(get_db)):
+    project = get_project(db, ctx, project_id)
+    created = ensure_demo_setup(db, ctx, ctx.organization_id, project)
+    db.commit()
+    return DemoSetupOut(
+        created_devices=created["devices"],
+        created_rules=created["rules"],
+        devices=service.list_devices(db, ctx, project),
+        rules=service.list_rules(db, ctx, project),
+    )

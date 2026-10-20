@@ -26,7 +26,20 @@ class HomeActivity(BaseModel):
     created_at: datetime
 
 
+class HomeReading(BaseModel):
+    """Última lectura simulada por variable del proyecto reciente; value=None con stale=True es "Sin señal"."""
+
+    variable: str
+    value: float | None
+    unit: str
+    observed_at: datetime | None
+    stale: bool
+    device_name: str
+    origin: str
+
+
 class HomeOut(BaseModel):
     recent_project: HomeProject | None
     counts: HomeCounts
+    readings: list[HomeReading]
     activity: list[HomeActivity]

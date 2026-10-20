@@ -7,8 +7,9 @@ from app.modules.catalog import seed as catalog_seed
 from app.modules.identity import seed as identity_seed
 from app.modules.projects import seed as projects_seed
 from app.modules.prototypes import seed as prototypes_seed
+from app.modules.telemetry import seed as telemetry_seed
 
-SEEDS = (identity_seed, catalog_seed, projects_seed, prototypes_seed)
+SEEDS = (identity_seed, catalog_seed, projects_seed, prototypes_seed, telemetry_seed)
 
 
 def run() -> None:

@@ -33,6 +33,10 @@ class Settings:
     seed_org_name: str = field(default_factory=lambda: _env("SEED_ORG_NAME", "HarvestT"))
     seed_org_slug: str = field(default_factory=lambda: _env("SEED_ORG_SLUG", "harvestt"))
     public_org_slug: str = field(default_factory=lambda: _env("PUBLIC_ORG_SLUG", "harvestt"))
+    # Crea el proyecto "Invernadero demostrativo" con sensores y reglas demostrativas (V3)
+    seed_demo_simulation: bool = field(
+        default_factory=lambda: _env("SEED_DEMO_SIMULATION", "0").lower() in ("1", "true", "yes")
+    )
     storage_backend: str = field(default_factory=lambda: _env("STORAGE_BACKEND", "local"))
     storage_dir: str = field(default_factory=lambda: _env("STORAGE_DIR", "storage"))
     s3_endpoint: str = field(default_factory=lambda: _env("S3_ENDPOINT"))
