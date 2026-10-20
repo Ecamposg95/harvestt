@@ -10,7 +10,7 @@ import { PrototypesAdminPage } from '@/features/prototypes/PrototypesAdminPage'
 import { ShowcasePage } from '@/features/prototypes/ShowcasePage'
 import { AppLayout } from '@/layouts/AppLayout'
 import { PublicLayout } from '@/layouts/PublicLayout'
-import { AppHome } from '@/pages/AppHome'
+import { HomePage } from '@/features/home/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFound } from '@/pages/NotFound'
 import { useAuth } from '@/store/auth'
@@ -38,7 +38,7 @@ export default function App() {
           </RequireAuth>
         }
       >
-        <Route index element={<AppHome />} />
+        <Route index element={<HomePage />} />
         <Route path="plants" element={<PlantsPage />} />
         <Route path="plants/:id" element={<PlantDetailPage />} />
         <Route path="projects" element={<ProjectsPage />} />
