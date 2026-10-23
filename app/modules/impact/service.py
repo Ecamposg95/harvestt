@@ -13,10 +13,13 @@ from app.modules.catalog.models import (
     ORIGIN_MISSING,
     ORIGIN_SIMULATED,
     SUBJECT_SPECIES,
+    Source,
+    Species,
     TraitAssertion,
 )
-from app.modules.impact.schemas import KpiOut, ProjectImpactOut
+from app.modules.impact.schemas import KpiOut, ProjectImpactOut, PublicImpactOut
 from app.modules.projects.models import CYCLE_ACTIVE, CropCycle, Observation, Project
+from app.modules.prototypes.models import Prototype
 from app.modules.simulation.clock import as_utc
 from app.modules.simulation.models import SimulationRun
 from app.modules.telemetry.models import INCIDENT_OPEN, Incident
@@ -132,3 +135,34 @@ def project_kpis(db: Session, ctx: RequestContext, project: Project, now: dateti
              len(acked), now),
     ]
     return ProjectImpactOut(project_id=project.id, as_of=now, kpis=kpis)
+
+
+def public_kpis(db: Session, public_org_id: str | None, now: datetime) -> PublicImpactOut:
+    """Solo catálogo global y vitrina de la organización pública; nada de proyectos."""
+    published = 0
+    if public_org_id is not None:
+        published = _count(
+            db,
+            select(Prototype.id).where(
+                Prototype.organization_id == public_org_id,
+                Prototype.is_public.is_(True),
+                Prototype.deleted_at.is_(None),
+            ),
+        )
+    species = _count(db, select(Species.id))
+    licenses = db.scalars(select(Source.license)).all()
+    licensed = sum(1 for lic in licenses if lic and lic.strip())
+    coverage, assertions = evidence_coverage(db, None)
+
+    kpis = [
+        _kpi("published_prototypes", "Prototipos publicados", published, None, ORIGIN_MEASURED,
+             "Prototipos publicados en la vitrina.", published, now),
+        _kpi("catalog_species", "Especies en el catálogo", species, None, ORIGIN_MEASURED,
+             "Especies registradas en el catálogo vegetal.", species, now),
+        _kpi("licensed_sources", "Fuentes con licencia registrada", licensed, None, ORIGIN_MEASURED,
+             "Fuentes del catálogo con licencia registrada.", len(licenses), now),
+        _kpi("catalog_evidence_coverage", "Cobertura de evidencia del catálogo", coverage, "%", ORIGIN_DERIVED,
+             "Afirmaciones con origen distinto de «desconocido» ÷ total de afirmaciones del catálogo × 100.",
+             assertions, now),
+    ]
+    return PublicImpactOut(as_of=now, kpis=kpis)

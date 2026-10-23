@@ -1,9 +1,14 @@
+import json
 from datetime import timedelta
 
+import pytest
 from sqlalchemy import select
 
+from app.core.config import Settings
+
 from app.modules.catalog import seed as catalog_seed
-from app.modules.catalog.models import Species, TraitAssertion
+from app.modules.catalog.models import Source, Species, TraitAssertion
+from app.modules.impact import router as impact_router
 from app.modules.projects.models import Observation
 from app.modules.telemetry.models import Incident
 from tests.test_alerts import add_rule, run_to_end
@@ -169,3 +174,93 @@ def test_other_project_data_not_counted(client, tenants, db, clock):
     assert k["active_cycles"]["value"] == 0
     assert k["observations_30d"]["value"] == 0
     assert k["days_since_oldest_active_cycle"]["value"] is None
+
+
+# ---- Públicos ----
+
+PUBLIC_KEYS = ["published_prototypes", "catalog_species", "licensed_sources", "catalog_evidence_coverage"]
+KPI_FIELDS = {"key", "label", "value", "unit", "origin", "formula", "inputs_count", "as_of"}
+
+
+@pytest.fixture
+def public_alfa_impact(monkeypatch):
+    monkeypatch.setattr(impact_router, "settings", Settings(public_org_slug="alfa"))
+
+
+def public(client) -> dict:
+    res = client.get(f"{API}/public/impact")
+    assert res.status_code == 200, res.text
+    return res.json()
+
+
+def public_kpis_by_key(client) -> dict[str, dict]:
+    return {k["key"]: k for k in public(client)["kpis"]}
+
+
+def make_prototype(client, headers, slug, is_public):
+    body = {"name": f"Proto {slug}", "purpose": "Demo", "slug": slug, "is_public": is_public}
+    res = client.post(f"{API}/prototypes", json=body, headers=headers)
+    assert res.status_code == 201, res.text
+    return res.json()
+
+
+def test_public_impact_without_auth_and_shape(client, public_alfa_impact):
+    body = public(client)
+    assert set(body) == {"as_of", "kpis"}
+    assert [k["key"] for k in body["kpis"]] == PUBLIC_KEYS
+    assert all(set(k) == KPI_FIELDS for k in body["kpis"])
+    assert {k["origin"] for k in body["kpis"]} == {"measured", "derived"}
+
+
+def test_public_impact_counts_only_public_live_prototypes_of_public_org(client, tenants, public_alfa_impact):
+    a, b = tenants["alfa_editor"], tenants["beta_editor"]
+    make_prototype(client, a, "pub", True)
+    make_prototype(client, a, "priv", False)
+    gone = make_prototype(client, a, "gone", True)
+    assert client.delete(f"{API}/prototypes/{gone['id']}", headers=a).status_code == 204
+    make_prototype(client, b, "beta-pub", True)
+    k = public_kpis_by_key(client)["published_prototypes"]
+    assert k["value"] == 1
+    assert k["inputs_count"] == 1
+
+
+def test_public_impact_unknown_public_org_still_answers(client, monkeypatch):
+    monkeypatch.setattr(impact_router, "settings", Settings(public_org_slug="no-existe"))
+    assert public_kpis_by_key(client)["published_prototypes"]["value"] == 0
+
+
+def test_public_impact_does_not_leak_tenant_data(client, tenants, db, public_alfa_impact):
+    lettuce, _ = two_species(db)
+
+    def snapshot():
+        return [{k: v for k, v in kpi.items() if k != "as_of"} for kpi in public(client)["kpis"]]
+
+    before = snapshot()
+    h = tenants["alfa_editor"]
+    pid = make_project(client, h, name="Secreto alfa")["id"]
+    add_cycle(client, h, pid, lettuce.id, status="active", started_on="2026-10-01")
+    client.post(f"{API}/projects/{pid}/observations", json={"kind": "note", "content": "Secreto"}, headers=h)
+    assert snapshot() == before
+    raw = json.dumps(public(client))
+    assert "Secreto" not in raw and pid not in raw
+
+
+def test_public_catalog_coverage_and_licensed_sources(client, db, public_alfa_impact):
+    k = public_kpis_by_key(client)
+    assert k["catalog_evidence_coverage"]["value"] is None
+    assert k["licensed_sources"]["value"] == 0
+
+    lettuce, other = two_species(db)
+    add_assertion(db, lettuce.id, origin="sourced")
+    seeded = db.scalars(select(Source.license)).all()
+    seeded_licensed = sum(1 for lic in seeded if lic and lic.strip())
+    db.add_all([Source(title="Con licencia", license="CC-BY-4.0"), Source(title="Sin licencia"), Source(title="Vacía", license="  ")])
+    db.commit()
+    total = db.query(TraitAssertion).count()
+    known = db.query(TraitAssertion).filter(TraitAssertion.origin != "missing").count()
+    k = public_kpis_by_key(client)
+    assert k["catalog_species"]["value"] == db.query(Species).count()
+    assert k["licensed_sources"]["value"] == seeded_licensed + 1
+    assert k["licensed_sources"]["inputs_count"] == len(seeded) + 3
+    assert k["catalog_evidence_coverage"]["value"] == round(known / total * 100, 1)
+    assert k["catalog_evidence_coverage"]["inputs_count"] == total

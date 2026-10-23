@@ -20,3 +20,8 @@ class ProjectImpactOut(BaseModel):
     project_id: str
     as_of: datetime
     kpis: list[KpiOut]
+
+
+class PublicImpactOut(BaseModel):
+    as_of: datetime
+    kpis: list[KpiOut]
