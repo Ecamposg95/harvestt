@@ -15,6 +15,7 @@ from app.modules.catalog.router import router as catalog_router
 from app.modules.graph.router import router as graph_router
 from app.modules.home.router import router as home_router
 from app.modules.identity.router import router as identity_router
+from app.modules.impact.router import router as impact_router
 from app.modules.projects.router import router as projects_router
 from app.modules.prototypes.router import router as prototypes_router
 from app.modules.simulation.router import router as simulation_router
@@ -62,6 +63,7 @@ def create_app() -> FastAPI:
         simulation_router,
         studio_router,
         graph_router,
+        impact_router,
     ):
         api.include_router(router)
     app.include_router(api)
