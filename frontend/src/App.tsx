@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { lazy, ReactNode, Suspense } from 'react'
 import { PlantDetailPage } from '@/features/catalog/PlantDetailPage'
 import { PlantsPage } from '@/features/catalog/PlantsPage'
+import { ProjectImpactPage } from '@/features/impact/ProjectImpactPage'
 import { OperationsPage } from '@/features/operations/OperationsPage'
 import { ProjectDetailPage } from '@/features/projects/ProjectDetailPage'
 import { ProjectsPage } from '@/features/projects/ProjectsPage'
@@ -51,6 +52,7 @@ export default function App() {
         <Route path="projects/:id" element={<ProjectDetailPage />} />
         <Route path="projects/:id/operations" element={<OperationsPage />} />
         <Route path="projects/:id/studio" element={<StudioPage />} />
+        <Route path="projects/:id/impact" element={<ProjectImpactPage />} />
         <Route path="prototypes" element={<PrototypesAdminPage />} />
         <Route path="prototypes/:id" element={<PrototypeAdminDetailPage />} />
         <Route
