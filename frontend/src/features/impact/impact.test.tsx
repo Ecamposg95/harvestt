@@ -6,6 +6,8 @@ import { projectTabHref } from '@/features/projects/ProjectTabs'
 import { impactApi, type Kpi } from './api'
 import { KpiFigure } from './KpiFigure'
 import { ProjectImpactPage } from './ProjectImpactPage'
+import { ImpactSection } from './ImpactSection'
+import { PublicLayout } from '@/layouts/PublicLayout'
 
 vi.mock('@/features/projects/api', () => ({ getProject: vi.fn() }))
 
@@ -106,4 +108,41 @@ it('error muestra reintento', async () => {
   vi.spyOn(impactApi, 'project').mockRejectedValue(new Error('x'))
   renderProjectImpact()
   await waitFor(() => expect(screen.getByRole('button', { name: 'Reintentar' })).toBeInTheDocument())
+})
+
+
+const PUBLIC_KPIS: Kpi[] = [
+  kpi({ key: 'published_prototypes', label: 'Prototipos publicados', value: 3 }),
+  kpi({ key: 'catalog_species', label: 'Especies en el catálogo', value: 12 }),
+  kpi({ key: 'licensed_sources', label: 'Fuentes con licencia registrada', value: 1 }),
+  kpi({ key: 'catalog_evidence_coverage', label: 'Cobertura de evidencia del catálogo', value: null, unit: '%', origin: 'derived' }),
+]
+
+it('muestra los cuatro KPIs públicos con su origen y la nota de lo que no se estima', async () => {
+  vi.spyOn(impactApi, 'public').mockResolvedValue({ as_of: '2026-10-22T12:00:00Z', kpis: PUBLIC_KPIS })
+  render(<ImpactSection />)
+  const section = await screen.findByRole('region', { name: 'Impacto' })
+  await waitFor(() => expect(within(section).getByText('Prototipos publicados')).toBeInTheDocument())
+  expect(within(section).getByText('12')).toBeInTheDocument()
+  expect(within(section).getAllByText('Medido')).toHaveLength(3)
+  expect(within(section).getByText('Sin datos suficientes')).toBeInTheDocument()
+  expect(within(section).getByText(/rendimiento, agua, carbono ni dinero/)).toBeInTheDocument()
+})
+
+it('si /public/impact falla, la vitrina sigue sin la sección', async () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  const call = vi.spyOn(impactApi, 'public').mockRejectedValue(new Error('x'))
+  render(<ImpactSection />)
+  await waitFor(() => expect(call).toHaveBeenCalled())
+  await waitFor(() => expect(warn).toHaveBeenCalled())
+  expect(screen.queryByRole('region', { name: 'Impacto' })).toBeNull()
+})
+
+it('el enlace "Impacto" del encabezado público apunta a /#impacto', () => {
+  render(
+    <MemoryRouter>
+      <PublicLayout />
+    </MemoryRouter>,
+  )
+  expect(screen.getByRole('link', { name: 'Impacto' })).toHaveAttribute('href', '/#impacto')
 })
