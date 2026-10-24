@@ -264,3 +264,26 @@ def test_public_catalog_coverage_and_licensed_sources(client, db, public_alfa_im
     assert k["licensed_sources"]["inputs_count"] == len(seeded) + 3
     assert k["catalog_evidence_coverage"]["value"] == round(known / total * 100, 1)
     assert k["catalog_evidence_coverage"]["inputs_count"] == total
+
+
+def test_future_start_date_is_not_counted_as_days_since_start(client, tenants, db, clock):
+    lettuce, _ = two_species(db)
+    h = tenants["alfa_editor"]
+    pid = make_project(client, h)["id"]
+    add_cycle(client, h, pid, lettuce.id, status="active", started_on="2026-10-27")
+    k = kpis(client, h, pid)["days_since_oldest_active_cycle"]
+    assert k["value"] is None
+    assert k["inputs_count"] == 0
+    add_cycle(client, h, pid, lettuce.id, status="active", started_on="2026-10-15")
+    k = kpis(client, h, pid)["days_since_oldest_active_cycle"]
+    assert k["value"] == 5
+    assert k["inputs_count"] == 1
+
+
+def test_future_dated_observations_are_not_in_last_30_days(client, tenants, db, clock):
+    h = tenants["alfa_editor"]
+    pid = make_project(client, h)["id"]
+    obs = client.post(f"{API}/projects/{pid}/observations", json={"kind": "note", "content": "futuro"}, headers=h).json()
+    db.get(Observation, obs["id"]).observed_at = clock.now + timedelta(days=3)
+    db.commit()
+    assert kpis(client, h, pid)["observations_30d"]["value"] == 0

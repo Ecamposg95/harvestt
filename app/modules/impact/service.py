@@ -83,7 +83,8 @@ def _cited_sources(db: Session, species_ids: list[str]) -> tuple[int, int]:
 def project_kpis(db: Session, ctx: RequestContext, project: Project, now: datetime) -> ProjectImpactOut:
     cycles = db.scalars(scoped(CropCycle, ctx).where(CropCycle.project_id == project.id)).unique().all()
     active = [c for c in cycles if c.status == CYCLE_ACTIVE]
-    dated = [c.started_on for c in active if c.started_on is not None]
+    # Una fecha de inicio futura no da días transcurridos: se ignora como insumo.
+    dated = [c.started_on for c in active if c.started_on is not None and c.started_on <= now.date()]
     days = (now.date() - min(dated)).days if dated else None
     species_ids = sorted({c.species_id for c in cycles})
 
@@ -92,6 +93,7 @@ def project_kpis(db: Session, ctx: RequestContext, project: Project, now: dateti
         scoped(Observation, ctx).where(
             Observation.project_id == project.id,
             Observation.observed_at >= now - timedelta(days=OBSERVATION_WINDOW_DAYS),
+            Observation.observed_at <= now,
         ),
     )
     coverage, assertions = evidence_coverage(db, species_ids)
