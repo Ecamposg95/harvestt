@@ -68,7 +68,7 @@ HARVESTT_PASSWORD=... python -m scripts.demo.load_demo \
 - Los modelos son representaciones ilustrativas hechas a partir de fotos y láminas del equipo, no planos de fabricación.
 - En un proyecto, Operaciones → "Preparar demostración" crea dos sensores y dos reglas demostrativas para lanzar corridas.
 
-### Estado: real / simulado / pendiente (hito visual V1–V4 y V6)
+### Estado: real / simulado / pendiente (hito visual V1–V6)
 
 | Elemento | Estado |
 |---|---|
@@ -83,5 +83,7 @@ HARVESTT_PASSWORD=... python -m scripts.demo.load_demo \
 | Layout del Studio (zonas y plantas) | Real (datos del tenant, con versión) |
 | Medios de especie (foto principal con callouts) | Real: solo superadmin; licencia y atribución obligatorias y visibles |
 | Grafo de conocimiento | Real: solo nodos y relaciones derivados de datos registrados; sin edición |
-| KPIs de impacto (V5) | Pendiente |
+| KPIs de impacto del proyecto (pestaña Impacto) | Real y calculado al vuelo: conteos reales (MEDIDO), derivados con fórmula visible (DERIVADO); corridas e incidentes vienen de la telemetría simulada (SIMULADO). Sin insumos: "Sin datos suficientes", nunca 0 |
+| KPIs públicos (sección Impacto de la vitrina) | Real: prototipos publicados, especies del catálogo, fuentes con licencia y cobertura de evidencia; sin datos de proyectos |
+| Rendimiento, ahorro de agua, CO₂, dinero | Fuera de alcance: no se estiman sin metodología documentada |
 | Telemetría física de dispositivos | Pendiente (fuera de este hito) |
