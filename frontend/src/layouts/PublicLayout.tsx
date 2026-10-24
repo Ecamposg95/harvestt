@@ -15,7 +15,7 @@ export function PublicLayout() {
             <Link to="/" className="glass whitespace-nowrap !rounded-full px-3 py-1.5 font-semibold sm:px-4 sm:py-2">
               Prototipos
             </Link>
-            <a href="/#impacto" className="glass whitespace-nowrap !rounded-full px-3 py-1.5 font-semibold sm:px-4 sm:py-2">
+            <a href="/#impacto" className="glass hidden whitespace-nowrap sm:inline-block !rounded-full px-3 py-1.5 font-semibold sm:px-4 sm:py-2">
               Impacto
             </a>
             <Link to={token ? '/app' : '/login'} className="whitespace-nowrap rounded-full bg-ink px-3 py-1.5 font-semibold text-ink-fg sm:px-4 sm:py-2">

@@ -26,9 +26,9 @@ export function KpiFigure({ kpi, size }: Props) {
       ) : (
         <p className={cx('font-semibold text-muted', hero ? 'text-lg' : 'text-sm')}>Sin datos suficientes</p>
       )}
-      <div className="mt-auto flex flex-wrap items-center gap-2">
+      <div className="relative mt-auto flex flex-wrap items-center gap-2">
         {text !== null && <OriginBadge origin={kpi.origin} className="w-fit" />}
-        <span className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+        <span onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
           <button
             type="button"
             aria-expanded={open}
@@ -48,7 +48,7 @@ export function KpiFigure({ kpi, size }: Props) {
             id={tipId}
             role="tooltip"
             hidden={!open}
-            className="absolute bottom-full left-0 z-20 mb-2 w-[min(18rem,calc(100vw-3rem))] rounded-2xl bg-ink px-3 py-2 text-xs font-medium leading-snug text-ink-fg shadow-glass"
+            className="absolute inset-x-0 bottom-full z-20 mb-2 rounded-2xl bg-ink px-3 py-2 text-xs font-medium normal-case leading-snug tracking-normal text-ink-fg"
           >
             {kpi.formula}
           </span>
