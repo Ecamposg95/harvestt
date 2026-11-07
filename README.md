@@ -1,89 +1,129 @@
-# HarvestT: Sistema de Agrotecnología Automatizado con IA
+<div align="center">
 
-HarvestT es una plataforma integral de hardware y software diseñada para revolucionar la agronomía clásica mediante la automatización y el uso de Inteligencia Artificial. El proyecto se enfoca en la creación de invernaderos y germinadores inteligentes capaces de reproducir condiciones climáticas óptimas de manera autónoma.
+# HarvestT
 
-## Características Principales
+**Agrotecnología automatizada para el cultivo en ambientes controlados**
 
-- **Monitoreo en Tiempo Real:** Sensores integrados que miden luminosidad, humedad (ambiental y de suelo), temperatura y calidad del aire.
-- **Control Inteligente:** Implementación de algoritmos de Machine Learning, agentes inteligentes expertos y lógica difusa para la toma de decisiones y análisis predictivo.
-- **Hardware Robusto:** Basado en microcontroladores (como ATMEGA328/PIC) y computadoras de placa única (SBC) para gestionar actuadores de calefacción, iluminación LED de espectro completo y dispensadores de nutrientes.
-- **Ecosistema Digital:** Aplicación móvil para notificaciones, alertas, planes de cultivo y visualización remota mediante cámaras internas (*"watch and learn"*).
+*De prototipo galardonado (2017–2018) a plataforma de investigación con integridad de datos verificable (2026)*
 
-## Objetivos del Proyecto
+[Plataforma en producción](https://harvestt-production.up.railway.app) ·
+[Historia](docs/HISTORIA.md) ·
+[Arquitectura](docs/ARQUITECTURA.md) ·
+[Integridad científica](docs/INTEGRIDAD_CIENTIFICA.md) ·
+[Estado](docs/STATUS.md) ·
+[Cambios](CHANGELOG.md)
 
-- **Sustentabilidad Urbana:** Facilitar el desarrollo de agricultura vertical y urbana en metrópolis como la CDMX.
-- **Optimización de Cultivos:** Reducir el ciclo de crecimiento de las plantas controlando variables como el fotoperiodo.
-- **Impacto Social:** Democratizar la agronomía permitiendo que personas sin conocimientos técnicos puedan cultivar sus propios alimentos de forma eficiente.
+</div>
 
-## Reconocimientos Internacionales
+---
 
-| Reconocimiento | Evento | Sede | Fecha |
-| --- | --- | --- | --- |
-| 🥈 Medalla de Plata | INTARG | Katowice, Polonia | Junio 2017 |
-| 🥇 Medalla de Oro | ICAN | Toronto, Canadá | Septiembre 2018 |
+## Resumen
 
-## Equipo (General Systech)
+HarvestT es un proyecto de investigación y desarrollo tecnológico que busca trasladar la agronomía clásica a un entorno automatizado, medible y reproducible. Nació como un sistema de hardware y software para invernaderos y germinadores inteligentes capaces de reproducir condiciones climáticas favorables de forma autónoma. Su desarrollo fue reconocido internacionalmente con la **Medalla de Plata en INTARG (Katowice, Polonia, 2017)** y la **Medalla de Oro en ICAN (Toronto, Canadá, 2018)**.
 
-| Integrante | Rol |
-| --- | --- |
-| Emmanuel Campos Genaro | Responsable Técnico / Análisis Económico |
-| José Israel Romero Flores | Diseño de circuitos eléctricos y tarjetas de control |
-| Leonardo Tonatiuh González García | Programación e interfaz gráfica |
-| Luis Antonio Hernandez Moha | Desarrollo de software y prototipos |
+En 2026 el proyecto inició su segunda etapa: **HarvestT Cortex**, una plataforma web para investigar especies, planificar y operar cultivos y conservar evidencia de cada ciclo. Cortex se construye *software primero*: valida el flujo de trabajo, el modelo de datos y la telemetría con simulación explícitamente etiquetada, de modo que la futura integración con dispositivos físicos se haga sobre un contrato ya probado.
 
-## HarvestT Cortex (plataforma)
+## Principio rector
 
-Plataforma web para investigar, planificar y operar cultivos en ambientes controlados, con vitrina pública de prototipos. Especificación de producto: [`docs/HARVESTT_TASK_PACK.md`](docs/HARVESTT_TASK_PACK.md).
+> **Toda cifra presentada como conocimiento agronómico debe tener fuente y contexto; todo dato sintético debe estar marcado. Un dato ausente se representa como desconocido, nunca como cero.**
 
-**Stack:** FastAPI · SQLAlchemy · Alembic · PostgreSQL · React · TypeScript · Vite · Tailwind · three.js · Railway.
+Cada valor que muestra la plataforma declara su origen con una de seis categorías — **Medido · Fuente · Derivado · Simulado · Ilustrativo · Desconocido** — y los indicadores derivados exponen su fórmula. El detalle metodológico está en [`docs/INTEGRIDAD_CIENTIFICA.md`](docs/INTEGRIDAD_CIENTIFICA.md).
 
-### Desarrollo local
+## Etapas del proyecto
+
+| Etapa | Periodo | Enfoque | Resultado |
+|---|---|---|---|
+| **I. Prototipos físicos** | 2017–2018 | Sensores, microcontroladores, actuadores, control inteligente | Invernadero Geodésico, Cultivador Delta, Germinador ECOS; medallas INTARG e ICAN |
+| **II. HarvestT Cortex** | 2026– | Plataforma de investigación, simulación y evidencia | Hito visual V1–V6 en producción (noviembre 2026) |
+| **III. Integración física** | Planeada | Telemetría real, adaptador de dispositivos, control supervisado | Pendiente; ver [hoja de ruta](docs/STATUS.md#hoja-de-ruta) |
+
+La cronología completa está en [`docs/HISTORIA.md`](docs/HISTORIA.md).
+
+## Objetivos
+
+- **Sustentabilidad urbana.** Facilitar la agricultura vertical y urbana en metrópolis como la Ciudad de México.
+- **Optimización de cultivos.** Controlar variables como fotoperiodo, temperatura y humedad para acortar y estabilizar ciclos.
+- **Democratización del conocimiento.** Permitir que personas sin formación agronómica cultiven alimentos con apoyo de evidencia trazable.
+- **Rigor.** Separar con claridad lo medido de lo simulado y lo ilustrativo, para que la plataforma sea útil como instrumento de investigación.
+
+## Capacidades de HarvestT Cortex
+
+| Módulo | Capacidad | Naturaleza del dato |
+|---|---|---|
+| Catálogo de especies | Búsqueda por familia, fichas con afirmaciones contextualizadas, medios con licencia y atribución | Fuente / Desconocido |
+| Proyectos y bitácora | Proyectos, ciclos de cultivo y observaciones por organización | Medido (registrado por el usuario) |
+| Vitrina pública | Prototipos con modelo 3D (STL con color por cara) y puntos etiquetados | Ilustrativo |
+| Invernadero virtual | Sensores, lecturas, reglas de alerta e incidentes con motor determinista `didactic-v1` | **Simulado** |
+| Studio 3D | Distribución de zonas y plantas procedurales, guardado versionado, vista 2D sin WebGL | Layout real / plantas ilustrativas |
+| Impacto | KPIs de proyecto y públicos con fórmula y origen por cifra | Medido / Derivado / Simulado |
+| Grafo de conocimiento | Nodos y relaciones derivados únicamente de datos registrados, con procedencia | Derivado |
+
+## Arquitectura en síntesis
+
+Monolito modular *API-first* y multi-organización desde el origen.
+
+```
+React 18 · TypeScript · Vite · Tailwind · three.js · d3-force
+                         │  /api/v1
+FastAPI · Pydantic 2 · SQLAlchemy 2 · Alembic (0001 → 0007)
+                         │
+PostgreSQL 17                 Almacenamiento de objetos S3 (Railway)
+```
+
+Módulos de dominio: `identity`, `audit`, `catalog`, `projects`, `prototypes`, `simulation`, `telemetry`, `studio`, `impact`, `graph`, `home`. Descripción completa, modelo de datos y decisiones en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
+
+## Puesta en marcha
+
+**Requisitos:** Python 3.12+, Node 20+, Docker (para PostgreSQL local).
 
 ```bash
-cp .env.example .env          # define SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD
-make setup                    # dependencias Python y frontend
-make dev                      # Postgres (Docker) + migraciones + seed
-make dev-api                  # API en http://localhost:8000 (docs en /api/docs)
+cp .env.example .env          # define SEED_ADMIN_EMAIL y SEED_ADMIN_PASSWORD
+make setup                    # dependencias de Python y del frontend
+make dev                      # PostgreSQL (Docker) + migraciones + seed
+make dev-api                  # API en http://localhost:8000  (OpenAPI en /api/docs)
 make dev-web                  # frontend en http://localhost:5173
-make test                     # pytest + tsc + vitest
+make test                     # pytest + verificación de tipos + vitest
 ```
 
 ### Despliegue
 
-Railway despliega automáticamente cada push a `main` usando el `Dockerfile`. Al arrancar, el contenedor aplica las migraciones (`alembic upgrade head`, hoy hasta `0007`) y el seed idempotente. Los archivos de prototipos y medios de especie se guardan en el bucket S3 de Railway.
-
-Variables opcionales: `SEED_DEMO_SIMULATION=1` crea el proyecto "Invernadero demostrativo" con sensores y reglas de ejemplo (apagado por defecto; producción no lo usa).
+Railway despliega cada *push* a `main` con el `Dockerfile`. Al arrancar, el contenedor aplica `alembic upgrade head` y un seed idempotente. Los archivos de prototipos y los medios de especie se guardan en el bucket S3 de Railway. `SEED_DEMO_SIMULATION=1` crea el proyecto «Invernadero demostrativo» (apagado en producción).
 
 ### Datos de demostración
 
-Los prototipos de la demo (Invernadero Geodésico, Cultivador Delta y Germinador ECOS) se generan como STL procedurales con color y se cargan por la API, con sus puntos etiquetados:
+Los prototipos históricos se reconstruyen como STL procedurales a partir de fotografías y láminas del equipo, y se cargan por la API con sus puntos etiquetados:
 
 ```bash
 HARVESTT_PASSWORD=... python -m scripts.demo.load_demo \
   --base http://localhost:8080 --email admin@... --photos-dir RUTA_FOTOS [--replace]
 ```
 
-- Idempotente por slug; `--replace` borra y recrea.
-- Las fotos no se versionan: el cargador las busca por nombre en `--photos-dir` (fotos del Cultivador Delta, render y lámina del geodésico).
-- Los modelos son representaciones ilustrativas hechas a partir de fotos y láminas del equipo, no planos de fabricación.
-- En un proyecto, Operaciones → "Preparar demostración" crea dos sensores y dos reglas demostrativas para lanzar corridas.
+Idempotente por *slug*; `--replace` recrea. Las fotografías no se versionan. **Los modelos son representaciones ilustrativas, no planos de fabricación.**
 
-### Estado: real / simulado / pendiente (hito visual V1–V6)
+## Metodología de desarrollo
 
-| Elemento | Estado |
+Cada fase se diseña en una especificación, se planifica contra el código existente y se implementa con desarrollo guiado por pruebas en su propia rama. Ninguna fase llega a producción sin: suite completa en verde, migraciones probadas en ciclo `upgrade → check → downgrade → upgrade` sobre PostgreSQL 17, *smoke test* del contenedor, revisión visual (claro, oscuro y 375 px) y autorización explícita del responsable técnico. Especificaciones y planes: [`docs/superpowers/`](docs/superpowers/). Especificación de producto: [`docs/HARVESTT_TASK_PACK.md`](docs/HARVESTT_TASK_PACK.md).
+
+## Reconocimientos internacionales
+
+| Reconocimiento | Evento | Sede | Fecha |
+|---|---|---|---|
+| Medalla de Plata | INTARG — International Invention and Innovation Show | Katowice, Polonia | Junio de 2017 |
+| Medalla de Oro | ICAN — International Invention & Innovation Competition in Canada | Toronto, Canadá | Septiembre de 2018 |
+
+## Equipo — General Systech
+
+| Integrante | Contribución |
 |---|---|
-| Proyectos, ciclos, observaciones, actividad del inicio | Real (datos del tenant) |
-| Catálogo de especies | Real; rasgos sin evidencia se muestran como "Desconocido" |
-| Puntos etiquetados sobre modelos STL | Real: editor en el admin (máx. 12 por prototipo); callouts que siguen la rotación, se atenúan detrás del modelo y no se enciman; en móvil, números con leyenda |
-| Vitrina pública | Real: modelo 3D del prototipo destacado; STL con color por cara cuando el archivo lo trae |
-| Invernadero virtual: lecturas, gráficas, medidores, incidentes | **Simulado** (motor `didactic-v1`, determinista por semilla); siempre con la banda "Simulación didáctica, sin calibración agronómica" y la etiqueta SIMULADO; sin señal se muestra "Sin señal", nunca 0 |
-| Reglas de alerta del demo (30 °C, 45 %) | Umbrales de ejemplo, no agronómicos |
-| Escena 3D del invernadero y del Studio | **Ilustrativo**: forma y alturas ilustrativas; piso a partir del área registrada |
-| Plantas 3D procedurales (catálogo, ficha, Studio) | **Ilustrativo**: "Representación ilustrativa; no predice crecimiento" |
-| Layout del Studio (zonas y plantas) | Real (datos del tenant, con versión) |
-| Medios de especie (foto principal con callouts) | Real: solo superadmin; licencia y atribución obligatorias y visibles |
-| Grafo de conocimiento | Real: solo nodos y relaciones derivados de datos registrados; sin edición |
-| KPIs de impacto del proyecto (pestaña Impacto) | Real y calculado al vuelo: conteos reales (MEDIDO), derivados con fórmula visible (DERIVADO); corridas e incidentes vienen de la telemetría simulada (SIMULADO). Sin insumos: "Sin datos suficientes", nunca 0 |
-| KPIs públicos (sección Impacto de la vitrina) | Real: prototipos publicados, especies del catálogo, fuentes con licencia y cobertura de evidencia; sin datos de proyectos |
-| Rendimiento, ahorro de agua, CO₂, dinero | Fuera de alcance: no se estiman sin metodología documentada |
-| Telemetría física de dispositivos | Pendiente (fuera de este hito) |
+| Emmanuel Campos Genaro | Responsable técnico, análisis económico y dirección de HarvestT Cortex |
+| José Israel Romero Flores | Diseño de circuitos eléctricos y tarjetas de control |
+| Leonardo Tonatiuh González García | Programación e interfaz gráfica |
+| Luis Antonio Hernández Moha | Desarrollo de software y prototipos |
+
+## Cómo citar
+
+Si utiliza HarvestT en trabajo académico, cite el repositorio con los metadatos de [`CITATION.cff`](CITATION.cff).
+
+---
+
+<sub>HarvestT · General Systech · Ciudad de México · 2017–2026</sub>

@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "Si utiliza este software, cítelo con los siguientes metadatos."
+title: "HarvestT: agrotecnología automatizada para el cultivo en ambientes controlados"
+abstract: >-
+  HarvestT es un proyecto de investigación y desarrollo tecnológico de
+  agrotecnología automatizada. Su primera etapa (2017–2018) produjo prototipos
+  físicos de invernaderos y germinadores inteligentes, reconocidos en INTARG 2017
+  y ICAN 2018. Su segunda etapa, HarvestT Cortex (2026), es una plataforma web
+  para investigar especies, planificar y operar cultivos y conservar evidencia
+  con procedencia explícita de cada dato.
+type: software
+authors:
+  - family-names: "Campos Genaro"
+    given-names: "Emmanuel"
+  - family-names: "Romero Flores"
+    given-names: "José Israel"
+  - family-names: "González García"
+    given-names: "Leonardo Tonatiuh"
+  - family-names: "Hernández Moha"
+    given-names: "Luis Antonio"
+date-released: "2026-11-07"
+url: "https://harvestt-production.up.railway.app"
+repository-code: "https://github.com/Ecamposg95/harvestt"
+keywords:
+  - agrotecnología
+  - agricultura de ambiente controlado
+  - agricultura urbana
+  - invernadero inteligente
+  - procedencia de datos
+  - simulación

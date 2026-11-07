@@ -54,3 +54,7 @@ Extras fuera de los planes, hechos para la demo: vitrina con modelo 3D destacado
 3. **Grafo:** registrar aristas reales `designed_for` (prototipo → especie) cuando el equipo indique qué cultiva cada prototipo.
 4. **Menores conocidos:** carrera de dos altas simultáneas puede dejar 13 hotspots; puntos borrados en cascada sin evento de auditoría propio; STL con normales invertidas no se pueden seleccionar desde fuera; piso ilustrativo no cuadrado en Studio sin área; sin pinch-zoom táctil en el grafo.
 5. **Limpieza:** ramas `sdd/*` y `feat/hito-*` ya integradas pueden borrarse del remoto cuando se confirme la demo.
+
+## Cierre del hito (2026-11-07)
+
+Las quince ramas `feat/*` y `sdd/*` están contenidas en `main`; no queda trabajo sin integrar. El estado vigente del sistema se mantiene en [`docs/STATUS.md`](../../STATUS.md); la arquitectura, en [`docs/ARQUITECTURA.md`](../../ARQUITECTURA.md). Este plan queda como registro histórico del hito.
