@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { errorMessage } from '@/api/client'
-import { cx, ErrorState, Loading } from '@/components/ui'
+import { Button, cx, ErrorState, Loading } from '@/components/ui'
 import { KpiFigure } from '@/features/impact/KpiFigure'
 import type { Kpi } from '@/features/impact/api'
 import { prototypesApi } from '@/features/prototypes/api'
@@ -11,6 +11,8 @@ import { EcosystemDiagram } from './EcosystemDiagram'
 import { prefersReducedMotion } from './geo'
 import { GlobeFallback } from './GlobeFallback'
 import { LazyGlobe } from './LazyGlobe'
+import { Dialog } from '@/features/catalog/Dialog'
+import { RequestForm } from './RequestForm'
 
 const CHAPTERS: Record<string, { title: string; text: string }> = {
   history: {
@@ -46,6 +48,7 @@ export function VisionPage() {
   const [state, setState] = useState<State>({ phase: 'loading' })
   // Crear un contexto WebGL es caro y está limitado: se decide una sola vez.
   const [hasWebgl] = useState(webglAvailable)
+  const [form, setForm] = useState<'node' | 'contact' | null>(null)
 
   const load = useCallback(() => {
     setState({ phase: 'loading' })
@@ -143,7 +146,22 @@ export function VisionPage() {
               })}
             </ol>
           </section>
+
+          <section aria-label="Participa" className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6">
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={() => setForm('node')}>Únete como nodo</Button>
+              <Button variant="secondary" onClick={() => setForm('contact')}>
+                Habla con el equipo
+              </Button>
+            </div>
+          </section>
         </>
+      )}
+
+      {form && (
+        <Dialog title={form === 'node' ? 'Únete como nodo' : 'Habla con el equipo'} onClose={() => setForm(null)}>
+          <RequestForm kind={form} onDone={() => setForm(null)} />
+        </Dialog>
       )}
     </div>
   )

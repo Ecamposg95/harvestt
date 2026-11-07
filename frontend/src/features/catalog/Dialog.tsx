@@ -15,7 +15,9 @@ export function Dialog({ title, onClose, children }: Props) {
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null
-    const first = panel.current?.querySelector<HTMLElement>('select, input, textarea, button')
+    const first =
+      panel.current?.querySelector<HTMLElement>('[data-autofocus]') ??
+      panel.current?.querySelector<HTMLElement>('select, input, textarea, button')
     first?.focus()
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') close.current()
@@ -34,7 +36,7 @@ export function Dialog({ title, onClose, children }: Props) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="glass w-full max-w-md p-6"
+        className="glass max-h-full w-full max-w-md overflow-y-auto p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-4">

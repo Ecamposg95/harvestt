@@ -137,3 +137,77 @@ it('webglAvailable se consulta una sola vez aunque la página se vuelva a render
   expect(spy).toHaveBeenCalledTimes(1)
   expect(webglAvailable).toHaveBeenCalledTimes(1)
 })
+
+async function openForm(label: string) {
+  vi.spyOn(visionApi, 'summary').mockResolvedValue(VISION)
+  renderPage()
+  fireEvent.click(await screen.findByRole('button', { name: label }))
+  return screen.findByRole('dialog')
+}
+
+function fill(dialog: HTMLElement) {
+  fireEvent.change(within(dialog).getByLabelText('Nombre'), { target: { value: 'Ana Pérez' } })
+  fireEvent.change(within(dialog).getByLabelText('Correo'), { target: { value: 'ana@example.org' } })
+  fireEvent.change(within(dialog).getByLabelText('Mensaje'), { target: { value: 'Quiero operar un nodo en mi huerto.' } })
+}
+
+it('envía solicitud de nodo sin coordenadas si no se marca ubicación', async () => {
+  const send = vi.spyOn(visionApi, 'sendRequest').mockResolvedValue(undefined)
+  const dialog = await openForm('Únete como nodo')
+  expect(within(dialog).getByLabelText('Nombre')).toHaveFocus()
+  fill(dialog)
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Enviar' }))
+  expect(await screen.findByText('Gracias. El equipo revisará tu solicitud y te escribirá.')).toBeInTheDocument()
+  expect(send).toHaveBeenCalledTimes(1)
+  const body = send.mock.calls[0][0]
+  expect(body).toMatchObject({ kind: 'node', name: 'Ana Pérez', email: 'ana@example.org', website: '' })
+  expect(body).not.toHaveProperty('lat')
+  expect(body).not.toHaveProperty('lon')
+})
+
+it('con la casilla marcada envía lat y lon juntas; si se niega, envía sin ellas', async () => {
+  const send = vi.spyOn(visionApi, 'sendRequest').mockResolvedValue(undefined)
+  const getCurrentPosition = vi.fn((ok: (p: unknown) => void) => ok({ coords: { latitude: 19.43, longitude: -99.13 } }))
+  Object.defineProperty(navigator, 'geolocation', { value: { getCurrentPosition }, configurable: true })
+  const dialog = await openForm('Únete como nodo')
+  fill(dialog)
+  fireEvent.click(within(dialog).getByLabelText('Compartir mi ubicación aproximada (ciudad)'))
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Enviar' }))
+  await screen.findByText(/Gracias/)
+  expect(getCurrentPosition).toHaveBeenCalledTimes(1)
+  expect(send.mock.calls[0][0]).toMatchObject({ lat: 19.43, lon: -99.13 })
+})
+
+it('si la geolocalización falla envía sin coordenadas y sin error', async () => {
+  const send = vi.spyOn(visionApi, 'sendRequest').mockResolvedValue(undefined)
+  const getCurrentPosition = vi.fn((_ok: unknown, fail: () => void) => fail())
+  Object.defineProperty(navigator, 'geolocation', { value: { getCurrentPosition }, configurable: true })
+  const dialog = await openForm('Únete como nodo')
+  fill(dialog)
+  fireEvent.click(within(dialog).getByLabelText('Compartir mi ubicación aproximada (ciudad)'))
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Enviar' }))
+  await screen.findByText(/Gracias/)
+  expect(send.mock.calls[0][0]).not.toHaveProperty('lat')
+  expect(send.mock.calls[0][0]).not.toHaveProperty('lon')
+})
+
+it('muestra error de validación del servidor junto al correo', async () => {
+  const err = Object.assign(new Error('422'), {
+    isAxiosError: true,
+    response: { status: 422, data: { detail: [{ loc: ['body', 'email'], msg: 'Correo no válido', type: 'value_error' }] } },
+  })
+  vi.spyOn(visionApi, 'sendRequest').mockRejectedValue(err)
+  const dialog = await openForm('Habla con el equipo')
+  fill(dialog)
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Enviar' }))
+  const msg = await within(dialog).findByText('Correo no válido')
+  expect(within(dialog).getByLabelText('Correo')).toHaveAccessibleDescription('Correo no válido')
+  expect(msg).toBeVisible()
+  expect(within(dialog).queryByLabelText('Ciudad')).toBeNull()
+})
+
+it('Escape cierra el diálogo', async () => {
+  await openForm('Habla con el equipo')
+  fireEvent.keyDown(document, { key: 'Escape' })
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+})
