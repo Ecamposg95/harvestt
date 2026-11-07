@@ -126,3 +126,14 @@ it('con movimiento reducido el globo recibe animate=false', async () => {
   renderPage()
   expect(await screen.findByTestId('globe')).toHaveAttribute('data-animate', 'false')
 })
+
+it('webglAvailable se consulta una sola vez aunque la página se vuelva a renderizar', async () => {
+  vi.mocked(webglAvailable).mockClear()
+  vi.mocked(webglAvailable).mockReturnValue(false)
+  const spy = vi.spyOn(visionApi, 'summary').mockResolvedValue({ ...VISION, sites: SITES })
+  renderPage()
+  fireEvent.click(await screen.findByText('CDMX · prototipos históricos').then(() => document.body))
+  await screen.findByText('Prototipos construidos')
+  expect(spy).toHaveBeenCalledTimes(1)
+  expect(webglAvailable).toHaveBeenCalledTimes(1)
+})

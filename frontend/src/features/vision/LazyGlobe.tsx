@@ -10,7 +10,7 @@ export function LazyGlobe(props: GlobeProps) {
       fallback={
         <div
           role="status"
-          className={`flex items-center justify-center text-xs font-medium text-muted ${props.className ?? ''}`}
+          className={`flex aspect-square w-full max-w-[520px] items-center justify-center text-xs font-medium text-muted ${props.className ?? ''}`}
         >
           Preparando globo…
         </div>

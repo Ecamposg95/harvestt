@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { webglAvailable } from '@/features/three/webgl'
 import { useTheme } from '@/store/theme'
 import type { VisionSite } from './api'
 import { latLonToVector3 } from './geo'
@@ -41,7 +40,7 @@ export default function Globe({ sites, animate, className = '' }: GlobeProps) {
 
   useEffect(() => {
     const mount = mountRef.current
-    if (!mount || !webglAvailable()) return
+    if (!mount) return
     const list: VisionSite[] = JSON.parse(sitesKey)
 
     let renderer: THREE.WebGLRenderer
@@ -120,12 +119,15 @@ export default function Globe({ sites, animate, className = '' }: GlobeProps) {
     const focus = list.find((s) => s.kind === 'historic') ?? { lon: -99 }
     globe.rotation.y = -((focus.lon + 90) * Math.PI) / 180 // la cara frontal es lon = -90
 
+    const renderOnce = () => renderer.render(scene, camera)
+
     applyThemeRef.current = (dark: boolean) => {
       const p = palette(dark)
       sphereMat.color.setHex(p.sphere)
       lineMat.color.setHex(p.line)
       dotMat.color.setHex(p.accent)
       dashedMat.color.setHex(p.accent)
+      if (!animate) renderOnce()
     }
 
     const resize = () => {
@@ -134,7 +136,7 @@ export default function Globe({ sites, animate, className = '' }: GlobeProps) {
       renderer.setSize(w, h, false)
       camera.aspect = w / h
       camera.updateProjectionMatrix()
-      if (!animate) renderer.render(scene, camera)
+      if (!animate) renderOnce()
     }
     const observer = new ResizeObserver(resize)
     observer.observe(mount)
@@ -149,7 +151,7 @@ export default function Globe({ sites, animate, className = '' }: GlobeProps) {
       renderer.render(scene, camera)
     }
     if (animate) tick()
-    else renderer.render(scene, camera)
+    else renderOnce()
 
     return () => {
       applyThemeRef.current = null

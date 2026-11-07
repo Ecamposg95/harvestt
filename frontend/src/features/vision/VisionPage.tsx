@@ -44,6 +44,8 @@ type State =
 
 export function VisionPage() {
   const [state, setState] = useState<State>({ phase: 'loading' })
+  // Crear un contexto WebGL es caro y está limitado: se decide una sola vez.
+  const [hasWebgl] = useState(webglAvailable)
 
   const load = useCallback(() => {
     setState({ phase: 'loading' })
@@ -76,7 +78,7 @@ export function VisionPage() {
         </div>
         <div data-testid="globe-slot" className="min-w-0">
           {state.phase === 'ready' &&
-            (webglAvailable() ? (
+            (hasWebgl ? (
               <LazyGlobe sites={state.vision.sites} animate={!prefersReducedMotion()} className="mx-auto" />
             ) : (
               <GlobeFallback sites={state.vision.sites} />
