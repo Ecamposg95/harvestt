@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { cx } from '@/components/ui'
 
-export type ProjectTab = 'resumen' | 'bitacora' | 'ciclos' | 'operaciones' | 'studio'
+export type ProjectTab = 'resumen' | 'bitacora' | 'ciclos' | 'operaciones' | 'studio' | 'impacto'
 
 const TABS: Array<{ key: ProjectTab; label: string }> = [
   { key: 'resumen', label: 'Resumen' },
@@ -9,6 +9,7 @@ const TABS: Array<{ key: ProjectTab; label: string }> = [
   { key: 'ciclos', label: 'Ciclos' },
   { key: 'operaciones', label: 'Operaciones' },
   { key: 'studio', label: 'Studio' },
+  { key: 'impacto', label: 'Impacto' },
 ]
 
 export function projectTabHref(projectId: string, tab: ProjectTab): string {
@@ -16,6 +17,7 @@ export function projectTabHref(projectId: string, tab: ProjectTab): string {
   if (tab === 'resumen') return base
   if (tab === 'operaciones') return `${base}/operations`
   if (tab === 'studio') return `${base}/studio`
+  if (tab === 'impacto') return `${base}/impact`
   return `${base}?tab=${tab}`
 }
 

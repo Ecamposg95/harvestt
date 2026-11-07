@@ -40,7 +40,7 @@ Orden fijo V1 → V6. V3 y V6 solo dependen de V1 y podrían adelantarse si el u
 | V2 | Completa | Sí (`074c981`) |
 | V3 | Completa (Tareas 1–9; la 10 de cierre se hizo en la integración) | Sí (`24b1a3d`) |
 | V4 | Completa (Tareas 1–7; la 8 de cierre se hizo en la integración) | Sí (`24b1a3d`) |
-| V5 | Plan detallado escrito (2026-10-22), sin implementar | No |
+| V5 | Completa (Tareas 1–6, rama `feat/hito-v5-impacto`) | No (pendiente de autorización) |
 | V6 | Completa (Tareas 1–6; la 7 de cierre se hizo en la integración) | Sí (`24b1a3d`) |
 
 V3, V4 y V6 se integraron juntas en `feat/demo-integracion` y llegaron a `main` como fast-forward. Verificación de la integración: pytest completo y vitest 217/217 en verde, build con three y d3-force en chunks perezosos, migraciones `0001 → 0007` con `upgrade → check → downgrade 0004 → upgrade → check` sin diferencias en Postgres 17, smoke del contenedor Docker y revisión visual en navegador (claro, oscuro, 375 px).
@@ -49,7 +49,7 @@ Extras fuera de los planes, hechos para la demo: vitrina con modelo 3D destacado
 
 ### Pendiente
 
-1. **V5 (impacto y KPIs):** plan detallado en `2026-10-22-hito-v5-impacto.md`; falta revisión del usuario y elegir modo de ejecución (recomendado: nativo).
+1. **V5 (impacto y KPIs):** implementada en `feat/hito-v5-impacto` (pytest 244, vitest 231, build y smoke del contenedor en verde); falta merge a `main` y despliegue con autorización.
 2. **Datos de demo en producción:** hecho el 2026-10-22 con autorización (Invernadero Geodésico, Cultivador Delta y Germinador ECOS con STL, fotos y puntos). Se corrigió `S3_SECRET_ACCESS_KEY` de la app, que no coincidía con el bucket (las subidas en producción fallaban con `SignatureDoesNotMatch`).
 3. **Grafo:** registrar aristas reales `designed_for` (prototipo → especie) cuando el equipo indique qué cultiva cada prototipo.
 4. **Menores conocidos:** carrera de dos altas simultáneas puede dejar 13 hotspots; puntos borrados en cascada sin evento de auditoría propio; STL con normales invertidas no se pueden seleccionar desde fuera; piso ilustrativo no cuadrado en Studio sin área; sin pinch-zoom táctil en el grafo.

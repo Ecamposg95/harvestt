@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { errorMessage } from '@/api/client'
 import { ErrorState } from '@/components/ui'
+import { ImpactSection } from '@/features/impact/ImpactSection'
 import { prototypesApi, PublicPrototypeSummary } from './api'
 import { StlViewer } from './LazyStlViewer'
 import { HeroPlaceholder, StatusBadge } from './shared'
@@ -104,6 +105,8 @@ export function ShowcasePage() {
           </ul>
         )}
       </section>
+
+      <ImpactSection />
     </div>
   )
 }
