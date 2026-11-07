@@ -33,6 +33,10 @@ class Settings:
     seed_org_name: str = field(default_factory=lambda: _env("SEED_ORG_NAME", "HarvestT"))
     seed_org_slug: str = field(default_factory=lambda: _env("SEED_ORG_SLUG", "harvestt"))
     public_org_slug: str = field(default_factory=lambda: _env("PUBLIC_ORG_SLUG", "harvestt"))
+    # Sitio histórico de la página Visión (prototipos 2017-2018), aproximado a ciudad
+    public_origin_label: str = field(default_factory=lambda: _env("PUBLIC_ORIGIN_LABEL", "CDMX · prototipos históricos"))
+    public_origin_lat: float = field(default_factory=lambda: float(_env("PUBLIC_ORIGIN_LAT", "19.4")))
+    public_origin_lon: float = field(default_factory=lambda: float(_env("PUBLIC_ORIGIN_LON", "-99.1")))
     # Crea el proyecto "Invernadero demostrativo" con sensores y reglas demostrativas (V3)
     seed_demo_simulation: bool = field(
         default_factory=lambda: _env("SEED_DEMO_SIMULATION", "0").lower() in ("1", "true", "yes")

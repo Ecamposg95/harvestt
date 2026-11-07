@@ -64,3 +64,32 @@ class RequestOut(BaseModel):
 class RequestReview(BaseModel):
     status: Literal["approved", "rejected"]
     note: str | None = Field(default=None, max_length=500)
+
+
+class VisionFigure(BaseModel):
+    key: str
+    label: str
+    value: float | None
+    status: Literal["available", "soon"]
+    origin: str
+    formula: str
+
+
+class VisionLayer(BaseModel):
+    key: str
+    status: Literal["done", "operating", "in_construction", "vision"]
+    reason: str
+
+
+class VisionSite(BaseModel):
+    kind: Literal["historic", "future"]
+    label: str
+    lat: float
+    lon: float
+
+
+class VisionOut(BaseModel):
+    as_of: datetime
+    figures: list[VisionFigure]
+    layers: list[VisionLayer]
+    sites: list[VisionSite]

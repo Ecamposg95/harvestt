@@ -1,12 +1,19 @@
-from sqlalchemy import select
+from datetime import datetime, timedelta
+
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core import audit
+from app.core.config import settings
 from app.core.errors import not_found
 from app.core.mixins import utcnow
 from app.modules.identity.models import User
+from app.modules.catalog.models import Species
+from app.modules.prototypes.service import public_prototypes
+from app.modules.simulation.clock import as_utc
+from app.modules.telemetry.models import DEVICE_SIMULATED, SOURCE_SIMULATED, Device, TelemetryReading
 from app.modules.vision.models import InboundRequest, Recognition
-from app.modules.vision.schemas import RecognitionIn, RequestIn, RequestReview
+from app.modules.vision.schemas import RecognitionIn, RequestIn, RequestReview, VisionFigure, VisionLayer, VisionOut, VisionSite
 
 
 def list_recognitions(db: Session, org_id: str) -> list[Recognition]:
@@ -77,3 +84,86 @@ def review_request(db: Session, user: User, req_id: str, review: RequestReview) 
     db.commit()
     db.refresh(req)
     return req
+
+
+OPERATING_WINDOW = timedelta(days=7)
+
+
+def _operating_nodes(db: Session, org_id: str, now: datetime) -> int:
+    """Proyectos con un dispositivo físico vivo que envió una lectura real en la ventana.
+
+    Se aproxima la instalación por proyecto hasta que exista la entidad Node (M5).
+    La comparación de fechas se hace en Python: SQLite devuelve fechas sin zona.
+    """
+    stmt = (
+        select(TelemetryReading.project_id, func.max(TelemetryReading.observed_at))
+        .join(Device, Device.id == TelemetryReading.device_id)
+        .where(
+            Device.organization_id == org_id,
+            Device.kind != DEVICE_SIMULATED,
+            Device.deleted_at.is_(None),
+            TelemetryReading.source != SOURCE_SIMULATED,
+        )
+        .group_by(TelemetryReading.project_id)
+    )
+    cutoff = as_utc(now) - OPERATING_WINDOW
+    return sum(1 for _, last in db.execute(stmt) if as_utc(last) >= cutoff)
+
+
+def vision_summary(db: Session, org_id: str | None, now: datetime) -> VisionOut:
+    prototypes = recognitions = operating = None
+    if org_id is not None:
+        prototypes = len(public_prototypes(db, org_id))
+        recognitions = db.scalar(
+            select(func.count()).select_from(Recognition).where(
+                Recognition.organization_id == org_id, Recognition.deleted_at.is_(None)
+            )
+        )
+        operating = _operating_nodes(db, org_id, now)
+
+    def num(v: int | None) -> float | None:
+        return None if v is None else float(v)
+
+    figures = [
+        VisionFigure(key="prototypes", label="Prototipos", value=num(prototypes), status="available",
+                     origin="measured", formula="Prototipos publicados en la vitrina."),
+        VisionFigure(key="operating_nodes", label="Nodos operando", value=num(operating), status="available",
+                     origin="measured",
+                     formula="Instalaciones con un dispositivo físico que envió una lectura real en los últimos "
+                             "7 días. Lo simulado no cuenta."),
+        VisionFigure(key="signed_readings", label="Lecturas firmadas", value=None, status="soon",
+                     origin="missing", formula="Disponible cuando opere la red de confianza (M5)."),
+        VisionFigure(key="recognitions", label="Reconocimientos internacionales", value=num(recognitions),
+                     status="available", origin="sourced", formula="Reconocimientos registrados con evidencia."),
+    ]
+
+    has_species = db.scalar(select(Species.id).where(Species.deleted_at.is_(None)).limit(1)) is not None
+    has_history = bool(prototypes) or bool(recognitions)
+    layers = [
+        VisionLayer(key="history", status="done" if has_history else "vision",
+                    reason="Prototipos 2017–2018 y reconocimientos registrados."),
+        VisionLayer(key="cortex", status="operating" if has_species else "in_construction",
+                    reason="Plataforma en producción con catálogo."),
+        VisionLayer(key="knowledge", status="in_construction",
+                    reason="Ontología, bancos de plantas y mapa GIS: hito M2–M4."),
+        VisionLayer(key="trust", status="vision", reason="Red de confianza: hito M5."),
+        VisionLayer(key="commons", status="vision", reason="harvestt.org: hito M6."),
+    ]
+
+    sites = [VisionSite(kind="historic", label=settings.public_origin_label,
+                        lat=settings.public_origin_lat, lon=settings.public_origin_lon)]
+    stmt = (
+        select(InboundRequest)
+        .where(
+            InboundRequest.kind == "node",
+            InboundRequest.status == "approved",
+            InboundRequest.deleted_at.is_(None),
+            InboundRequest.lat.is_not(None),
+            InboundRequest.lon.is_not(None),
+        )
+        .order_by(InboundRequest.created_at)
+    )
+    for req in db.scalars(stmt):
+        sites.append(VisionSite(kind="future", label=req.city or "Nodo solicitado", lat=req.lat, lon=req.lon))
+
+    return VisionOut(as_of=now, figures=figures, layers=layers, sites=sites)

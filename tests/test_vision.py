@@ -97,3 +97,120 @@ def test_review_request_superadmin(client, db, root, tenants):
     assert db.scalar(select(func.count()).select_from(AuditEvent).where(AuditEvent.operation == "review")) == 1
     pending = client.get("/api/v1/admin/requests?status=pending", headers=root).json()
     assert req_id not in [r["id"] for r in pending]
+
+
+# --- GET /public/vision ---
+
+from datetime import datetime, timedelta, timezone  # noqa: E402
+
+from app.modules.catalog.models import Species  # noqa: E402
+from app.modules.projects.models import Project  # noqa: E402
+from app.modules.telemetry.models import Device, TelemetryReading  # noqa: E402
+
+LAYER_KEYS = ["history", "cortex", "knowledge", "trust", "commons"]
+
+
+def _figures(res):
+    return {f["key"]: f for f in res.json()["figures"]}
+
+
+def _layers(res):
+    return {x["key"]: x for x in res.json()["layers"]}
+
+
+def test_vision_without_public_org(client, monkeypatch):
+    monkeypatch.setattr(vision_router, "settings", Settings(public_org_slug="no-existe"))
+    res = client.get("/api/v1/public/vision")
+    assert res.status_code == 200
+    figs = _figures(res)
+    assert [f["key"] for f in res.json()["figures"]] == ["prototypes", "operating_nodes", "signed_readings",
+                                                         "recognitions"]
+    assert figs["prototypes"]["value"] is None and figs["recognitions"]["value"] is None
+    assert figs["operating_nodes"]["value"] is None
+    assert figs["signed_readings"]["status"] == "soon" and figs["signed_readings"]["value"] is None
+    assert [x["key"] for x in res.json()["layers"]] == LAYER_KEYS
+    assert res.json()["sites"][0]["kind"] == "historic"
+
+
+def _device(db, org_id, project_id, kind):
+    dev = Device(organization_id=org_id, project_id=project_id, name="d", kind=kind, variables=["temperature"],
+                 x=0, y=0, z=0)
+    db.add(dev)
+    db.flush()
+    return dev
+
+
+def _reading(db, dev, when, source):
+    db.add(TelemetryReading(organization_id=dev.organization_id, event_id=f"e-{dev.id}-{when.timestamp()}",
+                            device_id=dev.id, project_id=dev.project_id, variable="temperature", value=20.0,
+                            unit="C", observed_at=when, received_at=when, source=source, quality="good"))
+
+
+def test_operating_nodes_ignores_simulated_and_stale(client, db, tenants, clock, monkeypatch):
+    monkeypatch.setattr(vision_router, "settings", Settings(public_org_slug="alfa"))
+    alfa = db.scalar(select(Organization.id).where(Organization.slug == "alfa"))
+    beta = db.scalar(select(Organization.id).where(Organization.slug == "beta"))
+    projs = {}
+    for name, org in [("a", alfa), ("b", alfa), ("c", alfa), ("d", beta), ("e", alfa)]:
+        p = Project(organization_id=org, name=name)
+        db.add(p)
+        db.flush()
+        projs[name] = p
+    now = clock.now
+    _reading(db, _device(db, alfa, projs["a"].id, "simulated"), now - timedelta(hours=1), "simulated")
+    _reading(db, _device(db, alfa, projs["b"].id, "physical"), now - timedelta(hours=1), "simulated")
+    _reading(db, _device(db, alfa, projs["c"].id, "physical"), now - timedelta(days=8), "device")
+    _reading(db, _device(db, beta, projs["d"].id, "physical"), now - timedelta(hours=1), "device")
+    db.commit()
+    assert _figures(client.get("/api/v1/public/vision"))["operating_nodes"]["value"] == 0
+    _reading(db, _device(db, alfa, projs["e"].id, "physical"), now - timedelta(hours=1), "device")
+    db.commit()
+    assert _figures(client.get("/api/v1/public/vision"))["operating_nodes"]["value"] == 1
+
+
+def test_sites_only_approved_node_requests(client, db, monkeypatch):
+    monkeypatch.setattr(vision_router, "settings", Settings(public_org_slug="alfa"))
+    for kind, status, city in [("node", "approved", "Oaxaca"), ("node", "pending", "A"),
+                               ("node", "rejected", "B"), ("contact", "approved", "C")]:
+        db.add(InboundRequest(kind=kind, status=status, name="Ana", email="a@example.org", message="Mensaje largo",
+                              city=city, lat=17.1, lon=-96.7))
+    db.add(InboundRequest(kind="node", status="approved", name="Ana", email="a@example.org",
+                          message="Mensaje largo", city=None, lat=None, lon=None))
+    db.commit()
+    sites = client.get("/api/v1/public/vision").json()["sites"]
+    assert sites[0]["kind"] == "historic"
+    assert [s["kind"] for s in sites].count("future") == 1
+    assert sites[1] == {"kind": "future", "label": "Oaxaca", "lat": 17.1, "lon": -96.7}
+
+
+def _rec(db, org_slug="alfa"):
+    org_id = db.scalar(select(Organization.id).where(Organization.slug == org_slug))
+    rec = Recognition(organization_id=org_id, award="Oro", event="ICAN", venue="Toronto",
+                      awarded_on=date(2018, 9, 1), evidence="Archivo del equipo")
+    db.add(rec)
+    db.commit()
+    return rec
+
+
+def test_deleted_recognition_not_counted(client, db, tenants, monkeypatch):
+    monkeypatch.setattr(vision_router, "settings", Settings(public_org_slug="alfa"))
+    rec = _rec(db)
+    assert _figures(client.get("/api/v1/public/vision"))["recognitions"]["value"] == 1
+    rec.deleted_at = datetime.now(timezone.utc)
+    db.commit()
+    assert _figures(client.get("/api/v1/public/vision"))["recognitions"]["value"] == 0
+
+
+def test_layers_history_done_with_recognition(client, db, tenants, monkeypatch):
+    monkeypatch.setattr(vision_router, "settings", Settings(public_org_slug="alfa"))
+    layers = _layers(client.get("/api/v1/public/vision"))
+    assert layers["history"]["status"] == "vision"
+    assert layers["cortex"]["status"] == "in_construction"
+    _rec(db)
+    db.add(Species(scientific_name="Lactuca sativa"))
+    db.commit()
+    layers = _layers(client.get("/api/v1/public/vision"))
+    assert layers["history"]["status"] == "done"
+    assert layers["cortex"]["status"] == "operating"
+    assert layers["knowledge"]["status"] == "in_construction"
+    assert layers["trust"]["status"] == "vision" and layers["commons"]["status"] == "vision"

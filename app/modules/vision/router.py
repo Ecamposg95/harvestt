@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 
@@ -7,8 +9,9 @@ from app.core.deps import require_superadmin
 from app.core.errors import not_found
 from app.modules.identity.models import User
 from app.modules.prototypes.service import public_org_id
+from app.modules.simulation.clock import get_now
 from app.modules.vision import service
-from app.modules.vision.schemas import RecognitionIn, RecognitionOut, RequestAck, RequestIn, RequestOut, RequestReview
+from app.modules.vision.schemas import RecognitionIn, RecognitionOut, RequestAck, RequestIn, RequestOut, RequestReview, VisionOut
 
 public_router = APIRouter(prefix="/public", tags=["vision"])
 admin_router = APIRouter(prefix="/admin", tags=["vision-admin"])
@@ -19,6 +22,11 @@ def _org_id(db: Session) -> str:
     if org_id is None:
         raise not_found("organización pública")
     return org_id
+
+
+@public_router.get("/vision", response_model=VisionOut)
+def vision(db: Session = Depends(get_db), now: datetime = Depends(get_now)):
+    return service.vision_summary(db, public_org_id(db, settings.public_org_slug), now)
 
 
 @admin_router.get("/recognitions", response_model=list[RecognitionOut])
