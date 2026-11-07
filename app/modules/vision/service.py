@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session
 
 from app.core import audit
@@ -93,21 +93,20 @@ def _operating_nodes(db: Session, org_id: str, now: datetime) -> int:
     """Proyectos con un dispositivo físico vivo que envió una lectura real en la ventana.
 
     Se aproxima la instalación por proyecto hasta que exista la entidad Node (M5).
-    La comparación de fechas se hace en Python: SQLite devuelve fechas sin zona.
+    La ventana se acota en SQL para no recorrer todo el historial en una ruta anónima.
     """
     stmt = (
-        select(TelemetryReading.project_id, func.max(TelemetryReading.observed_at))
+        select(func.count(distinct(TelemetryReading.project_id)))
         .join(Device, Device.id == TelemetryReading.device_id)
         .where(
             Device.organization_id == org_id,
             Device.kind != DEVICE_SIMULATED,
             Device.deleted_at.is_(None),
             TelemetryReading.source != SOURCE_SIMULATED,
+            TelemetryReading.observed_at >= as_utc(now) - OPERATING_WINDOW,
         )
-        .group_by(TelemetryReading.project_id)
     )
-    cutoff = as_utc(now) - OPERATING_WINDOW
-    return sum(1 for _, last in db.execute(stmt) if as_utc(last) >= cutoff)
+    return db.scalar(stmt) or 0
 
 
 def vision_summary(db: Session, org_id: str | None, now: datetime) -> VisionOut:

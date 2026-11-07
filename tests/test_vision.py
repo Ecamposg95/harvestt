@@ -151,13 +151,23 @@ def test_operating_nodes_ignores_simulated_and_stale(client, db, tenants, clock,
     alfa = db.scalar(select(Organization.id).where(Organization.slug == "alfa"))
     beta = db.scalar(select(Organization.id).where(Organization.slug == "beta"))
     projs = {}
-    for name, org in [("a", alfa), ("b", alfa), ("c", alfa), ("d", beta), ("e", alfa)]:
+    for name, org in [("a", alfa), ("b", alfa), ("c", alfa), ("d", beta), ("e", alfa), ("f", alfa), ("g", alfa)]:
         p = Project(organization_id=org, name=name)
         db.add(p)
         db.flush()
         projs[name] = p
     now = clock.now
     _reading(db, _device(db, alfa, projs["a"].id, "simulated"), now - timedelta(hours=1), "simulated")
+    # dispositivo simulado con lectura real reciente: aísla el filtro por tipo de dispositivo
+    _reading(db, _device(db, alfa, projs["a"].id, "simulated"), now - timedelta(hours=2), "device")
+    # dispositivo físico borrado con lectura real reciente
+    deleted = _device(db, alfa, projs["f"].id, "physical")
+    deleted.deleted_at = now
+    _reading(db, deleted, now - timedelta(hours=1), "device")
+    # lectura real vieja (8 días) y lectura simulada reciente en el mismo proyecto
+    stale = _device(db, alfa, projs["g"].id, "physical")
+    _reading(db, stale, now - timedelta(days=8), "device")
+    _reading(db, stale, now - timedelta(hours=1), "simulated")
     _reading(db, _device(db, alfa, projs["b"].id, "physical"), now - timedelta(hours=1), "simulated")
     _reading(db, _device(db, alfa, projs["c"].id, "physical"), now - timedelta(days=8), "device")
     _reading(db, _device(db, beta, projs["d"].id, "physical"), now - timedelta(hours=1), "device")
