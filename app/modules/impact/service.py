@@ -54,9 +54,19 @@ def _count(db: Session, stmt) -> int:
 
 
 def _species_assertions(species_ids: list[str] | None):
-    stmt = select(TraitAssertion.origin, TraitAssertion.evidence_refs)
+    """Afirmaciones vivas de especies vivas; None = todo el catálogo. Igual que la ficha del catálogo:
+    lo borrado (deleted_at) no cuenta y las afirmaciones de cultivares quedan fuera."""
+    stmt = (
+        select(TraitAssertion.origin, TraitAssertion.evidence_refs)
+        .join(Species, Species.id == TraitAssertion.subject_id)
+        .where(
+            TraitAssertion.subject_type == SUBJECT_SPECIES,
+            TraitAssertion.deleted_at.is_(None),
+            Species.deleted_at.is_(None),
+        )
+    )
     if species_ids is not None:
-        stmt = stmt.where(TraitAssertion.subject_type == SUBJECT_SPECIES, TraitAssertion.subject_id.in_(species_ids))
+        stmt = stmt.where(TraitAssertion.subject_id.in_(species_ids))
     return stmt
 
 
@@ -71,12 +81,16 @@ def evidence_coverage(db: Session, species_ids: list[str] | None) -> tuple[float
     return round(known / len(origins) * 100, 1), len(origins)
 
 
-def _cited_sources(db: Session, species_ids: list[str]) -> tuple[int, int]:
-    """(fuentes distintas citadas, afirmaciones consideradas) de las especies dadas."""
+def _cited_sources(db: Session, species_ids: list[str]) -> tuple[int | None, int]:
+    """(fuentes distintas citadas, afirmaciones consideradas). None si no hay afirmaciones: nunca 0 sin insumos."""
     if not species_ids:
-        return 0, 0
+        return None, 0
     refs = [row.evidence_refs for row in db.execute(_species_assertions(species_ids))]
+    if not refs:
+        return None, 0
     sources = {r.get("source_id") for group in refs for r in (group or []) if r.get("source_id")}
+    if sources:
+        sources -= set(db.scalars(select(Source.id).where(Source.id.in_(sources), Source.deleted_at.is_not(None))))
     return len(sources), len(refs)
 
 
@@ -151,8 +165,8 @@ def public_kpis(db: Session, public_org_id: str | None, now: datetime) -> Public
                 Prototype.deleted_at.is_(None),
             ),
         )
-    species = _count(db, select(Species.id))
-    licenses = db.scalars(select(Source.license)).all()
+    species = _count(db, select(Species.id).where(Species.deleted_at.is_(None)))
+    licenses = db.scalars(select(Source.license).where(Source.deleted_at.is_(None))).all()
     licensed = sum(1 for lic in licenses if lic and lic.strip())
     coverage, assertions = evidence_coverage(db, None)
 

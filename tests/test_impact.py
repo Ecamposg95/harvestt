@@ -69,9 +69,9 @@ def test_project_impact_requires_auth_and_tenant(client, tenants):
 def test_empty_project_counts_zero_and_derived_null(client, tenants, clock):
     k = kpis(client, tenants["alfa_viewer"], make_project(client, tenants["alfa_editor"])["id"])
     assert list(k) == PROJECT_KEYS
-    for key in ("active_cycles", "observations_30d", "sources_cited", "simulation_runs", "incidents_open", "incidents_acknowledged"):
+    for key in ("active_cycles", "observations_30d", "simulation_runs", "incidents_open", "incidents_acknowledged"):
         assert k[key]["value"] == 0
-    for key in ("days_since_oldest_active_cycle", "evidence_coverage", "mean_minutes_to_acknowledge"):
+    for key in ("days_since_oldest_active_cycle", "evidence_coverage", "sources_cited", "mean_minutes_to_acknowledge"):
         assert k[key]["value"] is None
     assert {v["origin"] for v in k.values()} <= {"measured", "derived", "simulated"}
     assert all(v["formula"] and v["as_of"] and v["label"] for v in k.values())
@@ -287,3 +287,58 @@ def test_future_dated_observations_are_not_in_last_30_days(client, tenants, db, 
     db.get(Observation, obs["id"]).observed_at = clock.now + timedelta(days=3)
     db.commit()
     assert kpis(client, h, pid)["observations_30d"]["value"] == 0
+
+
+def test_sources_cited_is_null_without_assertions(client, tenants, db, clock):
+    catalog_seed.seed(db)
+    db.add(Species(scientific_name="Sin afirmaciones"))
+    db.commit()
+    bare = db.scalars(select(Species).where(Species.scientific_name == "Sin afirmaciones")).one()
+    h = tenants["alfa_editor"]
+    pid = make_project(client, h)["id"]
+    add_cycle(client, h, pid, bare.id)
+    k = kpis(client, h, pid)["sources_cited"]
+    assert k["value"] is None
+    assert k["inputs_count"] == 0
+
+
+def test_project_kpis_ignore_soft_deleted_assertions_and_sources(client, tenants, db, clock):
+    lettuce, _ = two_species(db)
+    h = tenants["alfa_editor"]
+    pid = make_project(client, h)["id"]
+    add_cycle(client, h, pid, lettuce.id)
+    before = kpis(client, h, pid)
+    gone = Source(title="Borrada", deleted_at=clock.now)
+    db.add(gone)
+    db.commit()
+    add_assertion(db, lettuce.id, "sourced", [{"source_id": gone.id}])
+    db.add(TraitAssertion(subject_type="species", subject_id=lettuce.id, variable="ph", origin="sourced",
+                          evidence_refs=[{"source_id": "fuente-de-borrada"}], deleted_at=clock.now))
+    db.commit()
+    after = kpis(client, h, pid)
+    # La afirmación borrada no cuenta; la que cita una fuente borrada sí cuenta, pero no la fuente.
+    assert after["evidence_coverage"]["inputs_count"] == before["evidence_coverage"]["inputs_count"] + 1
+    assert after["sources_cited"]["value"] == (before["sources_cited"]["value"] or 0)
+
+
+def test_public_kpis_ignore_soft_deleted_rows_and_cultivar_assertions(client, db, clock, public_alfa_impact):
+    lettuce, other = two_species(db)
+    before = public_kpis_by_key(client)
+    other.deleted_at = clock.now
+    db.add_all([Source(title="Viva", license="CC0"), Source(title="Borrada", license="CC-BY-4.0", deleted_at=clock.now)])
+    db.add(TraitAssertion(subject_type="cultivar", subject_id="c1", variable="ph", origin="measured", evidence_refs=[]))
+    db.add(TraitAssertion(subject_type="species", subject_id=lettuce.id, variable="ph", origin="measured",
+                          evidence_refs=[], deleted_at=clock.now))
+    db.commit()
+    k = public_kpis_by_key(client)
+    assert k["catalog_species"]["value"] == before["catalog_species"]["value"] - 1
+    assert k["licensed_sources"]["value"] == before["licensed_sources"]["value"] + 1
+    assert k["licensed_sources"]["inputs_count"] == before["licensed_sources"]["inputs_count"] + 1
+    live = (
+        db.query(TraitAssertion)
+        .join(Species, Species.id == TraitAssertion.subject_id)
+        .filter(TraitAssertion.subject_type == "species", TraitAssertion.deleted_at.is_(None), Species.deleted_at.is_(None))
+    )
+    total, known = live.count(), live.filter(TraitAssertion.origin != "missing").count()
+    assert k["catalog_evidence_coverage"]["inputs_count"] == total
+    assert k["catalog_evidence_coverage"]["value"] == round(known / total * 100, 1)
