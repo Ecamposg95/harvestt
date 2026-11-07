@@ -55,3 +55,29 @@ export const visionApi = {
   summary: () => api.get<Vision>('/public/vision').then((r) => r.data),
   sendRequest: (input: RequestInput) => api.post('/public/requests', input).then(() => undefined),
 }
+
+export type RequestStatus = 'pending' | 'approved' | 'rejected'
+
+export interface InboundRequest {
+  id: string
+  kind: 'node' | 'contact'
+  name: string
+  organization: string | null
+  email: string
+  city: string | null
+  lat: number | null
+  lon: number | null
+  message: string
+  status: RequestStatus
+  review_note: string | null
+  reviewed_by: string | null
+  reviewed_at: string | null
+  created_at: string
+}
+
+export const visionAdminApi = {
+  list: (status?: RequestStatus) =>
+    api.get<InboundRequest[]>('/admin/requests', { params: status ? { status } : undefined }).then((r) => r.data),
+  review: (id: string, status: 'approved' | 'rejected', note?: string) =>
+    api.patch<InboundRequest>(`/admin/requests/${id}`, { status, note }).then((r) => r.data),
+}

@@ -3,7 +3,10 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { prototypesApi } from '@/features/prototypes/api'
 import { PublicLayout } from '@/layouts/PublicLayout'
-import { visionApi, type Vision } from './api'
+import { visionAdminApi, visionApi, type InboundRequest, type Vision } from './api'
+import { Sidebar } from '@/components/Sidebar'
+import { useAuth } from '@/store/auth'
+import { RequestsInboxPage } from './RequestsInboxPage'
 import { webglAvailable } from '@/features/three/webgl'
 import { prefersReducedMotion } from './geo'
 import { VisionPage } from './VisionPage'
@@ -210,4 +213,66 @@ it('Escape cierra el diálogo', async () => {
   await openForm('Habla con el equipo')
   fireEvent.keyDown(document, { key: 'Escape' })
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+})
+
+function setSuper(is_superadmin: boolean) {
+  useAuth.setState({ user: { id: 'u', email: 'a@b.c', full_name: 'A', is_superadmin }, memberships: [] })
+}
+
+it('la entrada Solicitudes solo aparece para superadmin', () => {
+  const view = (
+    <MemoryRouter>
+      <Sidebar mobileOpen={false} onClose={() => undefined} />
+    </MemoryRouter>
+  )
+  setSuper(false)
+  const { unmount } = render(view)
+  expect(screen.queryByRole('link', { name: 'Solicitudes' })).toBeNull()
+  unmount()
+  setSuper(true)
+  render(view)
+  expect(screen.getByRole('link', { name: 'Solicitudes' })).toHaveAttribute('href', '/app/solicitudes')
+})
+
+const REQ: InboundRequest = {
+  id: 'r1', kind: 'node', name: 'Ana Pérez', organization: 'Huerto Sur', email: 'ana@example.org', city: 'Bogotá',
+  lat: 4.7, lon: -74.1, message: 'Quiero operar un nodo.', status: 'pending', review_note: null, reviewed_by: null,
+  reviewed_at: null, created_at: '2026-11-01T10:00:00Z',
+}
+
+it('Solicitudes: sin superadmin muestra «Solo superadmin.» y no consulta', () => {
+  setSuper(false)
+  const list = vi.spyOn(visionAdminApi, 'list').mockResolvedValue([])
+  render(<RequestsInboxPage />)
+  expect(screen.getByText('Solo superadmin.')).toBeInTheDocument()
+  expect(list).not.toHaveBeenCalled()
+})
+
+it('aprobar llama a review y la tarjeta sale de Pendientes', async () => {
+  setSuper(true)
+  const list = vi.spyOn(visionAdminApi, 'list').mockResolvedValue([REQ])
+  const review = vi.spyOn(visionAdminApi, 'review').mockResolvedValue({ ...REQ, status: 'approved' })
+  render(<RequestsInboxPage />)
+  expect(await screen.findByText('Ana Pérez')).toBeInTheDocument()
+  expect(list).toHaveBeenCalledWith('pending')
+  expect(screen.getByText('Aprobar una solicitud de nodo con ubicación la muestra en el globo público, redondeada a nivel ciudad.')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: 'Aprobar' }))
+  await waitFor(() => expect(screen.queryByText('Ana Pérez')).toBeNull())
+  expect(review).toHaveBeenCalledWith('r1', 'approved', undefined)
+})
+
+it('rechazar exige nota', async () => {
+  setSuper(true)
+  vi.spyOn(visionAdminApi, 'list').mockResolvedValue([REQ])
+  const review = vi.spyOn(visionAdminApi, 'review').mockResolvedValue({ ...REQ, status: 'rejected' })
+  render(<RequestsInboxPage />)
+  await screen.findByText('Ana Pérez')
+  fireEvent.click(screen.getByRole('button', { name: 'Rechazar' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Confirmar rechazo' }))
+  expect(await screen.findByText('Escribe el motivo del rechazo.')).toBeInTheDocument()
+  expect(review).not.toHaveBeenCalled()
+  fireEvent.change(screen.getByLabelText('Motivo del rechazo'), { target: { value: 'Fuera de alcance' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Confirmar rechazo' }))
+  await waitFor(() => expect(review).toHaveBeenCalledWith('r1', 'rejected', 'Fuera de alcance'))
+  await waitFor(() => expect(screen.queryByText('Ana Pérez')).toBeNull())
 })

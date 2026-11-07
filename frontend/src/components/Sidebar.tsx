@@ -15,6 +15,8 @@ export const NAV_ITEMS: Array<{ to: string; label: string; icon: IconName; end?:
   { to: '/app/graph', label: 'Grafo', icon: 'graph' },
 ]
 
+const SUPERADMIN_ITEMS: typeof NAV_ITEMS = [{ to: '/app/solicitudes', label: 'Solicitudes', icon: 'folder' }]
+
 function RailButton({ icon, label, expanded, onClick }: { icon: IconName; label: string; expanded: boolean; onClick: () => void }) {
   return (
     <button
@@ -88,7 +90,7 @@ export function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean; onClose:
           {expanded ? <Logo withCortex cortexClassName="text-ink-fg/60" /> : <Logo compact />}
         </NavLink>
         <nav aria-label="Principal" className="flex flex-1 flex-col gap-1">
-          {NAV_ITEMS.map((item) => (
+          {(user?.is_superadmin ? [...NAV_ITEMS, ...SUPERADMIN_ITEMS] : NAV_ITEMS).map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
