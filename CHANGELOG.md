@@ -6,7 +6,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 
 ### Documentación
 - Conjunto documental institucional: `README.md`, `docs/HISTORIA.md`, `docs/ARQUITECTURA.md`, `docs/INTEGRIDAD_CIENTIFICA.md`, `docs/STATUS.md`, `CITATION.cff` y este registro.
-- Consolidación: las quince ramas de trabajo (`feat/*`, `sdd/*`) verificadas como integradas en `main`.
+- Consolidación: las quince ramas de trabajo (`feat/*`, `sdd/*`) verificadas como integradas en `main` y eliminadas del remoto.
 
 ## [V5 — Impacto] — 2026-11-07
 

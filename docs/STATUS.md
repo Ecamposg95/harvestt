@@ -4,7 +4,7 @@
 
 ## 1. Resumen ejecutivo
 
-El hito visual V1–V6 está completo, integrado en `main` y desplegado en producción. Las quince ramas de trabajo (`feat/*` y `sdd/*`) están contenidas en `main`; no existe trabajo pendiente de integración. La plataforma opera con datos reales del usuario para catálogo, proyectos, layout y prototipos, y con simulación declarada para telemetría.
+El hito visual V1–V6 está completo, integrado en `main` y desplegado en producción. Las quince ramas de trabajo (`feat/*` y `sdd/*`) se integraron en `main` y se eliminaron del remoto; no existe trabajo pendiente de integración. La plataforma opera con datos reales del usuario para catálogo, proyectos, layout y prototipos, y con simulación declarada para telemetría.
 
 ## 2. Fases del hito visual
 
@@ -44,7 +44,7 @@ El hito visual V1–V6 está completo, integrado en `main` y desplegado en produ
 1. **Cobertura de evidencia en producción: 0 %.** Las 12 afirmaciones del catálogo están en «Desconocido». Se resuelve cargando afirmaciones con fuente revisada, no ajustando la cifra.
 2. **Grafo:** registrar aristas reales `designed_for` (prototipo → especie) cuando el equipo indique qué cultiva cada prototipo.
 3. **Defectos menores conocidos:** dos altas simultáneas pueden dejar 13 puntos en un prototipo; puntos borrados en cascada sin evento de auditoría propio; STL con normales invertidas no seleccionables desde fuera; piso ilustrativo no cuadrado en Studio sin área; sin *pinch-zoom* táctil en el grafo.
-4. **Limpieza de ramas remotas:** las ramas `feat/*` y `sdd/*` ya integradas pueden eliminarse del remoto una vez confirmada la demostración.
+4. **Limpieza de ramas remotas:** hecha el 2026-11-07; las quince ramas `feat/*` y `sdd/*` integradas se eliminaron del remoto. El repositorio conserva solo `main`.
 
 ## Hoja de ruta
 
