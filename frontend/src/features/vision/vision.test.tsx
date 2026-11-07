@@ -4,10 +4,18 @@ import { beforeEach, expect, it, vi } from 'vitest'
 import { prototypesApi } from '@/features/prototypes/api'
 import { PublicLayout } from '@/layouts/PublicLayout'
 import { visionApi, type Vision } from './api'
+import { webglAvailable } from '@/features/three/webgl'
+import { prefersReducedMotion } from './geo'
 import { VisionPage } from './VisionPage'
 
 vi.mock('@/features/prototypes/LazyStlViewer', () => ({
   StlViewer: ({ label }: { label: string }) => <div data-testid="stl" aria-label={label} />,
+}))
+
+vi.mock('@/features/three/webgl', () => ({ webglAvailable: vi.fn(() => false) }))
+vi.mock('./geo', async (orig) => ({ ...(await orig<typeof import('./geo')>()), prefersReducedMotion: vi.fn(() => false) }))
+vi.mock('./LazyGlobe', () => ({
+  LazyGlobe: ({ animate }: { animate: boolean }) => <div data-testid="globe" data-animate={String(animate)} />,
 }))
 
 beforeEach(() => vi.restoreAllMocks())
@@ -94,4 +102,27 @@ it('PublicLayout enlaza a /vision', () => {
     </MemoryRouter>,
   )
   expect(screen.getByRole('link', { name: 'Visión' })).toHaveAttribute('href', '/vision')
+})
+
+const SITES: Vision['sites'] = [
+  { kind: 'historic', label: 'CDMX · prototipos históricos', lat: 19.4, lon: -99.1 },
+  { kind: 'future', label: 'Bogotá', lat: 4.7, lon: -74.1 },
+]
+
+it('sin WebGL usa GlobeFallback con la lista de sitios', async () => {
+  vi.mocked(webglAvailable).mockReturnValue(false)
+  vi.spyOn(visionApi, 'summary').mockResolvedValue({ ...VISION, sites: SITES })
+  renderPage()
+  expect(await screen.findByText('CDMX · prototipos históricos')).toBeInTheDocument()
+  expect(screen.getByText('prototipo histórico')).toBeInTheDocument()
+  expect(screen.getByText('nodo solicitado')).toBeInTheDocument()
+  expect(screen.queryByTestId('globe')).toBeNull()
+})
+
+it('con movimiento reducido el globo recibe animate=false', async () => {
+  vi.mocked(webglAvailable).mockReturnValue(true)
+  vi.mocked(prefersReducedMotion).mockReturnValue(true)
+  vi.spyOn(visionApi, 'summary').mockResolvedValue({ ...VISION, sites: SITES })
+  renderPage()
+  expect(await screen.findByTestId('globe')).toHaveAttribute('data-animate', 'false')
 })

@@ -6,7 +6,11 @@ import type { Kpi } from '@/features/impact/api'
 import { prototypesApi } from '@/features/prototypes/api'
 import { StlViewer } from '@/features/prototypes/LazyStlViewer'
 import { LAYER_LABEL, visionApi, type LayerStatus, type Vision, type VisionFigure } from './api'
+import { webglAvailable } from '@/features/three/webgl'
 import { EcosystemDiagram } from './EcosystemDiagram'
+import { prefersReducedMotion } from './geo'
+import { GlobeFallback } from './GlobeFallback'
+import { LazyGlobe } from './LazyGlobe'
 
 const CHAPTERS: Record<string, { title: string; text: string }> = {
   history: {
@@ -70,7 +74,14 @@ export function VisionPage() {
           </p>
           <p className="mt-6 text-sm font-semibold text-muted">● Operando · ◐ En construcción · ○ Visión</p>
         </div>
-        <div data-testid="globe-slot" className="min-w-0" />
+        <div data-testid="globe-slot" className="min-w-0">
+          {state.phase === 'ready' &&
+            (webglAvailable() ? (
+              <LazyGlobe sites={state.vision.sites} animate={!prefersReducedMotion()} className="mx-auto" />
+            ) : (
+              <GlobeFallback sites={state.vision.sites} />
+            ))}
+        </div>
       </header>
 
       {state.phase === 'loading' && (
