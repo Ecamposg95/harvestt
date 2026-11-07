@@ -58,7 +58,7 @@ it('renderiza cifras: "pronto" para soon, "Sin datos suficientes" para null y va
 
 it('muestra las cinco capas en orden con su etiqueta de estado', async () => {
   vi.spyOn(visionApi, 'summary').mockResolvedValue(VISION)
-  renderPage()
+  const { container } = renderPage()
   await screen.findByText('Prototipos construidos')
   const titles = screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)
   expect(titles).toEqual([
@@ -71,7 +71,7 @@ it('muestra las cinco capas en orden con su etiqueta de estado', async () => {
   const knowledge = screen.getByRole('heading', { level: 3, name: /Capa 1/ }).closest('article')!
   expect(within(knowledge).getByText('En construcción')).toBeInTheDocument()
   expect(await screen.findByTestId('stl')).toBeInTheDocument()
-  expect(screen.getByTestId('globe-slot')).toBeInTheDocument()
+  expect(within(container.querySelector('header')!).getByTestId('globe-slot')).toBeInTheDocument()
 })
 
 it('muestra error con reintento', async () => {

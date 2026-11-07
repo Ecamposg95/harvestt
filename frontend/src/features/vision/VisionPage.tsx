@@ -59,15 +59,18 @@ export function VisionPage() {
 
   return (
     <div className="overflow-x-hidden">
-      <header className="mx-auto max-w-7xl px-4 pb-10 pt-10 sm:px-6">
-        <p className="eyebrow">HARVESTT · MOONSHOT</p>
-        <h1 className="display mt-4 max-w-4xl text-[clamp(2.25rem,7vw,5rem)]">
-          Una red abierta de datos de cultivo en la que el mundo pueda confiar.
-        </h1>
-        <p className="mt-6 max-w-2xl text-lg text-muted sm:text-xl">
-          Hardware que mide, una red que no deja alterar los datos, IA que los interpreta y un portal abierto para todos.
-        </p>
-        <p className="mt-6 text-sm font-semibold text-muted">● Operando · ◐ En construcción · ○ Visión</p>
+      <header className="mx-auto grid max-w-7xl items-center gap-10 px-4 pb-10 pt-10 sm:px-6 lg:grid-cols-2">
+        <div className="min-w-0">
+          <p className="eyebrow">HARVESTT · MOONSHOT</p>
+          <h1 className="display mt-4 max-w-4xl text-[clamp(2.25rem,7vw,5rem)]">
+            Una red abierta de datos de cultivo en la que el mundo pueda confiar.
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg text-muted sm:text-xl">
+            Hardware que mide, una red que no deja alterar los datos, IA que los interpreta y un portal abierto para todos.
+          </p>
+          <p className="mt-6 text-sm font-semibold text-muted">● Operando · ◐ En construcción · ○ Visión</p>
+        </div>
+        <div data-testid="globe-slot" className="min-w-0" />
       </header>
 
       {state.phase === 'loading' && (
@@ -121,7 +124,6 @@ export function VisionPage() {
                           />
                         </div>
                       )}
-                      {layer.key === 'commons' && <div data-testid="globe-slot" />}
                     </article>
                   </li>
                 )
