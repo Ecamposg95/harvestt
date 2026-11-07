@@ -40,7 +40,7 @@ Orden fijo V1 → V6. V3 y V6 solo dependen de V1 y podrían adelantarse si el u
 | V2 | Completa | Sí (`074c981`) |
 | V3 | Completa (Tareas 1–9; la 10 de cierre se hizo en la integración) | Sí (`24b1a3d`) |
 | V4 | Completa (Tareas 1–7; la 8 de cierre se hizo en la integración) | Sí (`24b1a3d`) |
-| V5 | Completa (Tareas 1–6 + correcciones de revisión); en `main` como `9786a54` | No (despliegue pendiente de autorización) |
+| V5 | Completa (Tareas 1–6 + correcciones de revisión); en `main` como `9786a54` | Sí (`806d021`, 2026-11-07) |
 | V6 | Completa (Tareas 1–6; la 7 de cierre se hizo en la integración) | Sí (`24b1a3d`) |
 
 V3, V4 y V6 se integraron juntas en `feat/demo-integracion` y llegaron a `main` como fast-forward. Verificación de la integración: pytest completo y vitest 217/217 en verde, build con three y d3-force en chunks perezosos, migraciones `0001 → 0007` con `upgrade → check → downgrade 0004 → upgrade → check` sin diferencias en Postgres 17, smoke del contenedor Docker y revisión visual en navegador (claro, oscuro, 375 px).
@@ -49,7 +49,7 @@ Extras fuera de los planes, hechos para la demo: vitrina con modelo 3D destacado
 
 ### Pendiente
 
-1. **V5 (impacto y KPIs):** fusionada a `main` el 2026-11-07 (`9786a54`). La revisión agregó: registros borrados (`deleted_at`) no cuentan en ningún KPI, la cobertura pública solo usa afirmaciones de especies y `sources_cited` es null sin afirmaciones. Falta el despliegue (push a `main`) con autorización.
+1. **V5 (impacto y KPIs):** fusionada a `main` el 2026-11-07 (`9786a54`). La revisión agregó: registros borrados (`deleted_at`) no cuentan en ningún KPI, la cobertura pública solo usa afirmaciones de especies y `sources_cited` es null sin afirmaciones. Desplegada a producción el 2026-11-07 con autorización (`806d021`); `/api/v1/health/ready` y `/api/v1/public/impact` verificados. En producción la cobertura de evidencia del catálogo da 0 % real (las 12 afirmaciones están en «desconocido»): se corrige cargando afirmaciones con fuente, no maquillando la cifra.
 2. **Datos de demo en producción:** hecho el 2026-10-22 con autorización (Invernadero Geodésico, Cultivador Delta y Germinador ECOS con STL, fotos y puntos). Se corrigió `S3_SECRET_ACCESS_KEY` de la app, que no coincidía con el bucket (las subidas en producción fallaban con `SignatureDoesNotMatch`).
 3. **Grafo:** registrar aristas reales `designed_for` (prototipo → especie) cuando el equipo indique qué cultiva cada prototipo.
 4. **Menores conocidos:** carrera de dos altas simultáneas puede dejar 13 hotspots; puntos borrados en cascada sin evento de auditoría propio; STL con normales invertidas no se pueden seleccionar desde fuera; piso ilustrativo no cuadrado en Studio sin área; sin pinch-zoom táctil en el grafo.
