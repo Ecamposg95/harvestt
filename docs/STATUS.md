@@ -1,18 +1,18 @@
 # Estado del sistema
 
-**Corte:** 2026-11-07 · **Producción:** <https://harvestt-production.up.railway.app> (`main`, base `3c3f6b0` de M1; migración `0007_graph_edges`) · **Rama en curso:** `feat/hito-m1-vision` (M1, pendiente de autorización; no desplegada)
+**Corte:** 2026-11-07 · **Producción:** <https://harvestt-production.up.railway.app> (`main` `12c3a24`; migración `0008_vision`)
 
 ## 1. Resumen ejecutivo
 
 El hito visual V1–V6 está completo, integrado en `main` y desplegado en producción. Las quince ramas de trabajo (`feat/*` y `sdd/*`) se integraron en `main` y se eliminaron del remoto; no existe trabajo pendiente de integración. La plataforma opera con datos reales del usuario para catálogo, proyectos, layout y prototipos, y con simulación declarada para telemetría.
 
-## 1.1 Hito M1 · Página Visión (en rama)
+## 1.1 Hito M1 · Página Visión (en producción)
 
-La rama `feat/hito-m1-vision` (desde `main` `3c3f6b0`) incorpora la página pública `/vision` y la bandeja `/app/solicitudes`. **Fusionada a `main` en local; pendiente de autorización para subir y desplegar; no está en producción.** Última suite completa registrada: pytest 269 pruebas en verde y Vitest 253/253. Migración `0008_vision` (pendiente de aplicar en producción); el ciclo `upgrade → check → downgrade 0007 → upgrade → check` se verificó sin diferencias en PostgreSQL 17 local.
+M1 incorpora la página pública `/vision` y la bandeja `/app/solicitudes`. **Desplegada en producción el 2026-11-07 (`12c3a24`)**; verificados `/api/v1/health/ready`, `/api/v1/public/vision` y `/vision`. Última suite completa registrada: pytest 269 pruebas en verde y Vitest 253/253. Migración `0008_vision` (pendiente de aplicar en producción); el ciclo `upgrade → check → downgrade 0007 → upgrade → check` se verificó sin diferencias en PostgreSQL 17 local.
 
 **Pendiente antes de fusionar:** construcción y *smoke test* del contenedor Docker (no ejecutados: Docker no está disponible en la máquina de desarrollo; el *smoke* de la API y del SPA se hizo con uvicorn contra PostgreSQL 17 local) y revisión visual de `/vision` y `/app/solicitudes` en claro, oscuro y 375 px, con y sin WebGL. **Cargar los reconocimientos (`POST /api/v1/admin/recognitions`) antes de enlazar o anunciar `/vision`:** con 0 registrados la cifra muestra «Sin datos suficientes».
 
-Límite de 5 solicitudes por IP cada 10 minutos en el formulario público. La IP se toma de `X-Real-IP` (lo fija el proxy de Railway) o, si falta, de la última entrada de `X-Forwarded-For`; nunca de la parte que el cliente puede inventar. El límite vive en memoria del proceso (se reinicia con cada despliegue, no se comparte entre réplicas), es seguro entre hilos y acota su memoria a 10 000 IP. **Verificar tras el despliegue** que Railway entrega la IP real en `X-Real-IP` (los foros de Railway reportan comportamientos distintos).
+Límite de 5 solicitudes por IP cada 10 minutos en el formulario público. La IP se toma de `X-Real-IP` (lo fija el proxy de Railway) o, si falta, de la última entrada de `X-Forwarded-For`; nunca de la parte que el cliente puede inventar. El límite vive en memoria del proceso (se reinicia con cada despliegue, no se comparte entre réplicas), es seguro entre hilos y acota su memoria a 10 000 IP. Verificado en producción el 2026-11-07: con `X-Real-IP` y `X-Forwarded-For` falsificados en cada envío, el sexto envío recibe 429 (Railway sobrescribe `X-Real-IP`). Queda por observar que visitantes distintos no compartan cupo (no verificable desde un solo cliente).
 
 Cifras honestas de M1: «nodos operando» se calcula en cada consulta: instalaciones con un dispositivo no simulado que envió una lectura real en los últimos 7 días; sin organización pública, «Sin datos suficientes». El valor en producción se confirmará tras el despliegue (definición provisional hasta la entidad Node en M5); «lecturas firmadas» = «pronto» (la capa aún no existe); CDMX figura como «prototipo histórico», nunca como operando; los nodos futuros provienen solo de solicitudes aprobadas, con coordenadas redondeadas a 1 decimal.
 
@@ -52,7 +52,7 @@ Cifras honestas de M1: «nodos operando» se calcula en cada consulta: instalaci
 | «Lecturas firmadas» | **Pendiente** — se muestra «pronto» |
 | Sitio de CDMX en el globo | **Real** como «prototipo histórico» |
 | Nodos futuros en el globo | **Real** — solo solicitudes aprobadas, coordenadas a 1 decimal |
-| Reconocimientos (medallas) | **Real** — administrables por superadministrador, con evidencia obligatoria; carga en producción pendiente de autorización |
+| Reconocimientos (medallas) | **Real** — administrables por superadministrador, con evidencia obligatoria; carga en producción pendiente (evidencia por confirmar con el equipo) |
 | Telemetría de dispositivos físicos | **Pendiente** — Etapa III |
 
 ## 4. Observaciones abiertas

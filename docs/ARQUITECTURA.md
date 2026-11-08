@@ -1,6 +1,6 @@
 # Arquitectura de HarvestT Cortex
 
-**Versión del documento:** 1.0 · **Fecha:** 2026-11-07 · **Estado del sistema:** hito visual V1–V6 en producción · **Migración vigente en producción:** `0007_graph_edges` (la rama M1 añade `0008_vision`, pendiente de fusión)
+**Versión del documento:** 1.0 · **Fecha:** 2026-11-07 · **Estado del sistema:** hito visual V1–V6 y M1 (Visión) en producción · **Migración vigente en producción:** `0008_vision`
 
 ## 1. Propósito y alcance
 
@@ -81,7 +81,7 @@ Las versiones están fijadas en `requirements.txt` y `frontend/package.json`. Un
 
 La especificación OpenAPI completa se publica en `/api/docs`.
 
-### 5.2.1 Módulo `vision` (M1, en rama)
+### 5.2.1 Módulo `vision` (M1)
 
 `GET /public/vision` devuelve cifras con origen y razón; una cifra sin dato es `null` y se muestra «pronto» o «Sin datos suficientes», nunca 0 por falta de dato. «Nodos operando» cuenta proyectos con un dispositivo no simulado con lectura no simulada en los últimos 7 días (ventana acotada en SQL). Las solicitudes públicas (`POST /public/requests`) llevan un campo trampa anti-bots, exigen `lat` y `lon` juntos (422 en caso contrario) y redondean las coordenadas a 1 decimal antes de guardarse. Aprobar una solicitud solo cambia su estado (sin invitación por correo). Configuración: `PUBLIC_ORIGIN_LABEL`, `PUBLIC_ORIGIN_LAT`, `PUBLIC_ORIGIN_LON`. El globo es un chunk perezoso de three.js con mapa 2D sin WebGL.
 
@@ -134,7 +134,7 @@ Sistema de diseño «Salvia cristal», con modo claro y oscuro y diseño adaptab
 | `0005_simulation_telemetry` | Corridas, dispositivos, lecturas, reglas e incidentes |
 | `0006_studio_layout_species_media` | Zonas y plantas del Studio; medios de especie |
 | `0007_graph_edges` | Aristas explícitas del grafo |
-| `0008_vision` | Reconocimientos y solicitudes entrantes (módulo `vision`; en rama M1, sin aplicar en producción) |
+| `0008_vision` | Reconocimientos y solicitudes entrantes (módulo `vision`, M1) |
 
 Toda migración se verifica en PostgreSQL 17 con el ciclo `upgrade → check → downgrade → upgrade → check` sin diferencias.
 

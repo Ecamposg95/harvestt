@@ -2,9 +2,9 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Las fechas siguen ISO 8601.
 
-## [Sin publicar]
+## [M1 — Página Visión] — 2026-11-07
 
-### Añadido (rama `feat/hito-m1-vision`, pendiente de autorización para fusionar y desplegar)
+### Añadido
 - **M1 · Página Visión:** módulo `vision` con reconocimientos y solicitudes entrantes; migración `0008_vision`.
 - `GET /api/v1/public/vision` (cifras honestas, estados de capa, sitios aprobados) y `POST /api/v1/public/requests` (solicitud de nodo o contacto, trampa anti-bots, coordenadas redondeadas a 1 decimal).
 - `/api/v1/admin/recognitions` y `/api/v1/admin/requests` para superadministrador.

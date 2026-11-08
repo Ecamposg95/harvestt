@@ -57,7 +57,7 @@ La cronología completa está en [`docs/HISTORIA.md`](docs/HISTORIA.md).
 | Studio 3D | Distribución de zonas y plantas procedurales, guardado versionado, vista 2D sin WebGL | Layout real / plantas ilustrativas |
 | Impacto | KPIs de proyecto y públicos con fórmula y origen por cifra | Medido / Derivado / Simulado |
 | Grafo de conocimiento | Nodos y relaciones derivados únicamente de datos registrados, con procedencia | Derivado |
-| Página Visión (M1, en rama, pendiente de autorización para fusionar y desplegar) | Página pública `/vision` con cifras honestas («nodos operando» medido; «lecturas firmadas» = pronto), globo con el prototipo histórico de CDMX y nodos futuros solo de solicitudes aprobadas, recorrido por capas y solicitudes de nodo o contacto; bandeja `/app/solicitudes` para superadministrador | Medido / Derivado / Ilustrativo |
+| Página Visión (M1, en producción) | Página pública `/vision` con cifras honestas («nodos operando» medido; «lecturas firmadas» = pronto), globo con el prototipo histórico de CDMX y nodos futuros solo de solicitudes aprobadas, recorrido por capas y solicitudes de nodo o contacto; bandeja `/app/solicitudes` para superadministrador | Medido / Derivado / Ilustrativo |
 
 ## Arquitectura en síntesis
 
