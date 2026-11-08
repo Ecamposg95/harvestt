@@ -244,17 +244,37 @@ def test_public_requests_rate_limited_per_ip(client, db):
     assert res.status_code == 429
     assert res.json()["error"]["code"] == "rate_limited"
     assert db.scalar(select(func.count()).select_from(InboundRequest)) == 5
-    # otra IP (vía X-Forwarded-For) no comparte el cupo
-    assert client.post(url, json=REQ, headers={"X-Forwarded-For": "203.0.113.9, 10.0.0.1"}).status_code == 201
+    # otra IP (la que fija el proxy en X-Real-IP) no comparte el cupo
+    assert client.post(url, json=REQ, headers={"X-Real-IP": "203.0.113.9"}).status_code == 201
 
 
-def test_rate_limit_uses_first_forwarded_address(client):
+def test_rate_limit_ignores_spoofed_forwarded_prefix(client):
+    """El cliente controla la parte izquierda de X-Forwarded-For; cambiarla no debe dar cupo nuevo."""
     url = "/api/v1/public/requests"
-    h = {"X-Forwarded-For": "198.51.100.1, 10.0.0.1"}
-    for _ in range(5):
+    for i in range(5):
+        h = {"X-Forwarded-For": f"198.51.100.{i}, 203.0.113.7"}
         assert client.post(url, json=REQ, headers=h).status_code == 201
-    assert client.post(url, json=REQ, headers={"X-Forwarded-For": "198.51.100.1, 10.9.9.9"}).status_code == 429
-    assert client.post(url, json=REQ, headers={"X-Forwarded-For": "198.51.100.2"}).status_code == 201
+    h = {"X-Forwarded-For": "198.51.100.99, 203.0.113.7"}
+    assert client.post(url, json=REQ, headers=h).status_code == 429
+
+
+def test_rate_limit_prefers_real_ip_header(client):
+    """X-Real-IP lo fija el proxy de Railway en cada petición; tiene prioridad sobre X-Forwarded-For."""
+    url = "/api/v1/public/requests"
+    for i in range(5):
+        h = {"X-Real-IP": "203.0.113.50", "X-Forwarded-For": f"198.51.100.{i}"}
+        assert client.post(url, json=REQ, headers=h).status_code == 201
+    h = {"X-Real-IP": "203.0.113.50", "X-Forwarded-For": "198.51.100.200"}
+    assert client.post(url, json=REQ, headers=h).status_code == 429
+
+
+def test_rate_limiter_memory_is_bounded():
+    from app.modules.vision.ratelimit import RateLimiter
+
+    limiter = RateLimiter(limit=5, window_seconds=600, max_keys=100)
+    for i in range(1000):
+        assert limiter.check(f"10.0.{i // 256}.{i % 256}")
+    assert len(limiter) <= 100
 
 
 def test_public_request_writes_no_audit_row(client, db):
