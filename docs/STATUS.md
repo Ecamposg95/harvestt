@@ -6,6 +6,12 @@
 
 El hito visual V1–V6 está completo, integrado en `main` y desplegado en producción. Las quince ramas de trabajo (`feat/*` y `sdd/*`) se integraron en `main` y se eliminaron del remoto; no existe trabajo pendiente de integración. La plataforma opera con datos reales del usuario para catálogo, proyectos, layout y prototipos, y con simulación declarada para telemetría.
 
+## 1.1 Hito M1 · Página Visión (en rama)
+
+La rama `feat/hito-m1-vision` (desde `main` `3c3f6b0`) incorpora la página pública `/vision` y la bandeja `/app/solicitudes`. **Está en rama, pendiente de autorización para fusionar y desplegar; no está en producción.** Última suite completa registrada: pytest 262 pruebas en verde y Vitest 249/249. Migración `0008_vision` (pendiente de aplicar en producción).
+
+Cifras honestas de M1: «nodos operando» = 0 (medido: proyectos con un dispositivo físico que envió una lectura real en los últimos 7 días; definición provisional hasta la entidad Node en M5); «lecturas firmadas» = «pronto» (la capa aún no existe); CDMX figura como «prototipo histórico», nunca como operando; los nodos futuros provienen solo de solicitudes aprobadas, con coordenadas redondeadas a 1 decimal.
+
 ## 2. Fases del hito visual
 
 | Fase | Alcance | Estado | En producción |
@@ -37,6 +43,12 @@ El hito visual V1–V6 está completo, integrado en `main` y desplegado en produ
 | KPIs del proyecto | **Real**, calculados al vuelo: Medido, Derivado (fórmula visible) y Simulado; sin insumos, «Sin datos suficientes» |
 | KPIs públicos | **Real** — prototipos publicados, especies, fuentes con licencia, cobertura de evidencia |
 | Rendimiento, agua, CO₂, dinero | **Fuera de alcance** hasta contar con metodología documentada |
+| Página Visión `/vision` (rama M1) | **Real** — cifras medidas o «pronto»; no desplegada |
+| «Nodos operando» | **Medido** — hoy 0; solo dispositivos no simulados con lectura real en 7 días; interino hasta M5 |
+| «Lecturas firmadas» | **Pendiente** — se muestra «pronto» |
+| Sitio de CDMX en el globo | **Real** como «prototipo histórico» |
+| Nodos futuros en el globo | **Real** — solo solicitudes aprobadas, coordenadas a 1 decimal |
+| Reconocimientos (medallas) | **Real** — administrables por superadministrador, con evidencia obligatoria; carga en producción pendiente de autorización |
 | Telemetría de dispositivos físicos | **Pendiente** — Etapa III |
 
 ## 4. Observaciones abiertas
@@ -52,6 +64,7 @@ Derivada del backlog de [`HARVESTT_TASK_PACK.md`](HARVESTT_TASK_PACK.md) (§10).
 
 | Prioridad | Línea de trabajo | Tickets |
 |---|---|---|
+| P0 | Cierre de M1: autorización, fusión, despliegue y carga de reconocimientos | M1 |
 | P0 | Conocimiento y RAG con citas verificables y abstención | HVT-007 a HVT-010 |
 | P0 | Agentes con herramientas tipadas y ejecución auditada | HVT-011 |
 | P0 | Comparador de escenarios y exportación del expediente | HVT-016, HVT-017 |

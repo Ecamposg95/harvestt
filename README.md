@@ -57,6 +57,7 @@ La cronología completa está en [`docs/HISTORIA.md`](docs/HISTORIA.md).
 | Studio 3D | Distribución de zonas y plantas procedurales, guardado versionado, vista 2D sin WebGL | Layout real / plantas ilustrativas |
 | Impacto | KPIs de proyecto y públicos con fórmula y origen por cifra | Medido / Derivado / Simulado |
 | Grafo de conocimiento | Nodos y relaciones derivados únicamente de datos registrados, con procedencia | Derivado |
+| Página Visión (M1, en rama, pendiente de autorización para fusionar y desplegar) | Página pública `/vision` con cifras honestas («nodos operando» medido; «lecturas firmadas» = pronto), globo con el prototipo histórico de CDMX y nodos futuros solo de solicitudes aprobadas, recorrido por capas y solicitudes de nodo o contacto; bandeja `/app/solicitudes` para superadministrador | Medido / Derivado / Ilustrativo |
 
 ## Arquitectura en síntesis
 
@@ -65,12 +66,12 @@ Monolito modular *API-first* y multi-organización desde el origen.
 ```
 React 18 · TypeScript · Vite · Tailwind · three.js · d3-force
                          │  /api/v1
-FastAPI · Pydantic 2 · SQLAlchemy 2 · Alembic (0001 → 0007)
+FastAPI · Pydantic 2 · SQLAlchemy 2 · Alembic (0001 → 0008)
                          │
 PostgreSQL 17                 Almacenamiento de objetos S3 (Railway)
 ```
 
-Módulos de dominio: `identity`, `audit`, `catalog`, `projects`, `prototypes`, `simulation`, `telemetry`, `studio`, `impact`, `graph`, `home`. Descripción completa, modelo de datos y decisiones en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
+Módulos de dominio: `identity`, `audit`, `catalog`, `projects`, `prototypes`, `simulation`, `telemetry`, `studio`, `impact`, `graph`, `home`, `vision`. Descripción completa, modelo de datos y decisiones en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
 
 ## Puesta en marcha
 
