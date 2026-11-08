@@ -9,6 +9,8 @@ import { ProjectsPage } from '@/features/projects/ProjectsPage'
 import { PrototypeAdminDetailPage } from '@/features/prototypes/PrototypeAdminDetailPage'
 import { PrototypePublicPage } from '@/features/prototypes/PrototypePublicPage'
 import { PrototypesAdminPage } from '@/features/prototypes/PrototypesAdminPage'
+import { RequestsInboxPage } from '@/features/vision/RequestsInboxPage'
+import { VisionPage } from '@/features/vision/VisionPage'
 import { ShowcasePage } from '@/features/prototypes/ShowcasePage'
 import { StudioPage } from '@/features/studio/StudioPage'
 import { AppLayout } from '@/layouts/AppLayout'
@@ -34,6 +36,7 @@ export default function App() {
     <Routes>
       <Route element={<PublicLayout />}>
         <Route index element={<ShowcasePage />} />
+        <Route path="vision" element={<VisionPage />} />
         <Route path="prototipos/:slug" element={<PrototypePublicPage />} />
       </Route>
       <Route path="login" element={<LoginPage />} />
@@ -53,6 +56,7 @@ export default function App() {
         <Route path="projects/:id/operations" element={<OperationsPage />} />
         <Route path="projects/:id/studio" element={<StudioPage />} />
         <Route path="projects/:id/impact" element={<ProjectImpactPage />} />
+        <Route path="solicitudes" element={<RequestsInboxPage />} />
         <Route path="prototypes" element={<PrototypesAdminPage />} />
         <Route path="prototypes/:id" element={<PrototypeAdminDetailPage />} />
         <Route

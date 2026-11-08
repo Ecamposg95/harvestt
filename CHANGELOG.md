@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 
 ## [Sin publicar]
 
+### Añadido (rama `feat/hito-m1-vision`, pendiente de autorización para fusionar y desplegar)
+- **M1 · Página Visión:** módulo `vision` con reconocimientos y solicitudes entrantes; migración `0008_vision`.
+- `GET /api/v1/public/vision` (cifras honestas, estados de capa, sitios aprobados) y `POST /api/v1/public/requests` (solicitud de nodo o contacto, trampa anti-bots, coordenadas redondeadas a 1 decimal).
+- `/api/v1/admin/recognitions` y `/api/v1/admin/requests` para superadministrador.
+- Ajustes `PUBLIC_ORIGIN_LABEL`, `PUBLIC_ORIGIN_LAT`, `PUBLIC_ORIGIN_LON`.
+- Frontend: página pública `/vision` (globo three.js perezoso con mapa 2D sin WebGL, diagrama del ecosistema, recorrido por capas, formularios en diálogo) y bandeja `/app/solicitudes`.
+- «Nodos operando» se calcula en cada consulta: instalaciones con un dispositivo no simulado que envió una lectura real en los últimos 7 días; sin organización pública, «Sin datos suficientes». El valor en producción se confirmará tras el despliegue (definición provisional hasta M5); «lecturas firmadas» = «pronto»; CDMX como «prototipo histórico».
+
 ### Documentación
 - Conjunto documental institucional: `README.md`, `docs/HISTORIA.md`, `docs/ARQUITECTURA.md`, `docs/INTEGRIDAD_CIENTIFICA.md`, `docs/STATUS.md`, `CITATION.cff` y este registro.
 - Consolidación: las quince ramas de trabajo (`feat/*`, `sdd/*`) verificadas como integradas en `main` y eliminadas del remoto.
