@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import { errorMessage } from '@/api/client'
 import { Button, Field, Input, Textarea } from '@/components/ui'
@@ -6,6 +6,14 @@ import { visionApi, type RequestInput } from './api'
 
 type Errors = Partial<Record<'name' | 'organization' | 'email' | 'city' | 'message', string>>
 const FIELDS = ['name', 'organization', 'email', 'city', 'message'] as const
+
+const FIELD_MESSAGE: Record<(typeof FIELDS)[number], string> = {
+  name: 'Escribe tu nombre (2 a 120 caracteres).',
+  organization: 'Revisa este campo.',
+  email: 'Escribe un correo válido.',
+  city: 'Revisa este campo.',
+  message: 'El mensaje debe tener entre 10 y 2000 caracteres.',
+}
 
 /** Errores 422 por campo: formato propio de la API ({error.details.errors}) o FastAPI ({detail}). */
 function fieldErrors(err: unknown): Errors {
@@ -18,7 +26,7 @@ function fieldErrors(err: unknown): Errors {
   const out: Errors = {}
   for (const e of Array.isArray(list) ? list : []) {
     const field = String(e.loc?.[e.loc.length - 1] ?? '') as (typeof FIELDS)[number]
-    if (FIELDS.includes(field) && !out[field]) out[field] = e.msg ?? 'Valor no válido'
+    if (FIELDS.includes(field) && !out[field]) out[field] = FIELD_MESSAGE[field] ?? 'Revisa este campo.'
   }
   return out
 }
@@ -47,6 +55,14 @@ export function RequestForm({ kind, onDone }: { kind: 'node' | 'contact'; onDone
   const [formError, setFormError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState(false)
+  // Si el diálogo se cierra mientras se espera la ubicación, no se envía nada.
+  const alive = useRef(true)
+  useEffect(() => {
+    alive.current = true
+    return () => {
+      alive.current = false
+    }
+  }, [])
 
   const set = (k: keyof typeof values) => (e: { target: { value: string } }) =>
     setValues((v) => ({ ...v, [k]: e.target.value }))
@@ -62,6 +78,7 @@ export function RequestForm({ kind, onDone }: { kind: 'node' | 'contact'; onDone
       if (values.city.trim()) input.city = values.city.trim()
       if (share) {
         const pos = await approxPosition()
+        if (!alive.current) return
         if (pos) {
           input.lat = pos.lat
           input.lon = pos.lon
@@ -109,6 +126,9 @@ export function RequestForm({ kind, onDone }: { kind: 'node' | 'contact'; onDone
           <Field label="Ciudad" error={errors.city}>
             {(id, d) => <Input id={id} aria-describedby={d} value={values.city} onChange={set('city')} maxLength={120} />}
           </Field>
+          <p className="text-xs text-muted">
+            Si aprobamos tu solicitud, tu ciudad aparecerá en el mapa público de la red (ubicación redondeada a unos 11 km).
+          </p>
           <label className="flex items-start gap-2 text-sm">
             <input type="checkbox" checked={share} onChange={(e) => setShare(e.target.checked)} className="mt-0.5" />
             Compartir mi ubicación aproximada (ciudad)
@@ -121,7 +141,7 @@ export function RequestForm({ kind, onDone }: { kind: 'node' | 'contact'; onDone
         )}
       </Field>
       <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
-        <input name="website" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
+        <input name="hp_field" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
       </div>
       {formError && (
         <p role="alert" className="text-sm text-danger">

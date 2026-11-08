@@ -15,8 +15,8 @@ const ROTATION_SPEED = 0.0025
 
 function palette(dark: boolean) {
   return dark
-    ? { sphere: 0x1b221a, line: 0x4a5a47, accent: 0xa6e22e }
-    : { sphere: 0x2c3a2b, line: 0x6f8a68, accent: 0x9be12b }
+    ? { sphere: 0x1b221a, line: 0x4a5a47, accent: 0xa6e22e, historic: 0xd9d4c5 }
+    : { sphere: 0x2c3a2b, line: 0x6f8a68, accent: 0x9be12b, historic: 0xe8e3d3 }
 }
 
 function circlePoints(fn: (t: number) => [number, number, number], n = 96) {
@@ -84,8 +84,9 @@ export default function Globe({ sites, animate, className = '' }: GlobeProps) {
       addLine(circlePoints((t) => latLonToVector3(90 - (t / (Math.PI * 2)) * 180, lon, rr)).slice(0, 49))
     }
 
-    const dotGeo = new THREE.SphereGeometry(0.035, 16, 12)
-    const dotMat = new THREE.MeshBasicMaterial({ color: pal.accent })
+    // Prototipo histórico: rombo (octaedro) neutro y sin pulso; nunca el glifo de «operando».
+    const dotGeo = new THREE.OctahedronGeometry(0.045)
+    const dotMat = new THREE.MeshBasicMaterial({ color: pal.historic })
     // Anillo punteado: arcos cortos con huecos.
     const dashedRingGeo = new THREE.BufferGeometry()
     {
@@ -100,14 +101,12 @@ export default function Globe({ sites, animate, className = '' }: GlobeProps) {
     }
     const dashedMat = new THREE.LineBasicMaterial({ color: pal.accent })
 
-    const pulses: THREE.Mesh[] = []
     for (const s of list) {
       const [x, y, z] = latLonToVector3(s.lat, s.lon, R * 1.01)
       if (s.kind === 'historic') {
         const dot = new THREE.Mesh(dotGeo, dotMat)
         dot.position.set(x, y, z)
         globe.add(dot)
-        pulses.push(dot)
       } else {
         const ring = new THREE.LineSegments(dashedRingGeo, dashedMat)
         ring.position.set(x, y, z)
@@ -125,7 +124,7 @@ export default function Globe({ sites, animate, className = '' }: GlobeProps) {
       const p = palette(dark)
       sphereMat.color.setHex(p.sphere)
       lineMat.color.setHex(p.line)
-      dotMat.color.setHex(p.accent)
+      dotMat.color.setHex(p.historic)
       dashedMat.color.setHex(p.accent)
       if (!animate) renderOnce()
     }
@@ -146,8 +145,6 @@ export default function Globe({ sites, animate, className = '' }: GlobeProps) {
     const tick = () => {
       frame = requestAnimationFrame(tick)
       globe.rotation.y += ROTATION_SPEED
-      const k = 1 + 0.35 * Math.sin(performance.now() / 380)
-      pulses.forEach((p) => p.scale.setScalar(k))
       renderer.render(scene, camera)
     }
     if (animate) tick()

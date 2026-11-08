@@ -1,9 +1,9 @@
 import type { VisionSite } from './api'
 import { equirect } from './geo'
+import { SiteList } from './SiteList'
 
 const W = 360
 const H = 180
-const KIND_LABEL: Record<VisionSite['kind'], string> = { historic: 'prototipo histórico', future: 'nodo solicitado' }
 
 /** Mapa equirectangular 2D para navegadores sin WebGL, con la lista accesible de sitios. */
 export function GlobeFallback({ sites, className = '' }: { sites: VisionSite[]; className?: string }) {
@@ -26,19 +26,13 @@ export function GlobeFallback({ sites, className = '' }: { sites: VisionSite[]; 
         {sites.map((s, i) => {
           const [x, y] = equirect(s.lat, s.lon, W, H)
           return s.kind === 'historic' ? (
-            <circle key={i} cx={x} cy={y} r={3.5} className="fill-accent" />
+            <rect key={i} x={x - 3} y={y - 3} width={6} height={6} transform={`rotate(45 ${x} ${y})`} className="fill-muted stroke-text" strokeWidth={0.8} />
           ) : (
             <circle key={i} cx={x} cy={y} r={3.5} fill="none" strokeWidth={1.2} strokeDasharray="2 1.5" className="stroke-accent" />
           )
         })}
       </svg>
-      <ul className="mt-3 space-y-1 text-sm text-muted">
-        {sites.map((s, i) => (
-          <li key={i} className="break-words">
-            <span className="font-semibold text-text">{s.label}</span> · <span>{KIND_LABEL[s.kind]}</span>
-          </li>
-        ))}
-      </ul>
+      <SiteList sites={sites} className="mt-3" />
     </div>
   )
 }

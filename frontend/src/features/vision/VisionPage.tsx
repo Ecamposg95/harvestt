@@ -11,6 +11,7 @@ import { EcosystemDiagram } from './EcosystemDiagram'
 import { prefersReducedMotion } from './geo'
 import { GlobeFallback } from './GlobeFallback'
 import { LazyGlobe } from './LazyGlobe'
+import { SiteList } from './SiteList'
 import { Dialog } from '@/features/catalog/Dialog'
 import { RequestForm } from './RequestForm'
 
@@ -77,12 +78,15 @@ export function VisionPage() {
           <p className="mt-6 max-w-2xl text-lg text-muted sm:text-xl">
             Hardware que mide, una red que no deja alterar los datos, IA que los interpreta y un portal abierto para todos.
           </p>
-          <p className="mt-6 text-sm font-semibold text-muted">● Operando · ◐ En construcción · ○ Visión</p>
+          <p className="mt-6 text-sm font-semibold text-muted">Capas: ● Operando · ◐ En construcción · ○ Visión</p>
         </div>
         <div data-testid="globe-slot" className="min-w-0">
           {state.phase === 'ready' &&
             (hasWebgl ? (
-              <LazyGlobe sites={state.vision.sites} animate={!prefersReducedMotion()} className="mx-auto" />
+              <>
+                <LazyGlobe sites={state.vision.sites} animate={!prefersReducedMotion()} className="mx-auto" />
+                <SiteList sites={state.vision.sites} className="mt-3" />
+              </>
             ) : (
               <GlobeFallback sites={state.vision.sites} />
             ))}

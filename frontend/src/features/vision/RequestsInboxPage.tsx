@@ -69,6 +69,9 @@ function RequestCard({ item, onChanged }: { item: InboundRequest; onChanged: (r:
         <p className="break-words text-sm text-muted">
           {[item.organization, item.email, item.city].filter(Boolean).join(' · ')}
         </p>
+        {item.kind === 'node' && (
+          <p className="break-words text-xs text-muted">Etiqueta pública: {item.city || 'Nodo solicitado'}</p>
+        )}
       </div>
       <p className="whitespace-pre-line break-words text-sm text-fg">{item.message}</p>
       {item.review_note && <p className="break-words text-xs text-muted">Nota: {item.review_note}</p>}

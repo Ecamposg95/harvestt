@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { prototypesApi } from '@/features/prototypes/api'
@@ -119,6 +119,7 @@ it('sin WebGL usa GlobeFallback con la lista de sitios', async () => {
   expect(await screen.findByText('CDMX · prototipos históricos')).toBeInTheDocument()
   expect(screen.getByText('prototipo histórico')).toBeInTheDocument()
   expect(screen.getByText('nodo solicitado')).toBeInTheDocument()
+  expect(screen.getByRole('list', { name: 'Sitios de la red' })).toBeInTheDocument()
   expect(screen.queryByTestId('globe')).toBeNull()
 })
 
@@ -194,19 +195,76 @@ it('si la geolocalización falla envía sin coordenadas y sin error', async () =
   expect(send.mock.calls[0][0]).not.toHaveProperty('lon')
 })
 
-it('muestra error de validación del servidor junto al correo', async () => {
+it('muestra el 422 real de la API en español junto al correo', async () => {
   const err = Object.assign(new Error('422'), {
     isAxiosError: true,
-    response: { status: 422, data: { detail: [{ loc: ['body', 'email'], msg: 'Correo no válido', type: 'value_error' }] } },
+    response: {
+      status: 422,
+      data: {
+        error: {
+          code: 'invalid_input',
+          message: 'Datos inválidos',
+          request_id: 'r',
+          details: { errors: [{ loc: ['body', 'email'], msg: 'String should match pattern' }] },
+        },
+      },
+    },
   })
   vi.spyOn(visionApi, 'sendRequest').mockRejectedValue(err)
   const dialog = await openForm('Habla con el equipo')
   fill(dialog)
   fireEvent.click(within(dialog).getByRole('button', { name: 'Enviar' }))
-  const msg = await within(dialog).findByText('Correo no válido')
-  expect(within(dialog).getByLabelText('Correo')).toHaveAccessibleDescription('Correo no válido')
+  const msg = await within(dialog).findByText('Escribe un correo válido.')
+  expect(within(dialog).getByLabelText('Correo')).toHaveAccessibleDescription('Escribe un correo válido.')
   expect(msg).toBeVisible()
+  expect(within(dialog).queryByText(/String should/)).toBeNull()
   expect(within(dialog).queryByLabelText('Ciudad')).toBeNull()
+})
+
+it('el formulario de nodo avisa que la ciudad puede hacerse pública y el señuelo no tiene nombre semántico', async () => {
+  const dialog = await openForm('Únete como nodo')
+  expect(
+    within(dialog).getByText('Si aprobamos tu solicitud, tu ciudad aparecerá en el mapa público de la red (ubicación redondeada a unos 11 km).'),
+  ).toBeInTheDocument()
+  expect(dialog.querySelector('input[name="website"]')).toBeNull()
+  expect(dialog.querySelector('input[name="hp_field"]')).not.toBeNull()
+})
+
+it('si el diálogo se cierra mientras se espera la geolocalización no se envía la solicitud', async () => {
+  const send = vi.spyOn(visionApi, 'sendRequest').mockResolvedValue(undefined)
+  let resolvePos: (p: unknown) => void = () => undefined
+  const getCurrentPosition = vi.fn((ok: (p: unknown) => void) => {
+    resolvePos = ok
+  })
+  Object.defineProperty(navigator, 'geolocation', { value: { getCurrentPosition }, configurable: true })
+  const dialog = await openForm('Únete como nodo')
+  fill(dialog)
+  fireEvent.click(within(dialog).getByLabelText('Compartir mi ubicación aproximada (ciudad)'))
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Enviar' }))
+  await waitFor(() => expect(getCurrentPosition).toHaveBeenCalled())
+  fireEvent.keyDown(document, { key: 'Escape' })
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+  await act(async () => resolvePos({ coords: { latitude: 19.43, longitude: -99.13 } }))
+  expect(send).not.toHaveBeenCalled()
+})
+
+it('con WebGL también muestra la lista accesible de sitios y la clave del globo', async () => {
+  vi.mocked(webglAvailable).mockReturnValue(true)
+  vi.spyOn(visionApi, 'summary').mockResolvedValue({ ...VISION, sites: SITES })
+  renderPage()
+  expect(await screen.findByTestId('globe')).toBeInTheDocument()
+  const list = screen.getByRole('list', { name: 'Sitios de la red' })
+  expect(within(list).getByText('CDMX · prototipos históricos')).toBeInTheDocument()
+  expect(within(list).getByText('prototipo histórico')).toBeInTheDocument()
+  expect(within(list).getByText('Bogotá')).toBeInTheDocument()
+  expect(within(list).getByText('nodo solicitado')).toBeInTheDocument()
+  expect(screen.getByText('◆ prototipo histórico · ○ nodo solicitado')).toBeInTheDocument()
+})
+
+it('la leyenda del encabezado se refiere a capas', async () => {
+  vi.spyOn(visionApi, 'summary').mockResolvedValue(VISION)
+  renderPage()
+  expect(await screen.findByText('Capas: ● Operando · ◐ En construcción · ○ Visión')).toBeInTheDocument()
 })
 
 it('Escape cierra el diálogo', async () => {
@@ -255,6 +313,7 @@ it('aprobar llama a review y la tarjeta sale de Pendientes', async () => {
   render(<RequestsInboxPage />)
   expect(await screen.findByText('Ana Pérez')).toBeInTheDocument()
   expect(list).toHaveBeenCalledWith('pending')
+  expect(screen.getByText('Etiqueta pública: Bogotá')).toBeInTheDocument()
   expect(screen.getByText('Aprobar una solicitud de nodo con ubicación la muestra en el globo público, redondeada a nivel ciudad.')).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: 'Aprobar' }))
   await waitFor(() => expect(screen.queryByText('Ana Pérez')).toBeNull())
