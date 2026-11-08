@@ -11,6 +11,7 @@ from app.modules.identity.models import User
 from app.modules.prototypes.service import public_org_id
 from app.modules.simulation.clock import get_now
 from app.modules.vision import service
+from app.modules.vision.ratelimit import limit_public_requests
 from app.modules.vision.schemas import RecognitionIn, RecognitionOut, RequestAck, RequestIn, RequestOut, RequestReview, VisionOut
 
 public_router = APIRouter(prefix="/public", tags=["vision"])
@@ -45,7 +46,7 @@ def delete_recognition(rec_id: str, user: User = Depends(require_superadmin), db
     return Response(status_code=204)
 
 
-@public_router.post("/requests", response_model=RequestAck, status_code=201)
+@public_router.post("/requests", response_model=RequestAck, status_code=201, dependencies=[Depends(limit_public_requests)])
 def create_request(data: RequestIn, db: Session = Depends(get_db)):
     service.create_request(db, data)
     return RequestAck()  # misma respuesta aunque la trampa descarte la solicitud

@@ -29,7 +29,7 @@ class RequestIn(BaseModel):
     lat: float | None = Field(default=None, ge=-90, le=90)
     lon: float | None = Field(default=None, ge=-180, le=180)
     message: str = Field(min_length=10, max_length=2000)
-    website: str = ""  # campo trampa anti-bots
+    website: str = Field(default="", max_length=200)  # campo trampa anti-bots
 
     @model_validator(mode="after")
     def _coords_together(self) -> "RequestIn":

@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 
 from app.core.config import Settings
 from app.modules.vision import router as vision_router
+from app.modules.vision.ratelimit import request_limiter
 from tests.conftest import login_headers, make_member
 
 from app.modules.identity.models import Organization
@@ -24,6 +25,13 @@ def test_models_persist_with_defaults(db, tenants):
 
 REC = {"award": "Medalla de Plata", "event": "ICAN", "venue": "Toronto, Canadá",
        "awarded_on": "2018-09-01", "evidence": "Archivo del equipo"}
+
+
+@pytest.fixture(autouse=True)
+def _reset_limiter():
+    request_limiter.reset()
+    yield
+    request_limiter.reset()
 
 
 @pytest.fixture
@@ -75,6 +83,7 @@ def test_honeypot_accepts_but_discards(client, db):
 
 def test_request_validation(client):
     def post(**over):
+        request_limiter.reset()  # esta prueba hace más de 5 envíos a propósito
         return client.post("/api/v1/public/requests", json={**REQ, **over}).status_code
 
     assert post(lat=91, lon=0) == 422
@@ -208,7 +217,8 @@ def test_deleted_recognition_not_counted(client, db, tenants, monkeypatch):
     assert _figures(client.get("/api/v1/public/vision"))["recognitions"]["value"] == 1
     rec.deleted_at = datetime.now(timezone.utc)
     db.commit()
-    assert _figures(client.get("/api/v1/public/vision"))["recognitions"]["value"] == 0
+    # 0 registrados = sin datos cargados, no «cero medallas»
+    assert _figures(client.get("/api/v1/public/vision"))["recognitions"]["value"] is None
 
 
 def test_layers_history_done_with_recognition(client, db, tenants, monkeypatch):
@@ -224,3 +234,43 @@ def test_layers_history_done_with_recognition(client, db, tenants, monkeypatch):
     assert layers["cortex"]["status"] == "operating"
     assert layers["knowledge"]["status"] == "in_construction"
     assert layers["trust"]["status"] == "vision" and layers["commons"]["status"] == "vision"
+
+
+def test_public_requests_rate_limited_per_ip(client, db):
+    url = "/api/v1/public/requests"
+    for _ in range(5):
+        assert client.post(url, json=REQ).status_code == 201
+    res = client.post(url, json=REQ)
+    assert res.status_code == 429
+    assert res.json()["error"]["code"] == "rate_limited"
+    assert db.scalar(select(func.count()).select_from(InboundRequest)) == 5
+    # otra IP (vía X-Forwarded-For) no comparte el cupo
+    assert client.post(url, json=REQ, headers={"X-Forwarded-For": "203.0.113.9, 10.0.0.1"}).status_code == 201
+
+
+def test_rate_limit_uses_first_forwarded_address(client):
+    url = "/api/v1/public/requests"
+    h = {"X-Forwarded-For": "198.51.100.1, 10.0.0.1"}
+    for _ in range(5):
+        assert client.post(url, json=REQ, headers=h).status_code == 201
+    assert client.post(url, json=REQ, headers={"X-Forwarded-For": "198.51.100.1, 10.9.9.9"}).status_code == 429
+    assert client.post(url, json=REQ, headers={"X-Forwarded-For": "198.51.100.2"}).status_code == 201
+
+
+def test_public_request_writes_no_audit_row(client, db):
+    client.post("/api/v1/public/requests", json=REQ)
+    assert db.scalar(select(func.count()).select_from(AuditEvent).where(AuditEvent.resource_type == "inbound_request")) == 0
+
+
+def test_honeypot_and_list_limits(client, root, db):
+    assert client.post("/api/v1/public/requests", json={**REQ, "website": "x" * 201}).status_code == 422
+    for i in range(3):
+        db.add(InboundRequest(kind="contact", name=f"N{i}", email="a@b.co", message="mensaje largo ok"))
+    db.commit()
+    assert len(client.get("/api/v1/admin/requests", headers=root).json()) == 3
+
+
+def test_operating_formula_wording(client, monkeypatch):
+    monkeypatch.setattr(vision_router, "settings", Settings(public_org_slug="alfa"))
+    f = _figures(client.get("/api/v1/public/vision"))["operating_nodes"]["formula"]
+    assert "dispositivo no simulado" in f and "físico" not in f

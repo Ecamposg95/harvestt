@@ -57,8 +57,6 @@ def create_request(db: Session, data: RequestIn) -> InboundRequest | None:
     fields["lon"] = round_coord(data.lon)
     req = InboundRequest(**fields)
     db.add(req)
-    db.flush()
-    audit.record(db, None, "inbound_request", req.id, "create", {"kind": req.kind})
     db.commit()
     db.refresh(req)
     return req
@@ -68,7 +66,7 @@ def list_requests(db: Session, status: str | None) -> list[InboundRequest]:
     stmt = select(InboundRequest).where(InboundRequest.deleted_at.is_(None))
     if status:
         stmt = stmt.where(InboundRequest.status == status)
-    return list(db.scalars(stmt.order_by(InboundRequest.created_at.desc())))
+    return list(db.scalars(stmt.order_by(InboundRequest.created_at.desc()).limit(200)))
 
 
 def review_request(db: Session, user: User, req_id: str, review: RequestReview) -> InboundRequest:
@@ -123,12 +121,15 @@ def vision_summary(db: Session, org_id: str | None, now: datetime) -> VisionOut:
     def num(v: int | None) -> float | None:
         return None if v is None else float(v)
 
+    # 0 reconocimientos registrados significa «sin datos cargados», no «cero medallas».
+    recognitions = recognitions or None
+
     figures = [
         VisionFigure(key="prototypes", label="Prototipos", value=num(prototypes), status="available",
                      origin="measured", formula="Prototipos publicados en la vitrina."),
         VisionFigure(key="operating_nodes", label="Nodos operando", value=num(operating), status="available",
                      origin="measured",
-                     formula="Instalaciones con un dispositivo físico que envió una lectura real en los últimos "
+                     formula="Instalaciones con un dispositivo no simulado que envió una lectura real en los últimos "
                              "7 días. Lo simulado no cuenta."),
         VisionFigure(key="signed_readings", label="Lecturas firmadas", value=None, status="soon",
                      origin="missing", formula="Disponible cuando opere la red de confianza (M5)."),
