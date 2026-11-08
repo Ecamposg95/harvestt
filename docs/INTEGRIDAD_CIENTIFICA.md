@@ -34,10 +34,10 @@ Cada valor expuesto por la API y la interfaz pertenece exactamente a una categor
 9. **Corregir el dato, no la cifra.** Si un indicador resulta desfavorable (por ejemplo, 0 % de cobertura de evidencia), se corrige cargando evidencia, nunca ajustando la presentación.
 10. **Borrado lógico coherente.** Los registros borrados no participan en ningún indicador.
 11. **Lo simulado no cuenta como nodo.** Ni los dispositivos `simulated` ni las lecturas con `source = simulated` suman a «nodos operando». La definición vigente (proyectos con un dispositivo no simulado con lectura real en los últimos 7 días) es provisional hasta la entidad Node (M5).
-12. **Pasado y futuro, sin confundir.** El sitio de CDMX se muestra como «prototipo histórico», nunca como operando. Los nodos futuros del globo provienen solo de solicitudes de nodo aprobadas.
+12. **Pasado y futuro, sin confundir.** El sitio de CDMX se muestra como «prototipo histórico», nunca como operando: en el globo usa un marcador propio (rombo neutro, sin pulso), distinto del glifo de «operando», y la lista de sitios acompaña siempre al globo. Los nodos futuros del globo provienen solo de solicitudes de nodo aprobadas.
 13. **Ubicación aproximada.** Las coordenadas de una solicitud se redondean a 1 decimal (≈ una ciudad) antes de guardarse; no se almacena la ubicación exacta.
 14. **Capas sin dato, «pronto».** «Lecturas firmadas» se muestra «pronto» mientras la capa no exista; nunca 0.
-15. **Reconocimientos con evidencia.** No se puede registrar un reconocimiento sin evidencia.
+15. **Reconocimientos con evidencia.** No se puede registrar un reconocimiento sin evidencia. Con 0 reconocimientos registrados la cifra muestra «Sin datos suficientes», nunca 0.
 
 ## 4. Representaciones tridimensionales
 

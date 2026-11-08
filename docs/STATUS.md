@@ -10,7 +10,9 @@ El hito visual V1–V6 está completo, integrado en `main` y desplegado en produ
 
 La rama `feat/hito-m1-vision` (desde `main` `3c3f6b0`) incorpora la página pública `/vision` y la bandeja `/app/solicitudes`. **Está en rama, pendiente de autorización para fusionar y desplegar; no está en producción.** Última suite completa registrada: pytest 262 pruebas en verde y Vitest 249/249. Migración `0008_vision` (pendiente de aplicar en producción); el ciclo `upgrade → check → downgrade 0007 → upgrade → check` se verificó sin diferencias en PostgreSQL 17 local.
 
-**Pendiente antes de fusionar:** construcción y *smoke test* del contenedor Docker (no ejecutados: Docker no está disponible en la máquina de desarrollo; el *smoke* de la API y del SPA se hizo con uvicorn contra PostgreSQL 17 local) y revisión visual de `/vision` y `/app/solicitudes` en claro, oscuro y 375 px, con y sin WebGL.
+**Pendiente antes de fusionar:** construcción y *smoke test* del contenedor Docker (no ejecutados: Docker no está disponible en la máquina de desarrollo; el *smoke* de la API y del SPA se hizo con uvicorn contra PostgreSQL 17 local) y revisión visual de `/vision` y `/app/solicitudes` en claro, oscuro y 375 px, con y sin WebGL. **Cargar los reconocimientos (`POST /api/v1/admin/recognitions`) antes de enlazar o anunciar `/vision`:** con 0 registrados la cifra muestra «Sin datos suficientes».
+
+Límite de 5 solicitudes por IP cada 10 minutos en el formulario público (en memoria del proceso; se reinicia con cada despliegue).
 
 Cifras honestas de M1: «nodos operando» se calcula en cada consulta: instalaciones con un dispositivo no simulado que envió una lectura real en los últimos 7 días; sin organización pública, «Sin datos suficientes». El valor en producción se confirmará tras el despliegue (definición provisional hasta la entidad Node en M5); «lecturas firmadas» = «pronto» (la capa aún no existe); CDMX figura como «prototipo histórico», nunca como operando; los nodos futuros provienen solo de solicitudes aprobadas, con coordenadas redondeadas a 1 decimal.
 
