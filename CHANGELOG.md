@@ -10,7 +10,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 - `/api/v1/admin/recognitions` y `/api/v1/admin/requests` para superadministrador.
 - Ajustes `PUBLIC_ORIGIN_LABEL`, `PUBLIC_ORIGIN_LAT`, `PUBLIC_ORIGIN_LON`.
 - Frontend: página pública `/vision` (globo three.js perezoso con mapa 2D sin WebGL, diagrama del ecosistema, recorrido por capas, formularios en diálogo) y bandeja `/app/solicitudes`.
-- «Nodos operando» = 0 (medido, definición provisional hasta M5); «lecturas firmadas» = «pronto»; CDMX como «prototipo histórico».
+- «Nodos operando» se calcula en cada consulta: instalaciones con un dispositivo no simulado que envió una lectura real en los últimos 7 días; sin organización pública, «Sin datos suficientes». El valor en producción se confirmará tras el despliegue (definición provisional hasta M5); «lecturas firmadas» = «pronto»; CDMX como «prototipo histórico».
 
 ### Documentación
 - Conjunto documental institucional: `README.md`, `docs/HISTORIA.md`, `docs/ARQUITECTURA.md`, `docs/INTEGRIDAD_CIENTIFICA.md`, `docs/STATUS.md`, `CITATION.cff` y este registro.
