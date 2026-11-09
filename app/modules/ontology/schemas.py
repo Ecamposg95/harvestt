@@ -82,3 +82,28 @@ class SuggestionOut(BaseModel):
     external_id: str
     label: str
     url: str
+
+
+Note = Annotated[str, Field(min_length=3, max_length=500)]
+
+
+class ReviewIn(BaseModel):
+    action: Literal["approve", "request_changes", "reject"]
+    note: Note
+
+
+class ObsoleteIn(BaseModel):
+    replaced_by_id: str
+    note: Note
+
+
+class EquivalencesIn(BaseModel):
+    equivalences: list[EquivalenceIn] = Field(max_length=10)
+    note: Note
+
+
+class ReleaseOut(BaseModel):
+    version: int
+    note: str
+    created_at: datetime
+    term_count: int

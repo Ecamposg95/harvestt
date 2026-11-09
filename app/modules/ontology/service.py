@@ -73,7 +73,7 @@ def term_detail(db: Session, term: OntologyTerm) -> TermDetail:
         parent=_summary(db.get(OntologyTerm, term.parent_id) if term.parent_id else None),
         children=[_summary(c) for c in children],
         replaced_by=_summary(db.get(OntologyTerm, term.replaced_by_id) if term.replaced_by_id else None),
-        proposed_by_name=(proposer.full_name or proposer.email) if proposer else TEAM_NAME,
+        proposed_by_name=(proposer.full_name or "Colaborador") if proposer else TEAM_NAME,
         review_note=term.review_note,
         reviewed_at=term.reviewed_at,
         published_in_version=term.published_in_version,
