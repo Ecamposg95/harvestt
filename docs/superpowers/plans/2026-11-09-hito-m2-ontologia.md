@@ -23,6 +23,23 @@
 
 **Spec:** `docs/superpowers/specs/2026-11-07-hito-moonshot-design.md` §3, §6, §10ter (2 y 3), §11 y §12. Los mockups `ontologia*.html` no están en el repositorio; manda el texto de §6.
 
+## Estado de ejecución
+
+Rama `feat/hito-m2-ontologia`. Ejecución con subagentes: implementación y revisión por tarea. Se actualiza y se sube al cerrar cada tarea.
+
+| Tarea | Estado | Commits |
+|---|---|---|
+| 1 · Modelos y migración 0009 | Implementada, en revisión | `111db9d` |
+| 2 · Propuestas y sugerencias | Pendiente | |
+| 3 · Revisión y versiones | Pendiente | |
+| 4 · Semilla verificada | Pendiente | |
+| 5 · Puente con datos | Pendiente | |
+| 6 · Exportación | Pendiente | |
+| 7 · Grafo | Pendiente | |
+| 8 · Página de ontología | Pendiente | |
+| 9 · Propuestas y revisión (UI) | Pendiente | |
+| 10 · Visión, docs y puerta | Pendiente | |
+
 ## Global Constraints
 
 - Rama `feat/hito-m2-ontologia` desde `main`. Merge y despliegue **solo con autorización explícita del fundador**.
