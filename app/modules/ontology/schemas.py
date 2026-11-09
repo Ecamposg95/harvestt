@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints
 
 from app.modules.ontology.models import DOMAINS, MATCH_TYPES, SCHEMES
 
@@ -84,7 +84,7 @@ class SuggestionOut(BaseModel):
     url: str
 
 
-Note = Annotated[str, Field(min_length=3, max_length=500)]
+Note = Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=500)]
 
 
 class ReviewIn(BaseModel):

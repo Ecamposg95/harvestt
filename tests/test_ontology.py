@@ -207,6 +207,7 @@ def test_note_required(client, db, tenants):
     term = _propose(client, tenants["alfa_viewer"]).json()
     assert _review(client, root, term["id"], note="").status_code == 422
     assert _review(client, root, term["id"], note="ab").status_code == 422
+    assert _review(client, root, term["id"], note="     ").status_code == 422
 
 
 def test_request_changes_then_edit_then_approve(client, db, tenants):
@@ -327,3 +328,38 @@ def test_review_queue_oldest_first(client, db, tenants):
     q = client.get("/api/v1/ontology/review-queue", headers=root).json()
     assert [t["id"] for t in q] == [first["id"], second["id"]]
     assert client.get("/api/v1/ontology/review-queue", headers=tenants["alfa_editor"]).status_code == 403
+
+
+def test_advisory_lock_issued_only_on_postgres():
+    from unittest.mock import MagicMock
+
+    from app.modules.ontology import review as rv
+
+    pg = MagicMock()
+    pg.get_bind.return_value.dialect.name = "postgresql"
+    rv.serialize_publications(pg)
+    stmt, params = pg.execute.call_args.args
+    assert "pg_advisory_xact_lock" in str(stmt) and params == {"key": rv.ONTOLOGY_PUBLISH_LOCK}
+    lite = MagicMock()
+    lite.get_bind.return_value.dialect.name = "sqlite"
+    rv.serialize_publications(lite)
+    lite.execute.assert_not_called()
+
+
+def test_integrity_error_on_commit_maps_to_409(client, db, tenants, monkeypatch):
+    from sqlalchemy.exc import IntegrityError
+    from sqlalchemy.orm import Session
+
+    _v1(db)
+    root = _root(db, client)
+    term = _propose(client, tenants["alfa_viewer"]).json()
+    real = Session.commit
+
+    def boom(self):
+        raise IntegrityError("insert", {}, Exception("dup version"))
+
+    monkeypatch.setattr(Session, "commit", boom)
+    res = _review(client, root, term["id"])
+    monkeypatch.setattr(Session, "commit", real)
+    assert res.status_code == 409 and res.json()["error"]["code"] == "conflict"
+    assert db.get(OntologyTerm, term["id"]).status == "proposed"
