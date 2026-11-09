@@ -189,7 +189,7 @@
 
 **Files:**
 - Create: `app/modules/ontology/schemas.py`, `service.py`, `router.py`
-- Modify: `app/main.py` (incluir `ontology.router.router` y `public_router`), `tests/test_ontology.py`
+- Modify: `app/main.py` (incluir `ontology.router.router` y `public_router`), `tests/test_ontology.py`. En esta tarea `public_router = APIRouter(prefix="/public/ontology", tags=["ontology-public"])` se crea vacío y se registra; la Tarea 6 le añade las rutas.
 
 **Interfaces:**
 - Consumes: modelos de la Tarea 1; `get_current_user` y `require_superadmin` de `app.core.deps`.
@@ -202,14 +202,14 @@
   - `SuggestionOut(scheme, external_id, label, url)`.
 - Produces en service:
   - `visible_terms(db, user) -> Select`: publicados y obsoletos; más propios si no es superadmin; todo si lo es.
-  - `list_terms(db, user, domain: str | None, q: str | None, status: str | None) -> list[OntologyTerm]`: `q` filtra por `label_key` o por alias plegado que contenga `normalize_label(q)`; orden por `domain`, `label_key`.
+  - `list_terms(db, user, domain: str | None, q: str | None, status: str | None, mine: bool = False) -> list[OntologyTerm]`: `mine=True` limita a `proposed_by == user.id`; `q` filtra por `label_key` o por alias plegado que contenga `normalize_label(q)`; orden por `domain`, `label_key`.
   - `get_term(db, user, term_id) -> OntologyTerm`: `404 "término"` si no es visible.
   - `term_detail(db, term) -> TermDetail`.
   - `propose(db, user, data) -> OntologyTerm`: valida el padre (mismo dominio y `published`); rechaza duplicados con `409 term_exists` si otro término no rechazado del mismo dominio tiene igual `label_key`; `unit` solo con `domain == "trait"` (si no, 422 en `unit`); audita `"ontology_term"`, `"propose"`.
   - `edit(db, user, term, data) -> OntologyTerm`: solo quien propuso y solo en `proposed` o `in_review` (si no, 403 o 409); `in_review` vuelve a `proposed`; reemplaza las equivalencias si vienen.
   - `suggest(db, q: str, limit: int = 10) -> list[ExternalConcept]`: `label_key` contiene cada palabra de `normalize_label(q)`; `q` menor de 2 caracteres devuelve `[]`.
 - Produces en router, con prefijo `/ontology` y `get_current_user`:
-  - `GET /terms?domain&q&status`
+  - `GET /terms?domain&q&status&mine`
   - `GET /terms/{id}`
   - `POST /terms` → 201
   - `PATCH /terms/{id}`
@@ -512,7 +512,7 @@
   - «Sugerencias de Cortex»: llama a `suggest(etiqueta)` con *debounce* de 300 ms; cada sugerencia se agrega con un tipo de correspondencia elegido (por defecto `close`).
   - Aviso fijo de crédito (Global Constraints).
   - Errores del servidor: 409 `term_exists` → «Ya existe un término con esa etiqueta en este dominio»; 422 → el mensaje junto al campo `field`.
-- `MyProposals`: lista de `list({status})` filtrada a las propias, con estado y razón. Las que están `in_review` tienen «Editar», que abre el diálogo en modo edición.
+- `MyProposals`: lista de `list({ mine: true })`, con estado y razón. Las que están `in_review` tienen «Editar», que abre el diálogo en modo edición.
 - `ReviewQueue`:
   - tarjetas de `reviewQueue()` con la propuesta completa;
   - botones «Aprobar», «Pedir cambios» y «Rechazar», con nota obligatoria (el botón está deshabilitado con menos de 3 caracteres);
