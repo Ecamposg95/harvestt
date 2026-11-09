@@ -42,6 +42,9 @@ class Project(UUIDMixin, TenantMixin, AuditMixin, Base):
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     # Versión del layout del Studio (independiente de `version` del proyecto). 0 = sin layout guardado.
     layout_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    system_term_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("ontology_terms.id"), nullable=True, index=True
+    )
 
 
 class CropCycle(UUIDMixin, TenantMixin, AuditMixin, Base):
@@ -53,6 +56,9 @@ class CropCycle(UUIDMixin, TenantMixin, AuditMixin, Base):
     started_on: Mapped[date | None] = mapped_column(Date, nullable=True)
     stage: Mapped[str] = mapped_column(String(60), nullable=False, default=STAGE_UNKNOWN)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default=CYCLE_PLANNED)
+    stage_term_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("ontology_terms.id"), nullable=True, index=True
+    )
 
     species = relationship("Species", lazy="joined")
     cultivar = relationship("Cultivar", lazy="joined")
