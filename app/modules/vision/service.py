@@ -9,6 +9,8 @@ from app.core.errors import not_found
 from app.core.mixins import utcnow
 from app.modules.identity.models import User
 from app.modules.catalog.models import Species
+from app.modules.ontology.models import OntologyTerm
+from app.modules.ontology.review import current_version
 from app.modules.prototypes.service import public_prototypes
 from app.modules.simulation.clock import as_utc
 from app.modules.telemetry.models import DEVICE_SIMULATED, SOURCE_SIMULATED, Device, TelemetryReading
@@ -107,6 +109,16 @@ def _operating_nodes(db: Session, org_id: str, now: datetime) -> int:
     return db.scalar(stmt) or 0
 
 
+def _knowledge_reason(db: Session) -> str:
+    version = current_version(db)
+    if version < 1:
+        return "Ontología, bancos de plantas y mapa GIS: hito M2–M4."
+    terms = db.scalar(select(func.count()).select_from(OntologyTerm).where(
+        OntologyTerm.status == "published", OntologyTerm.deleted_at.is_(None),
+    )) or 0
+    return f"Ontología publicada (versión {version}, {terms} términos). Bancos de plantas y mapa GIS: hitos M3–M4."
+
+
 def vision_summary(db: Session, org_id: str | None, now: datetime) -> VisionOut:
     prototypes = recognitions = operating = None
     if org_id is not None:
@@ -144,8 +156,7 @@ def vision_summary(db: Session, org_id: str | None, now: datetime) -> VisionOut:
                     reason="Prototipos 2017–2018 y reconocimientos registrados."),
         VisionLayer(key="cortex", status="operating" if has_species else "in_construction",
                     reason="Plataforma en producción con catálogo."),
-        VisionLayer(key="knowledge", status="in_construction",
-                    reason="Ontología, bancos de plantas y mapa GIS: hito M2–M4."),
+        VisionLayer(key="knowledge", status="in_construction", reason=_knowledge_reason(db)),
         VisionLayer(key="trust", status="vision", reason="Red de confianza: hito M5."),
         VisionLayer(key="commons", status="vision", reason="harvestt.org: hito M6."),
     ]

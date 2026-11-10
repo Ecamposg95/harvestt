@@ -1,6 +1,6 @@
 # Estado del sistema
 
-**Corte:** 2026-11-07 · **Producción:** <https://harvestt-production.up.railway.app> (`main` `12c3a24`; migración `0008_vision`)
+**Corte:** 2026-11-09 · **Producción:** <https://harvestt-production.up.railway.app> (`main` `12c3a24`; migración `0008_vision`)
 
 ## 1. Resumen ejecutivo
 
@@ -15,6 +15,16 @@ M1 incorpora la página pública `/vision` y la bandeja `/app/solicitudes`. **De
 Límite de 5 solicitudes por IP cada 10 minutos en el formulario público. La IP se toma de `X-Real-IP` (lo fija el proxy de Railway) o, si falta, de la última entrada de `X-Forwarded-For`; nunca de la parte que el cliente puede inventar. El límite vive en memoria del proceso (se reinicia con cada despliegue, no se comparte entre réplicas), es seguro entre hilos y acota su memoria a 10 000 IP. Verificado en producción el 2026-11-07: con `X-Real-IP` y `X-Forwarded-For` falsificados en cada envío, el sexto envío recibe 429 (Railway sobrescribe `X-Real-IP`). Queda por observar que visitantes distintos no compartan cupo (no verificable desde un solo cliente).
 
 Cifras honestas de M1: «nodos operando» se calcula en cada consulta: instalaciones con un dispositivo no simulado que envió una lectura real en los últimos 7 días; sin organización pública, «Sin datos suficientes». El valor en producción se confirmará tras el despliegue (definición provisional hasta la entidad Node en M5); «lecturas firmadas» = «pronto» (la capa aún no existe); CDMX figura como «prototipo histórico», nunca como operando; los nodos futuros provienen solo de solicitudes aprobadas, con coordenadas redondeadas a 1 decimal.
+
+## 1.2 Hito M2 · Ontología (en rama)
+
+La rama `feat/hito-m2-ontologia` (desde `main`) incorpora el módulo separable `ontology`, el puente `term_links`, los términos en el grafo y la página `/app/ontologia` (explorar con árbol por dominio, buscador y ficha; proponer con sugerencias de equivalencias; «Mis propuestas»; bandeja de revisión para superadministrador). **Está en rama, pendiente de autorización para fusionar y desplegar; no está en producción.** Migración `0009_ontology` (pendiente de aplicar en producción).
+
+**Puerta de la fase (2026-11-09):** pytest 322 pruebas en verde; `tsc -b` sin errores; Vitest 279/279; `npm run build` en verde. Ciclo `upgrade → check → downgrade 0008 → upgrade → check` sin diferencias en PostgreSQL 17 (contenedor desechable). Imagen Docker construida sin errores. *Smoke* contra la demo local en contenedor (`harvestt-cortex:local` en `:8080`, PostgreSQL 17 con migración `0009` y seed): `/api/v1/health/ready` → `ok`; `/api/v1/public/ontology/export.ttl` → 200 con `owl:versionInfo "1"`; `/app/ontologia` sirve el SPA; el `relink` del arranque enlazó `TraitAssertion.variable` 12, `Project.system` 1, `Species.scientific_name` 3 y 0 en los demás campos. Revisión visual con Playwright de `/app/ontologia` (explorar, «Mis propuestas», revisión y diálogo de propuesta) y del grafo con nodos de término, en claro, oscuro y 375 px, sin desbordes horizontales.
+
+Semilla: 45 términos publicados en la versión 1, firmados «Equipo HarvestT», con equivalencias verificadas contra la fuente oficial (`scripts/ontology/verify_external.py`); las no verificables se omitieron.
+
+**Tras desplegar (con autorización):** verificar `/api/v1/public/ontology/export.json` en producción y que las 12 afirmaciones de producción quedaron con `variable_term_id`, consultando `/api/v1/graph?focus_type=term&focus_id=HVT:000027` («Temperatura del aire»).
 
 ## 2. Fases del hito visual
 
@@ -53,6 +63,11 @@ Cifras honestas de M1: «nodos operando» se calcula en cada consulta: instalaci
 | Sitio de CDMX en el globo | **Real** como «prototipo histórico» |
 | Nodos futuros en el globo | **Real** — solo solicitudes aprobadas, coordenadas a 1 decimal |
 | Reconocimientos (medallas) | **Real** — administrables por superadministrador, con evidencia obligatoria; carga en producción pendiente (evidencia por confirmar con el equipo) |
+| Ontología: términos de la semilla (rama M2) | **Real** — 45 términos del equipo («Equipo HarvestT»), equivalencias externas verificadas; no desplegada |
+| Ontología: propuestas y revisión | **Real** — cualquier cuenta propone; revisa solo superadministrador, con razón visible |
+| Enlaces de datos existentes a términos | **Real** — solo por coincidencia exacta con etiqueta o alias publicado; sin correspondencia el enlace queda vacío (sin término); se ve como conteo de uso en la ficha y aristas «clasificado como» en el grafo |
+| Exportación pública OWL/Turtle y JSON | **Real** — solo publicados y obsoletos; CC-BY 4.0 |
+| Rol de curador de la ontología | **Pendiente** — hoy revisa solo superadministrador |
 | Telemetría de dispositivos físicos | **Pendiente** — Etapa III |
 
 ## 4. Observaciones abiertas
@@ -61,6 +76,7 @@ Cifras honestas de M1: «nodos operando» se calcula en cada consulta: instalaci
 2. **Grafo:** registrar aristas reales `designed_for` (prototipo → especie) cuando el equipo indique qué cultiva cada prototipo.
 3. **Defectos menores conocidos:** dos altas simultáneas pueden dejar 13 puntos en un prototipo; puntos borrados en cascada sin evento de auditoría propio; STL con normales invertidas no seleccionables desde fuera; piso ilustrativo no cuadrado en Studio sin área; sin *pinch-zoom* táctil en el grafo.
 4. **Limpieza de ramas remotas:** hecha el 2026-11-07; las quince ramas `feat/*` y `sdd/*` integradas se eliminaron del remoto. El repositorio conserva solo `main`.
+5. **M2 · pendientes:** rol de curador (hoy revisa solo superadministrador); prueba real de concurrencia de publicación con dos sesiones en PostgreSQL (hoy cubierta por el candado `with_for_update()` y pruebas de una sola sesión); ejecución de la semilla y del `relink` en producción al desplegar (por verificar tras la autorización).
 
 ## Hoja de ruta
 
@@ -69,6 +85,7 @@ Derivada del backlog de [`HARVESTT_TASK_PACK.md`](HARVESTT_TASK_PACK.md) (§10).
 | Prioridad | Línea de trabajo | Tickets |
 |---|---|---|
 | P0 | Cierre de M1: autorización, fusión, despliegue y carga de reconocimientos | M1 |
+| P0 | Cierre de M2: autorización, fusión, despliegue y verificación de la ontología en producción | M2 |
 | P0 | Conocimiento y RAG con citas verificables y abstención | HVT-007 a HVT-010 |
 | P0 | Agentes con herramientas tipadas y ejecución auditada | HVT-011 |
 | P0 | Comparador de escenarios y exportación del expediente | HVT-016, HVT-017 |

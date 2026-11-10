@@ -39,6 +39,15 @@ describe('searchNodes', () => {
   })
 })
 
+describe('relationLabel', () => {
+  it('etiqueta las relaciones de la ontología', () => {
+    expect(relationLabel('subclass_of', true)).toBe('Subclase de')
+    expect(relationLabel('subclass_of', false)).toBe('Término más específico')
+    expect(relationLabel('classified_as', true)).toBe('Clasificado como')
+    expect(relationLabel('replaced_by', false)).toBe('Reemplaza a')
+  })
+})
+
 describe('nodeLink', () => {
   it('enlaza la pantalla del recurso según el tipo', () => {
     expect(nodeLink(node('species:sp1'))).toEqual({ kind: 'internal', to: '/app/plants/sp1', label: 'Abrir ficha de la especie' })
@@ -46,6 +55,7 @@ describe('nodeLink', () => {
     expect(nodeLink(node('project:p1'))).toEqual({ kind: 'internal', to: '/app/projects/p1', label: 'Abrir proyecto' })
     expect(nodeLink(node('prototype:pr1'))).toEqual({ kind: 'internal', to: '/app/prototypes/pr1', label: 'Abrir prototipo' })
     expect(nodeLink(node('source:gbif'))).toEqual({ kind: 'external', href: 'https://www.gbif.org/', label: 'Abrir fuente original' })
+    expect(nodeLink({ id: 'term:HVT:000001', type: 'term', label: 'Temperatura del aire', origin: null, meta: {} })).toEqual({ kind: 'internal', to: '/app/ontologia?term=HVT:000001', label: 'Abrir término en la ontología' })
     expect(nodeLink(node('trait:photoperiod'))).toBeNull()
     expect(nodeLink({ id: 'cultivar:cv1', type: 'cultivar', label: 'Grand Rapids', origin: null, meta: { species_id: 'sp1' } })).toEqual({
       kind: 'internal',
@@ -71,7 +81,7 @@ describe('conexiones y procedencia', () => {
   })
 
   it('cuenta nodos por tipo con ceros explícitos', () => {
-    expect(countByType(FIXTURE.nodes)).toEqual({ species: 1, cultivar: 0, trait: 1, source: 1, project: 1, crop_cycle: 1, prototype: 1 })
+    expect(countByType(FIXTURE.nodes)).toEqual({ species: 1, cultivar: 0, trait: 1, source: 1, project: 1, crop_cycle: 1, prototype: 1, term: 0 })
   })
 
   it('describe cada tipo de procedencia en español', () => {

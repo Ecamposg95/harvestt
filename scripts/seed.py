@@ -1,15 +1,17 @@
-"""Seed idempotente: org y superadmin desde env, catálogo inicial. Se ejecuta en cada arranque."""
+"""Seed idempotente: org y superadmin desde env, catálogo inicial, ontología semilla. Se ejecuta en cada arranque."""
 import logging
 
 import app.models_registry  # noqa: F401
 from app.core.db import SessionLocal
 from app.modules.catalog import seed as catalog_seed
 from app.modules.identity import seed as identity_seed
+from app.modules.ontology import seed as ontology_seed
 from app.modules.projects import seed as projects_seed
 from app.modules.prototypes import seed as prototypes_seed
 from app.modules.telemetry import seed as telemetry_seed
+from app.modules.term_links import seed as term_links_seed
 
-SEEDS = (identity_seed, catalog_seed, projects_seed, prototypes_seed, telemetry_seed)
+SEEDS = (identity_seed, catalog_seed, ontology_seed, projects_seed, prototypes_seed, telemetry_seed, term_links_seed)
 
 
 def run() -> None:

@@ -2,6 +2,18 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Las fechas siguen ISO 8601.
 
+## [Sin publicar]
+
+### Añadido (rama `feat/hito-m2-ontologia`, pendiente de autorización para fusionar y desplegar)
+- **M2 · Ontología:** módulo separable `ontology` (términos globales, equivalencias, conceptos externos y versiones); migración `0009_ontology`.
+- Ciclo propuesta → revisión → publicación con ID permanente `HVT:000001`, nota obligatoria en cada revisión, obsolescencia con `replaced_by` y versión que sube con cada publicación, obsolescencia o cambio de equivalencias.
+- `/api/v1/ontology/*` (lista, ficha, propuesta, sugerencias de equivalencias sin LLM, versiones, bandeja de revisión para superadministrador) y públicos `/api/v1/public/ontology/export.ttl`, `/export.json` y `/terms/{hvt_id}` (CC-BY 4.0; IRI con `ONTOLOGY_BASE_IRI`).
+- Semilla verificada de 45 términos en seis dominios con equivalencias a NCBI Taxon, PO, BBCH, AGROVOC, PECO, ENVO, SOSA, SSN y GeoSPARQL; verificador `python -m scripts.ontology.verify_external`.
+- Puente `term_links`: columnas `*_term_id` en especies, afirmaciones, proyectos y ciclos; `relink` idempotente al arrancar (solo coincidencia exacta; sin ella el enlace queda vacío, sin término); `GET /api/v1/ontology/terms/{id}/usage`.
+- Grafo: nodos `term` con aristas `subclass_of`, `replaced_by` y `classified_as`.
+- Frontend: página `/app/ontologia` (árbol por dominio, buscador, ficha, proponer, «Mis propuestas», revisión).
+- Visión: la capa «knowledge» informa la versión publicada y el número de términos.
+
 ## [M1 — Página Visión] — 2026-11-07
 
 ### Añadido

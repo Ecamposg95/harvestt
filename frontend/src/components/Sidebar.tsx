@@ -13,6 +13,7 @@ export const NAV_ITEMS: Array<{ to: string; label: string; icon: IconName; end?:
   { to: '/app/projects', label: 'Proyectos', icon: 'folder' },
   { to: '/app/prototypes', label: 'Prototipos', icon: 'cube' },
   { to: '/app/graph', label: 'Grafo', icon: 'graph' },
+  { to: '/app/ontologia', label: 'Ontología', icon: 'tree' },
 ]
 
 const SUPERADMIN_ITEMS: typeof NAV_ITEMS = [{ to: '/app/solicitudes', label: 'Solicitudes', icon: 'folder' }]

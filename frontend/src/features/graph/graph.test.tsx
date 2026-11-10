@@ -81,7 +81,7 @@ describe('GraphPage', () => {
       expect(spy).toHaveBeenLastCalledWith({ focus: null, depth: 2, types: NODE_TYPES.filter((t) => t !== 'source') }),
     )
     expect(within(legend).getByRole('button', { name: /Fuentes/ })).toHaveAttribute('aria-pressed', 'false')
-    for (const name of [/Especies/, /Cultivares/, /Rasgos/, /Proyectos/, /Ciclos/]) {
+    for (const name of [/Especies/, /Cultivares/, /Rasgos/, /Proyectos/, /Ciclos/, /Términos/]) {
       fireEvent.click(within(legend).getByRole('button', { name }))
     }
     expect(within(legend).getByRole('button', { name: /Prototipos/ })).toBeDisabled()

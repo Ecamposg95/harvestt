@@ -47,6 +47,9 @@ class Species(UUIDMixin, AuditMixin, Base):
     # {"gbif": {"id": "...", "source_id": "...", "url": "...", "match_type": "...", "verified_at": "..."}}
     external_ids: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    term_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("ontology_terms.id"), nullable=True, index=True
+    )
 
     cultivars: Mapped[list["Cultivar"]] = relationship(
         back_populates="species", lazy="selectin", order_by="Cultivar.name"
@@ -92,6 +95,15 @@ class TraitAssertion(UUIDMixin, AuditMixin, Base):
     # [{"source_id": "...", "locator": "p. 12"}]
     evidence_refs: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    variable_term_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("ontology_terms.id"), nullable=True, index=True
+    )
+    growth_stage_term_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("ontology_terms.id"), nullable=True, index=True
+    )
+    cultivation_system_term_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("ontology_terms.id"), nullable=True, index=True
+    )
 
 
 MEDIA_KINDS = ("photo", "render")

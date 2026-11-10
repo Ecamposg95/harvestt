@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-NodeType = Literal["species", "cultivar", "trait", "source", "project", "crop_cycle", "prototype"]
+NodeType = Literal["species", "cultivar", "trait", "source", "project", "crop_cycle", "prototype", "term"]
 Relation = Literal["designed_for", "related_to", "cites"]
 
 

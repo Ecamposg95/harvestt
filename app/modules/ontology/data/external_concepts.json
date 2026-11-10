@@ -1,0 +1,394 @@
+[
+  {
+    "scheme": "ncbi_taxon",
+    "external_id": "4210",
+    "label": "Asteraceae",
+    "url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=4210",
+    "verified_at": "2026-11-09",
+    "verified_via": "NCBI E-utilities esummary (db=taxonomy): scientificname coincide"
+  },
+  {
+    "scheme": "ncbi_taxon",
+    "external_id": "4235",
+    "label": "Lactuca",
+    "url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=4235",
+    "verified_at": "2026-11-09",
+    "verified_via": "NCBI E-utilities esummary (db=taxonomy): scientificname coincide"
+  },
+  {
+    "scheme": "ncbi_taxon",
+    "external_id": "4236",
+    "label": "Lactuca sativa",
+    "url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=4236",
+    "verified_at": "2026-11-09",
+    "verified_via": "NCBI E-utilities esummary (db=taxonomy): scientificname coincide"
+  },
+  {
+    "scheme": "ncbi_taxon",
+    "external_id": "4070",
+    "label": "Solanaceae",
+    "url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=4070",
+    "verified_at": "2026-11-09",
+    "verified_via": "NCBI E-utilities esummary (db=taxonomy): scientificname coincide"
+  },
+  {
+    "scheme": "ncbi_taxon",
+    "external_id": "4107",
+    "label": "Solanum",
+    "url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=4107",
+    "verified_at": "2026-11-09",
+    "verified_via": "NCBI E-utilities esummary (db=taxonomy): scientificname coincide"
+  },
+  {
+    "scheme": "ncbi_taxon",
+    "external_id": "4081",
+    "label": "Solanum lycopersicum",
+    "url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=4081",
+    "verified_at": "2026-11-09",
+    "verified_via": "NCBI E-utilities esummary (db=taxonomy): scientificname coincide"
+  },
+  {
+    "scheme": "ncbi_taxon",
+    "external_id": "4136",
+    "label": "Lamiaceae",
+    "url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=4136",
+    "verified_at": "2026-11-09",
+    "verified_via": "NCBI E-utilities esummary (db=taxonomy): scientificname coincide"
+  },
+  {
+    "scheme": "ncbi_taxon",
+    "external_id": "39173",
+    "label": "Ocimum",
+    "url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=39173",
+    "verified_at": "2026-11-09",
+    "verified_via": "NCBI E-utilities esummary (db=taxonomy): scientificname coincide"
+  },
+  {
+    "scheme": "ncbi_taxon",
+    "external_id": "39350",
+    "label": "Ocimum basilicum",
+    "url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=39350",
+    "verified_at": "2026-11-09",
+    "verified_via": "NCBI E-utilities esummary (db=taxonomy): scientificname coincide"
+  },
+  {
+    "scheme": "bbch",
+    "external_id": "0",
+    "label": "Germination / sprouting / bud development",
+    "url": "https://doi.org/10.5073/20180906-074619",
+    "verified_at": "2026-11-09",
+    "verified_via": "Verificación manual: Meier (ed.) 2018, BBCH Monograph, doi:10.5073/20180906-074619, p. 11, Tabla 1 «Principal growth stages»"
+  },
+  {
+    "scheme": "bbch",
+    "external_id": "1",
+    "label": "Leaf development (main shoot)",
+    "url": "https://doi.org/10.5073/20180906-074619",
+    "verified_at": "2026-11-09",
+    "verified_via": "Verificación manual: Meier (ed.) 2018, BBCH Monograph, doi:10.5073/20180906-074619, p. 11, Tabla 1 «Principal growth stages»"
+  },
+  {
+    "scheme": "bbch",
+    "external_id": "2",
+    "label": "Formation of side shoots / tillering",
+    "url": "https://doi.org/10.5073/20180906-074619",
+    "verified_at": "2026-11-09",
+    "verified_via": "Verificación manual: Meier (ed.) 2018, BBCH Monograph, doi:10.5073/20180906-074619, p. 11, Tabla 1 «Principal growth stages»"
+  },
+  {
+    "scheme": "bbch",
+    "external_id": "3",
+    "label": "Stem elongation or rosette growth / shoot development (main shoot)",
+    "url": "https://doi.org/10.5073/20180906-074619",
+    "verified_at": "2026-11-09",
+    "verified_via": "Verificación manual: Meier (ed.) 2018, BBCH Monograph, doi:10.5073/20180906-074619, p. 11, Tabla 1 «Principal growth stages»"
+  },
+  {
+    "scheme": "bbch",
+    "external_id": "4",
+    "label": "Development of harvestable vegetative plant parts or vegetatively propagated organs / booting (main shoot)",
+    "url": "https://doi.org/10.5073/20180906-074619",
+    "verified_at": "2026-11-09",
+    "verified_via": "Verificación manual: Meier (ed.) 2018, BBCH Monograph, doi:10.5073/20180906-074619, p. 11, Tabla 1 «Principal growth stages»"
+  },
+  {
+    "scheme": "bbch",
+    "external_id": "5",
+    "label": "Inflorescence emergence (main shoot) / heading",
+    "url": "https://doi.org/10.5073/20180906-074619",
+    "verified_at": "2026-11-09",
+    "verified_via": "Verificación manual: Meier (ed.) 2018, BBCH Monograph, doi:10.5073/20180906-074619, p. 11, Tabla 1 «Principal growth stages»"
+  },
+  {
+    "scheme": "bbch",
+    "external_id": "6",
+    "label": "Flowering (main shoot)",
+    "url": "https://doi.org/10.5073/20180906-074619",
+    "verified_at": "2026-11-09",
+    "verified_via": "Verificación manual: Meier (ed.) 2018, BBCH Monograph, doi:10.5073/20180906-074619, p. 11, Tabla 1 «Principal growth stages»"
+  },
+  {
+    "scheme": "bbch",
+    "external_id": "7",
+    "label": "Development of fruit",
+    "url": "https://doi.org/10.5073/20180906-074619",
+    "verified_at": "2026-11-09",
+    "verified_via": "Verificación manual: Meier (ed.) 2018, BBCH Monograph, doi:10.5073/20180906-074619, p. 11, Tabla 1 «Principal growth stages»"
+  },
+  {
+    "scheme": "bbch",
+    "external_id": "8",
+    "label": "Ripening or maturity of fruit and seed",
+    "url": "https://doi.org/10.5073/20180906-074619",
+    "verified_at": "2026-11-09",
+    "verified_via": "Verificación manual: Meier (ed.) 2018, BBCH Monograph, doi:10.5073/20180906-074619, p. 11, Tabla 1 «Principal growth stages»"
+  },
+  {
+    "scheme": "bbch",
+    "external_id": "9",
+    "label": "Senescence, beginning of dormancy",
+    "url": "https://doi.org/10.5073/20180906-074619",
+    "verified_at": "2026-11-09",
+    "verified_via": "Verificación manual: Meier (ed.) 2018, BBCH Monograph, doi:10.5073/20180906-074619, p. 11, Tabla 1 «Principal growth stages»"
+  },
+  {
+    "scheme": "po",
+    "external_id": "PO:0009008",
+    "label": "plant organ",
+    "url": "http://purl.obolibrary.org/obo/PO_0009008",
+    "verified_at": "2026-11-09",
+    "verified_via": "EBI OLS4 API /ontologies/po/terms?obo_id=: etiqueta coincide, no obsoleto"
+  },
+  {
+    "scheme": "po",
+    "external_id": "PO:0025034",
+    "label": "leaf",
+    "url": "http://purl.obolibrary.org/obo/PO_0025034",
+    "verified_at": "2026-11-09",
+    "verified_via": "EBI OLS4 API /ontologies/po/terms?obo_id=: etiqueta coincide, no obsoleto"
+  },
+  {
+    "scheme": "po",
+    "external_id": "PO:0009005",
+    "label": "root",
+    "url": "http://purl.obolibrary.org/obo/PO_0009005",
+    "verified_at": "2026-11-09",
+    "verified_via": "EBI OLS4 API /ontologies/po/terms?obo_id=: etiqueta coincide, no obsoleto"
+  },
+  {
+    "scheme": "po",
+    "external_id": "PO:0009047",
+    "label": "stem",
+    "url": "http://purl.obolibrary.org/obo/PO_0009047",
+    "verified_at": "2026-11-09",
+    "verified_via": "EBI OLS4 API /ontologies/po/terms?obo_id=: etiqueta coincide, no obsoleto"
+  },
+  {
+    "scheme": "po",
+    "external_id": "PO:0009046",
+    "label": "flower",
+    "url": "http://purl.obolibrary.org/obo/PO_0009046",
+    "verified_at": "2026-11-09",
+    "verified_via": "EBI OLS4 API /ontologies/po/terms?obo_id=: etiqueta coincide, no obsoleto"
+  },
+  {
+    "scheme": "po",
+    "external_id": "PO:0009001",
+    "label": "fruit",
+    "url": "http://purl.obolibrary.org/obo/PO_0009001",
+    "verified_at": "2026-11-09",
+    "verified_via": "EBI OLS4 API /ontologies/po/terms?obo_id=: etiqueta coincide, no obsoleto"
+  },
+  {
+    "scheme": "peco",
+    "external_id": "PECO:0007067",
+    "label": "hydroponic plant culture media exposure",
+    "url": "http://purl.obolibrary.org/obo/PECO_0007067",
+    "verified_at": "2026-11-09",
+    "verified_via": "EBI OLS4 API /ontologies/peco/terms?obo_id=: etiqueta coincide, no obsoleto"
+  },
+  {
+    "scheme": "peco",
+    "external_id": "PECO:0001073",
+    "label": "aeroponic plant growth media exposure",
+    "url": "http://purl.obolibrary.org/obo/PECO_0001073",
+    "verified_at": "2026-11-09",
+    "verified_via": "EBI OLS4 API /ontologies/peco/terms?obo_id=: etiqueta coincide, no obsoleto"
+  },
+  {
+    "scheme": "envo",
+    "external_id": "ENVO:00001998",
+    "label": "soil",
+    "url": "http://purl.obolibrary.org/obo/ENVO_00001998",
+    "verified_at": "2026-11-09",
+    "verified_via": "EBI OLS4 API /ontologies/envo/terms?obo_id=: etiqueta coincide, no obsoleto"
+  },
+  {
+    "scheme": "envo",
+    "external_id": "ENVO:03600087",
+    "label": "greenhouse",
+    "url": "http://purl.obolibrary.org/obo/ENVO_03600087",
+    "verified_at": "2026-11-09",
+    "verified_via": "EBI OLS4 API /ontologies/envo/terms?obo_id=: etiqueta coincide, no obsoleto"
+  },
+  {
+    "scheme": "agrovoc",
+    "external_id": "c_230",
+    "label": "air temperature",
+    "url": "http://aims.fao.org/aos/agrovoc/c_230",
+    "verified_at": "2026-11-09",
+    "verified_via": "AGROVOC Skosmos REST /agrovoc/label (lang=en): prefLabel coincide"
+  },
+  {
+    "scheme": "agrovoc",
+    "external_id": "c_6496",
+    "label": "relative humidity",
+    "url": "http://aims.fao.org/aos/agrovoc/c_6496",
+    "verified_at": "2026-11-09",
+    "verified_via": "AGROVOC Skosmos REST /agrovoc/label (lang=en): prefLabel coincide"
+  },
+  {
+    "scheme": "agrovoc",
+    "external_id": "c_b4422dc5",
+    "label": "photoperiod",
+    "url": "http://aims.fao.org/aos/agrovoc/c_b4422dc5",
+    "verified_at": "2026-11-09",
+    "verified_via": "AGROVOC Skosmos REST /agrovoc/label (lang=en): prefLabel coincide"
+  },
+  {
+    "scheme": "agrovoc",
+    "external_id": "c_5753",
+    "label": "pH",
+    "url": "http://aims.fao.org/aos/agrovoc/c_5753",
+    "verified_at": "2026-11-09",
+    "verified_via": "AGROVOC Skosmos REST /agrovoc/label (lang=en): prefLabel coincide"
+  },
+  {
+    "scheme": "agrovoc",
+    "external_id": "c_3734",
+    "label": "hydroponics",
+    "url": "http://aims.fao.org/aos/agrovoc/c_3734",
+    "verified_at": "2026-11-09",
+    "verified_via": "AGROVOC Skosmos REST /agrovoc/label (lang=en): prefLabel coincide"
+  },
+  {
+    "scheme": "agrovoc",
+    "external_id": "c_34200",
+    "label": "aeroponics",
+    "url": "http://aims.fao.org/aos/agrovoc/c_34200",
+    "verified_at": "2026-11-09",
+    "verified_via": "AGROVOC Skosmos REST /agrovoc/label (lang=en): prefLabel coincide"
+  },
+  {
+    "scheme": "agrovoc",
+    "external_id": "c_3393",
+    "label": "growing media",
+    "url": "http://aims.fao.org/aos/agrovoc/c_3393",
+    "verified_at": "2026-11-09",
+    "verified_via": "AGROVOC Skosmos REST /agrovoc/label (lang=en): prefLabel coincide"
+  },
+  {
+    "scheme": "agrovoc",
+    "external_id": "c_7156",
+    "label": "soil",
+    "url": "http://aims.fao.org/aos/agrovoc/c_7156",
+    "verified_at": "2026-11-09",
+    "verified_via": "AGROVOC Skosmos REST /agrovoc/label (lang=en): prefLabel coincide"
+  },
+  {
+    "scheme": "agrovoc",
+    "external_id": "c_1669",
+    "label": "climatic zones",
+    "url": "http://aims.fao.org/aos/agrovoc/c_1669",
+    "verified_at": "2026-11-09",
+    "verified_via": "AGROVOC Skosmos REST /agrovoc/label (lang=en): prefLabel coincide"
+  },
+  {
+    "scheme": "agrovoc",
+    "external_id": "c_3379",
+    "label": "greenhouses",
+    "url": "http://aims.fao.org/aos/agrovoc/c_3379",
+    "verified_at": "2026-11-09",
+    "verified_via": "AGROVOC Skosmos REST /agrovoc/label (lang=en): prefLabel coincide"
+  },
+  {
+    "scheme": "agrovoc",
+    "external_id": "c_28279",
+    "label": "sensors",
+    "url": "http://aims.fao.org/aos/agrovoc/c_28279",
+    "verified_at": "2026-11-09",
+    "verified_via": "AGROVOC Skosmos REST /agrovoc/label (lang=en): prefLabel coincide"
+  },
+  {
+    "scheme": "sosa",
+    "external_id": "http://www.w3.org/ns/sosa/Platform",
+    "label": "Platform",
+    "url": "http://www.w3.org/ns/sosa/Platform",
+    "verified_at": "2026-11-09",
+    "verified_via": "Documento Turtle de SOSA (W3C, https://www.w3.org/ns/sosa/): IRI y rdfs:label presentes"
+  },
+  {
+    "scheme": "sosa",
+    "external_id": "http://www.w3.org/ns/sosa/Sensor",
+    "label": "Sensor",
+    "url": "http://www.w3.org/ns/sosa/Sensor",
+    "verified_at": "2026-11-09",
+    "verified_via": "Documento Turtle de SOSA (W3C, https://www.w3.org/ns/sosa/): IRI y rdfs:label presentes"
+  },
+  {
+    "scheme": "sosa",
+    "external_id": "http://www.w3.org/ns/sosa/Observation",
+    "label": "Observation",
+    "url": "http://www.w3.org/ns/sosa/Observation",
+    "verified_at": "2026-11-09",
+    "verified_via": "Documento Turtle de SOSA (W3C, https://www.w3.org/ns/sosa/): IRI y rdfs:label presentes"
+  },
+  {
+    "scheme": "ssn",
+    "external_id": "http://www.w3.org/ns/ssn/System",
+    "label": "System",
+    "url": "http://www.w3.org/ns/ssn/System",
+    "verified_at": "2026-11-09",
+    "verified_via": "Documento Turtle de SSN (W3C, https://www.w3.org/ns/ssn/): IRI y rdfs:label presentes"
+  },
+  {
+    "scheme": "geosparql",
+    "external_id": "http://www.opengis.net/ont/geosparql#Feature",
+    "label": "Feature",
+    "url": "http://www.opengis.net/ont/geosparql#Feature",
+    "verified_at": "2026-11-09",
+    "verified_via": "Documento de GeoSPARQL (OGC, http://www.opengis.net/ont/geosparql): IRI y etiqueta presentes"
+  },
+  {
+    "scheme": "ucum",
+    "external_id": "Cel",
+    "label": "degree Celsius",
+    "url": "https://ucum.org/ucum",
+    "verified_at": "2026-11-09",
+    "verified_via": "Tabla de unidades de la especificación UCUM (https://ucum.org/ucum): nombre y código c/s coinciden"
+  },
+  {
+    "scheme": "ucum",
+    "external_id": "%",
+    "label": "percent",
+    "url": "https://ucum.org/ucum",
+    "verified_at": "2026-11-09",
+    "verified_via": "Tabla de unidades de la especificación UCUM (https://ucum.org/ucum): nombre y código c/s coinciden"
+  },
+  {
+    "scheme": "ucum",
+    "external_id": "h",
+    "label": "hour",
+    "url": "https://ucum.org/ucum",
+    "verified_at": "2026-11-09",
+    "verified_via": "Tabla de unidades de la especificación UCUM (https://ucum.org/ucum): nombre y código c/s coinciden"
+  },
+  {
+    "scheme": "ucum",
+    "external_id": "[pH]",
+    "label": "pH",
+    "url": "https://ucum.org/ucum",
+    "verified_at": "2026-11-09",
+    "verified_via": "Tabla de unidades de la especificación UCUM (https://ucum.org/ucum): nombre y código c/s coinciden"
+  }
+]

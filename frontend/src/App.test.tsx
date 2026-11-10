@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, expect, it, vi } from 'vitest'
 import { graphApi } from '@/features/graph/api'
+import { ontologyApi } from '@/features/ontology/api'
 import { useAuth } from '@/store/auth'
 import App from './App'
 
@@ -35,4 +36,21 @@ it('carga /app/graph desde su chunk perezoso', async () => {
     await screen.findByRole('heading', { level: 1, name: 'Grafo de conocimiento' }, { timeout: 5000 }),
   ).toBeInTheDocument()
   expect(await screen.findByText('Aún no hay nodos')).toBeInTheDocument()
+})
+
+it('monta /app/ontologia', async () => {
+  vi.spyOn(ontologyApi, 'list').mockResolvedValue([])
+  vi.spyOn(ontologyApi, 'releases').mockResolvedValue([])
+  useAuth.setState({
+    token: 't',
+    user: { id: 'u1', email: 'ana@alfa.test', full_name: 'Ana', is_superadmin: false },
+    memberships: [],
+  })
+  render(
+    <MemoryRouter initialEntries={['/app/ontologia']}>
+      <App />
+    </MemoryRouter>,
+  )
+  expect(await screen.findByRole('heading', { level: 1, name: 'Ontología HarvestT' })).toBeInTheDocument()
+  expect(await screen.findByText('Elige un término')).toBeInTheDocument()
 })

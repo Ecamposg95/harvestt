@@ -1,6 +1,6 @@
 # Arquitectura de HarvestT Cortex
 
-**Versión del documento:** 1.0 · **Fecha:** 2026-11-07 · **Estado del sistema:** hito visual V1–V6 y M1 (Visión) en producción · **Migración vigente en producción:** `0008_vision`
+**Versión del documento:** 1.0 · **Fecha:** 2026-11-07 · **Estado del sistema:** hito visual V1–V6 y M1 (Visión) en producción · **Migración vigente en producción:** `0008_vision` (la rama M2 añade `0009_ontology`, pendiente de fusión)
 
 ## 1. Propósito y alcance
 
@@ -78,12 +78,20 @@ Las versiones están fijadas en `requirements.txt` y `frontend/package.json`. Un
 | `graph` | GraphEdge | `GET /graph` (foco, profundidad, tipos; máximo 300 nodos) |
 | `home` | — | `/home` (actividad y resumen del inicio) |
 | `vision` | Recognition, InboundRequest | `GET /public/vision`, `POST /public/requests`; superadministrador: `/admin/recognitions`, `/admin/requests` |
+| `ontology` (separable) | OntologyTerm, TermEquivalence, ExternalConcept, OntologyRelease | `/ontology/terms` (lista, ficha, propuesta, edición de la propia propuesta), `/ontology/suggest`, `/ontology/releases`; superadministrador: `/ontology/review-queue`, `/ontology/terms/{id}/review`, `/obsolete`, `/equivalences`; públicos: `/public/ontology/export.ttl`, `/public/ontology/export.json`, `/public/ontology/terms/{hvt_id}` |
+| `term_links` | — (columnas `*_term_id` en catálogo y proyectos) | `GET /ontology/terms/{id}/usage` |
 
 La especificación OpenAPI completa se publica en `/api/docs`.
 
 ### 5.2.1 Módulo `vision` (M1)
 
 `GET /public/vision` devuelve cifras con origen y razón; una cifra sin dato es `null` y se muestra «pronto» o «Sin datos suficientes», nunca 0 por falta de dato. «Nodos operando» cuenta proyectos con un dispositivo no simulado con lectura no simulada en los últimos 7 días (ventana acotada en SQL). Las solicitudes públicas (`POST /public/requests`) llevan un campo trampa anti-bots, exigen `lat` y `lon` juntos (422 en caso contrario) y redondean las coordenadas a 1 decimal antes de guardarse. Aprobar una solicitud solo cambia su estado (sin invitación por correo). Configuración: `PUBLIC_ORIGIN_LABEL`, `PUBLIC_ORIGIN_LAT`, `PUBLIC_ORIGIN_LON`. El globo es un chunk perezoso de three.js con mapa 2D sin WebGL.
+
+### 5.2.2 Módulos `ontology` y `term_links` (M2, en rama)
+
+`ontology` es un módulo separable: importa solo de `app.core` y `app.modules.identity`, nunca de catálogo, proyectos, grafo, telemetría ni visión, para poder extraerse como servicio propio. Los términos son globales (sin organización) y pertenecen a un dominio (`organism`, `plant`, `trait`, `environment`, `place`, `node`). Ciclo de vida: `proposed → in_review → published | rejected`; un término publicado solo puede pasar a `obsolete`, con `replaced_by` apuntando a otro publicado. El ID permanente `HVT:` + 6 dígitos se asigna al publicar, dentro de un candado de publicación que serializa las versiones (`with_for_update()`), y nunca se reutiliza. Cada publicación, obsolescencia o cambio de equivalencias de un término publicado crea una versión nueva (`OntologyRelease`, entero que empieza en 1 con la semilla). Proponer requiere cuenta; revisar, obsoletar y editar equivalencias de un publicado es solo de superadministrador, con nota obligatoria de 3 a 500 caracteres. La etiqueta se compara normalizada (NFKD sin acentos, `casefold`, espacios colapsados) por dominio. Las equivalencias (`exact`, `close`, `broad` → `skos:exactMatch`, `skos:closeMatch`, `skos:broadMatch`) apuntan a `ontology_external_concepts`; la sugerencia es una búsqueda en esa tabla, sin LLM. La semilla de 45 términos se publica al arrancar de forma idempotente. La exportación pública (Turtle con `owl:versionInfo`, y JSON) lleva licencia CC-BY 4.0 y construye las IRI con `ONTOLOGY_BASE_IRI`.
+
+`term_links` es el puente producto → ontología. Añade columnas `*_term_id` (`species.term_id`, `trait_assertions.variable_term_id`, `growth_stage_term_id`, `cultivation_system_term_id`, `projects.system_term_id`, `crop_cycles.stage_term_id`) y, al final del seed de arranque, ejecuta `relink`: llena solo las columnas en `NULL` cuando el texto libre coincide exactamente, tras normalizar, con la etiqueta o un alias de un único término publicado del dominio. Sin coincidencia, o con coincidencia ambigua, queda `NULL`; el texto original no se toca. El grafo (`graph`) añade nodos `term` con aristas `subclass_of`, `replaced_by` y `classified_as`, y la capa «knowledge» de `vision` informa la versión publicada y el número de términos.
 
 ### 5.3 Simulación y telemetría
 
@@ -101,7 +109,7 @@ Las especies no almacenan valores universales («pH ideal»). Cada rasgo es una 
 frontend/src/
 ├── api/          cliente HTTP
 ├── components/   Sidebar, Logo, ui/ (OriginBadge, StatTile, Callout, gráficas, estados)
-├── features/     catalog · projects · operations · studio · impact · graph · prototypes · three · home
+├── features/     catalog · projects · operations · studio · impact · graph · prototypes · three · home · vision · ontology
 ├── layouts/      AppLayout (sidebar plegable) · PublicLayout
 ├── pages/        Login · NotFound
 └── store/        auth · tema · sidebar (Zustand)
@@ -120,6 +128,7 @@ frontend/src/
 | `/app/graph` | Grafo de conocimiento |
 | `/vision` | Página pública Visión: cifras, globo, diagrama del ecosistema, recorrido por capas, solicitudes |
 | `/app/solicitudes` | Bandeja de solicitudes (solo superadministrador) |
+| `/app/ontologia` | Ontología: árbol por dominio, buscador y ficha de término; proponer con sugerencias de equivalencias; «Mis propuestas»; bandeja de revisión (solo superadministrador) |
 
 Sistema de diseño «Salvia cristal», con modo claro y oscuro y diseño adaptable desde 375 px. three.js y d3-force se cargan en *chunks* perezosos para no penalizar la carga inicial.
 
@@ -135,6 +144,7 @@ Sistema de diseño «Salvia cristal», con modo claro y oscuro y diseño adaptab
 | `0006_studio_layout_species_media` | Zonas y plantas del Studio; medios de especie |
 | `0007_graph_edges` | Aristas explícitas del grafo |
 | `0008_vision` | Reconocimientos y solicitudes entrantes (módulo `vision`, M1) |
+| `0009_ontology` | Términos, equivalencias, conceptos externos y versiones de la ontología; columnas `*_term_id` en catálogo y proyectos (M2, en rama, sin aplicar en producción) |
 
 Toda migración se verifica en PostgreSQL 17 con el ciclo `upgrade → check → downgrade → upgrade → check` sin diferencias.
 
