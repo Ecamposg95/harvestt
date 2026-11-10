@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
+from app.core.config import settings
+from app.core.errors import not_found
 from app.core.deps import get_current_user, require_superadmin
 from app.modules.identity.models import User
+from app.modules.ontology import export as exports
 from app.modules.ontology import review as reviews
 from app.modules.ontology import service
 from app.modules.ontology.schemas import (
@@ -83,3 +86,30 @@ def releases(user: User = Depends(get_current_user), db: Session = Depends(get_d
 @router.get("/review-queue", response_model=list[TermSummary])
 def review_queue(user: User = Depends(require_superadmin), db: Session = Depends(get_db)):
     return reviews.review_queue(db)
+
+
+@public_router.get("/export.ttl")
+def export_turtle(db: Session = Depends(get_db)):
+    version, terms, equivalences, creators = exports.build(db)
+    body = exports.to_turtle(version, terms, settings.ontology_base_iri, equivalences, creators)
+    return Response(
+        body,
+        media_type="text/turtle; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="harvestt-ontologia-v{version}.ttl"'},
+    )
+
+
+@public_router.get("/export.json")
+def export_json(db: Session = Depends(get_db)):
+    version, terms, equivalences, creators = exports.build(db)
+    return exports.to_json(version, terms, equivalences, creators)
+
+
+@public_router.get("/terms/{hvt_id}", response_model=TermDetail)
+def public_term(hvt_id: str, db: Session = Depends(get_db)):
+    term = exports.public_term(db, hvt_id)
+    if term is None:
+        raise not_found("término")
+    detail = service.term_detail(db, term)
+    detail.review_note = None  # la razón de revisión es interna
+    return detail

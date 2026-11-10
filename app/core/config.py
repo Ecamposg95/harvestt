@@ -50,6 +50,11 @@ class Settings:
     s3_secret_access_key: str = field(default_factory=lambda: _env("S3_SECRET_ACCESS_KEY"))
     # Railway buckets usan virtual-host; MinIO local suele requerir "path"
     s3_addressing_style: str = field(default_factory=lambda: _env("S3_ADDRESSING_STYLE", "virtual"))
+    ontology_base_iri: str = field(
+        default_factory=lambda: _env(
+            "ONTOLOGY_BASE_IRI", "https://harvestt-production.up.railway.app/api/v1/public/ontology/terms/"
+        )
+    )
 
     @property
     def is_development(self) -> bool:

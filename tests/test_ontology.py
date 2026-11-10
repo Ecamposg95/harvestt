@@ -533,3 +533,82 @@ def test_startup_seeds_ontology_after_catalog():
     from scripts.seed import SEEDS
 
     assert SEEDS.index(ontology_seed) == SEEDS.index(catalog_seed) + 1
+
+
+# ---- Tarea 6: exportación pública y resolución por ID ----
+from app.modules.ontology import export as ontology_export  # noqa: E402
+
+PUB = "/api/v1/public/ontology"
+
+
+def _vocab(db):
+    ontology_seed.seed(db)
+    db.commit()
+
+
+def _extra(db, status, label, **over):
+    over.setdefault("definition", "Definición de prueba")
+    t = OntologyTerm(domain="trait", label=label, label_key=normalize_label(label), status=status, **over)
+    db.add(t)
+    db.commit()
+    return t
+
+
+def test_export_turtle_shape(client, db):
+    _vocab(db)
+    _extra(db, "proposed", "Término propuesto secreto")
+    res = client.get(f"{PUB}/export.ttl")
+    assert res.status_code == 200
+    assert res.headers["content-type"] == "text/turtle; charset=utf-8"
+    assert res.headers["content-disposition"] == 'attachment; filename="harvestt-ontologia-v1.ttl"'
+    ttl = res.text
+    assert 'owl:versionInfo "1"' in ttl
+    assert "<https://creativecommons.org/licenses/by/4.0/>" in ttl
+    assert 'skos:notation "HVT:000001"' in ttl
+    assert "skos:exactMatch" in ttl
+    assert 'dcterms:creator "Equipo HarvestT"' in ttl
+    assert "secreto" not in ttl
+
+
+def test_turtle_escapes_literals(db):
+    t = _extra(db, "published", "Con comillas", hvt_id="HVT:000999",
+               definition='Dice "hola"\ny \\ adiós\r')
+    ttl = ontology_export.to_turtle(1, [t], "https://x.test/terms/")
+    assert 'skos:definition "Dice \\"hola\\"\\ny \\\\ adiós\\r"@es' in ttl
+    assert "<https://x.test/terms/HVT_000999>" in ttl
+
+
+def test_export_json_includes_obsolete_with_replacement(client, db):
+    _vocab(db)
+    new = _extra(db, "published", "Nuevo", hvt_id="HVT:000998")
+    old = _extra(db, "obsolete", "Viejo", hvt_id="HVT:000997", replaced_by_id=new.id)
+    _extra(db, "published", "Borrado", hvt_id="HVT:000996", deleted_at=old.created_at)
+    body = client.get(f"{PUB}/export.json").json()
+    assert body["version"] == 1 and body["license"] == "https://creativecommons.org/licenses/by/4.0/"
+    by_id = {t["hvt_id"]: t for t in body["terms"]}
+    assert "HVT:000996" not in by_id
+    assert by_id["HVT:000997"]["status"] == "obsolete"
+    assert by_id["HVT:000997"]["replaced_by"] == by_id["HVT:000998"]["iri"]
+    assert by_id["HVT:000001"]["equivalences"][0]["scheme"] == "ncbi_taxon"
+    assert by_id["HVT:000001"]["creator"] == "Equipo HarvestT"
+    ttl = client.get(f"{PUB}/export.ttl").text
+    assert "dcterms:isReplacedBy" in ttl and "owl:deprecated true" in ttl
+
+
+def test_public_term_resolution(client, db):
+    _vocab(db)
+    rejected = _extra(db, "rejected", "Rechazado", hvt_id="HVT:000995")
+    for ident in ("HVT_000001", "HVT:000001"):
+        res = client.get(f"{PUB}/terms/{ident}")
+        assert res.status_code == 200, ident
+        assert res.json()["hvt_id"] == "HVT:000001"
+    assert client.get(f"{PUB}/terms/HVT_000995").status_code == 404
+    assert client.get(f"{PUB}/terms/HVT_999999").status_code == 404
+    assert client.get(f"{PUB}/terms/{rejected.id}").status_code == 404
+
+
+def test_iri_ref_never_emits_raw_unsafe_characters():
+    out = ontology_export._iri_ref('http://x.test/a b<c>d"e{f}g|h\\i^j`k')
+    inner = out[1:-1]
+    assert out.startswith("<") and out.endswith(">")
+    assert not any(ch in inner for ch in '<>" {}|\\^`')

@@ -51,6 +51,12 @@ def _summary(term: OntologyTerm | None) -> TermSummary | None:
     return TermSummary.model_validate(term) if term else None
 
 
+def proposer_name(db: Session, term: OntologyTerm) -> str:
+    """Nombre de crédito: nunca el correo. Semilla = equipo; sin nombre = «Colaborador»."""
+    proposer = db.get(User, term.proposed_by) if term.proposed_by else None
+    return (proposer.full_name or "Colaborador") if proposer else TEAM_NAME
+
+
 def term_detail(db: Session, term: OntologyTerm) -> TermDetail:
     equivalences = db.scalars(
         select(TermEquivalence).where(TermEquivalence.term_id == term.id, TermEquivalence.deleted_at.is_(None))
@@ -63,7 +69,6 @@ def term_detail(db: Session, term: OntologyTerm) -> TermDetail:
             OntologyTerm.status.in_(("published", "obsolete")),
         ).order_by(OntologyTerm.label_key)
     ).all()
-    proposer = db.get(User, term.proposed_by) if term.proposed_by else None
     base = TermSummary.model_validate(term).model_dump()
     return TermDetail(
         **base,
@@ -73,7 +78,7 @@ def term_detail(db: Session, term: OntologyTerm) -> TermDetail:
         parent=_summary(db.get(OntologyTerm, term.parent_id) if term.parent_id else None),
         children=[_summary(c) for c in children],
         replaced_by=_summary(db.get(OntologyTerm, term.replaced_by_id) if term.replaced_by_id else None),
-        proposed_by_name=(proposer.full_name or "Colaborador") if proposer else TEAM_NAME,
+        proposed_by_name=proposer_name(db, term),
         review_note=term.review_note,
         reviewed_at=term.reviewed_at,
         published_in_version=term.published_in_version,
