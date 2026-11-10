@@ -1,0 +1,859 @@
+[
+  {
+    "seed_key": "asteraceae",
+    "domain": "organism",
+    "parent_seed_key": null,
+    "label": "Asteraceae",
+    "definition": "Familia de plantas con flores agrupadas en cabezuelas; incluye la lechuga.",
+    "aliases": [],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "ncbi_taxon",
+        "external_id": "4210",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "lactuca",
+    "domain": "organism",
+    "parent_seed_key": "asteraceae",
+    "label": "Lactuca",
+    "definition": "Género de plantas de la familia Asteraceae.",
+    "aliases": [],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "ncbi_taxon",
+        "external_id": "4235",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "lactuca_sativa",
+    "domain": "organism",
+    "parent_seed_key": "lactuca",
+    "label": "Lactuca sativa L.",
+    "definition": "Especie de hortaliza de hoja, la lechuga cultivada.",
+    "aliases": [
+      "Lactuca sativa"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "ncbi_taxon",
+        "external_id": "4236",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "solanaceae",
+    "domain": "organism",
+    "parent_seed_key": null,
+    "label": "Solanaceae",
+    "definition": "Familia de plantas a la que pertenecen el tomate, el chile y la papa.",
+    "aliases": [],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "ncbi_taxon",
+        "external_id": "4070",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "solanum",
+    "domain": "organism",
+    "parent_seed_key": "solanaceae",
+    "label": "Solanum",
+    "definition": "Género de plantas de la familia Solanaceae.",
+    "aliases": [],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "ncbi_taxon",
+        "external_id": "4107",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "solanum_lycopersicum",
+    "domain": "organism",
+    "parent_seed_key": "solanum",
+    "label": "Solanum lycopersicum L.",
+    "definition": "Especie de la que procede el tomate cultivado.",
+    "aliases": [
+      "Solanum lycopersicum"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "ncbi_taxon",
+        "external_id": "4081",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "lamiaceae",
+    "domain": "organism",
+    "parent_seed_key": null,
+    "label": "Lamiaceae",
+    "definition": "Familia de plantas aromáticas de tallo a menudo cuadrangular; incluye la albahaca.",
+    "aliases": [],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "ncbi_taxon",
+        "external_id": "4136",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "ocimum",
+    "domain": "organism",
+    "parent_seed_key": "lamiaceae",
+    "label": "Ocimum",
+    "definition": "Género de plantas de la familia Lamiaceae.",
+    "aliases": [],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "ncbi_taxon",
+        "external_id": "39173",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "ocimum_basilicum",
+    "domain": "organism",
+    "parent_seed_key": "ocimum",
+    "label": "Ocimum basilicum L.",
+    "definition": "Especie aromática cultivada como albahaca.",
+    "aliases": [
+      "Ocimum basilicum"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "ncbi_taxon",
+        "external_id": "39350",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "bbch_stage",
+    "domain": "plant",
+    "parent_seed_key": null,
+    "label": "Estadio principal de crecimiento (BBCH)",
+    "definition": "Cada una de las diez fases largas y reconocibles en que la escala BBCH divide el ciclo de una planta, numeradas del 0 al 9.",
+    "aliases": [
+      "estadio BBCH",
+      "etapa fenológica",
+      "growth stage"
+    ],
+    "unit": null,
+    "equivalences": []
+  },
+  {
+    "seed_key": "bbch_0",
+    "domain": "plant",
+    "parent_seed_key": "bbch_stage",
+    "label": "Germinación y brotación",
+    "definition": "Desde la semilla o yema en reposo hasta que la plántula o el brote emergen.",
+    "aliases": [
+      "germinación",
+      "germination",
+      "brotación",
+      "sprouting",
+      "BBCH 0"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "bbch",
+        "external_id": "0",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "bbch_1",
+    "domain": "plant",
+    "parent_seed_key": "bbch_stage",
+    "label": "Desarrollo de hojas",
+    "definition": "Despliegue sucesivo de las hojas del tallo principal.",
+    "aliases": [
+      "desarrollo de hojas",
+      "leaf development",
+      "BBCH 1"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "bbch",
+        "external_id": "1",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "bbch_2",
+    "domain": "plant",
+    "parent_seed_key": "bbch_stage",
+    "label": "Formación de brotes laterales",
+    "definition": "Aparición de brotes laterales o macollos a partir del tallo principal.",
+    "aliases": [
+      "brotes laterales",
+      "macollamiento",
+      "side shoots",
+      "tillering",
+      "BBCH 2"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "bbch",
+        "external_id": "2",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "bbch_3",
+    "domain": "plant",
+    "parent_seed_key": "bbch_stage",
+    "label": "Crecimiento del tallo o de la roseta",
+    "definition": "Alargamiento del tallo principal o crecimiento de la roseta de hojas.",
+    "aliases": [
+      "elongación del tallo",
+      "crecimiento de la roseta",
+      "stem elongation",
+      "rosette growth",
+      "BBCH 3"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "bbch",
+        "external_id": "3",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "bbch_4",
+    "domain": "plant",
+    "parent_seed_key": "bbch_stage",
+    "label": "Desarrollo de partes vegetativas cosechables",
+    "definition": "Crecimiento de los órganos vegetativos que se cosechan, como la cabeza de la lechuga, o de los órganos de propagación vegetativa.",
+    "aliases": [
+      "partes vegetativas cosechables",
+      "harvestable vegetative plant parts",
+      "BBCH 4"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "bbch",
+        "external_id": "4",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "bbch_5",
+    "domain": "plant",
+    "parent_seed_key": "bbch_stage",
+    "label": "Aparición de la inflorescencia",
+    "definition": "Emergencia de la inflorescencia o de los botones florales del tallo principal.",
+    "aliases": [
+      "inflorescencia",
+      "espigado",
+      "inflorescence emergence",
+      "heading",
+      "BBCH 5"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "bbch",
+        "external_id": "5",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "bbch_6",
+    "domain": "plant",
+    "parent_seed_key": "bbch_stage",
+    "label": "Floración",
+    "definition": "Periodo en que las flores del tallo principal se abren.",
+    "aliases": [
+      "floración",
+      "flowering",
+      "antesis",
+      "BBCH 6"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "bbch",
+        "external_id": "6",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "bbch_7",
+    "domain": "plant",
+    "parent_seed_key": "bbch_stage",
+    "label": "Desarrollo del fruto",
+    "definition": "Crecimiento del fruto tras la floración.",
+    "aliases": [
+      "desarrollo del fruto",
+      "fructificación",
+      "development of fruit",
+      "fruit development",
+      "BBCH 7"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "bbch",
+        "external_id": "7",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "bbch_8",
+    "domain": "plant",
+    "parent_seed_key": "bbch_stage",
+    "label": "Maduración del fruto y la semilla",
+    "definition": "El fruto y la semilla alcanzan su madurez.",
+    "aliases": [
+      "maduración",
+      "madurez",
+      "ripening",
+      "maturity",
+      "BBCH 8"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "bbch",
+        "external_id": "8",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "bbch_9",
+    "domain": "plant",
+    "parent_seed_key": "bbch_stage",
+    "label": "Senescencia",
+    "definition": "Envejecimiento y muerte de la planta o de sus partes aéreas, o inicio del reposo.",
+    "aliases": [
+      "senescencia",
+      "senescence",
+      "dormancia",
+      "dormancy",
+      "BBCH 9"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "bbch",
+        "external_id": "9",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "plant_organ",
+    "domain": "plant",
+    "parent_seed_key": null,
+    "label": "Órgano de la planta",
+    "definition": "Parte de la planta con forma y función propias, como la hoja, la raíz o el fruto.",
+    "aliases": [
+      "órgano",
+      "plant organ"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "po",
+        "external_id": "PO:0009008",
+        "match": "close"
+      }
+    ]
+  },
+  {
+    "seed_key": "leaf",
+    "domain": "plant",
+    "parent_seed_key": "plant_organ",
+    "label": "Hoja",
+    "definition": "Órgano lateral, generalmente plano, donde ocurre la mayor parte de la fotosíntesis.",
+    "aliases": [
+      "hojas",
+      "leaf",
+      "leaves"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "po",
+        "external_id": "PO:0025034",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "root",
+    "domain": "plant",
+    "parent_seed_key": "plant_organ",
+    "label": "Raíz",
+    "definition": "Órgano que fija la planta y absorbe agua y nutrientes del medio.",
+    "aliases": [
+      "raíces",
+      "root",
+      "roots"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "po",
+        "external_id": "PO:0009005",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "stem",
+    "domain": "plant",
+    "parent_seed_key": "plant_organ",
+    "label": "Tallo",
+    "definition": "Eje de la planta que sostiene hojas, flores y frutos y conduce agua y savia.",
+    "aliases": [
+      "tallos",
+      "stem",
+      "stems"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "po",
+        "external_id": "PO:0009047",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "flower",
+    "domain": "plant",
+    "parent_seed_key": "plant_organ",
+    "label": "Flor",
+    "definition": "Estructura reproductiva de las plantas con flores.",
+    "aliases": [
+      "flores",
+      "flower",
+      "flowers"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "po",
+        "external_id": "PO:0009046",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "fruit",
+    "domain": "plant",
+    "parent_seed_key": "plant_organ",
+    "label": "Fruto",
+    "definition": "Estructura que se forma a partir de la flor y contiene las semillas.",
+    "aliases": [
+      "frutos",
+      "fruit",
+      "fruits"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "po",
+        "external_id": "PO:0009001",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "air_temperature",
+    "domain": "trait",
+    "parent_seed_key": null,
+    "label": "Temperatura del aire",
+    "definition": "Temperatura del aire que rodea a las plantas, medida a la sombra.",
+    "aliases": [
+      "air_temperature",
+      "air temperature"
+    ],
+    "unit": "Cel",
+    "equivalences": [
+      {
+        "scheme": "agrovoc",
+        "external_id": "c_230",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "relative_humidity",
+    "domain": "trait",
+    "parent_seed_key": null,
+    "label": "Humedad relativa",
+    "definition": "Cantidad de vapor de agua en el aire respecto del máximo que admitiría a la misma temperatura, en porcentaje.",
+    "aliases": [
+      "relative_humidity",
+      "relative humidity"
+    ],
+    "unit": "%",
+    "equivalences": [
+      {
+        "scheme": "agrovoc",
+        "external_id": "c_6496",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "photoperiod",
+    "domain": "trait",
+    "parent_seed_key": null,
+    "label": "Fotoperiodo",
+    "definition": "Número de horas de luz que recibe la planta en un día.",
+    "aliases": [
+      "photoperiod",
+      "fotoperíodo"
+    ],
+    "unit": "h",
+    "equivalences": [
+      {
+        "scheme": "agrovoc",
+        "external_id": "c_b4422dc5",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "ph",
+    "domain": "trait",
+    "parent_seed_key": null,
+    "label": "pH",
+    "definition": "Medida de acidez o alcalinidad de la solución nutritiva, el sustrato o el suelo.",
+    "aliases": [
+      "ph",
+      "potencial de hidrógeno"
+    ],
+    "unit": "[pH]",
+    "equivalences": [
+      {
+        "scheme": "agrovoc",
+        "external_id": "c_5753",
+        "match": "exact"
+      }
+    ]
+  },
+  {
+    "seed_key": "cultivation_system",
+    "domain": "environment",
+    "parent_seed_key": null,
+    "label": "Sistema de cultivo",
+    "definition": "Medio y forma en que se sostienen y nutren las raíces del cultivo.",
+    "aliases": [
+      "cultivation system",
+      "growing system"
+    ],
+    "unit": null,
+    "equivalences": []
+  },
+  {
+    "seed_key": "hydroponic",
+    "domain": "environment",
+    "parent_seed_key": "cultivation_system",
+    "label": "Hidroponía",
+    "definition": "Cultivo con las raíces en una solución nutritiva, sin suelo.",
+    "aliases": [
+      "hydroponic",
+      "hydroponics",
+      "hidropónico"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "agrovoc",
+        "external_id": "c_3734",
+        "match": "exact"
+      },
+      {
+        "scheme": "peco",
+        "external_id": "PECO:0007067",
+        "match": "close"
+      }
+    ]
+  },
+  {
+    "seed_key": "substrate",
+    "domain": "environment",
+    "parent_seed_key": "cultivation_system",
+    "label": "Sustrato",
+    "definition": "Cultivo en un medio sólido distinto del suelo, como fibra de coco, perlita o turba, regado con solución nutritiva.",
+    "aliases": [
+      "substrate",
+      "sustrato inerte",
+      "growing media"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "agrovoc",
+        "external_id": "c_3393",
+        "match": "close"
+      }
+    ]
+  },
+  {
+    "seed_key": "soil",
+    "domain": "environment",
+    "parent_seed_key": "cultivation_system",
+    "label": "Suelo",
+    "definition": "Cultivo con las raíces en suelo natural.",
+    "aliases": [
+      "soil",
+      "tierra"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "agrovoc",
+        "external_id": "c_7156",
+        "match": "close"
+      },
+      {
+        "scheme": "envo",
+        "external_id": "ENVO:00001998",
+        "match": "close"
+      }
+    ]
+  },
+  {
+    "seed_key": "aeroponic",
+    "domain": "environment",
+    "parent_seed_key": "cultivation_system",
+    "label": "Aeroponía",
+    "definition": "Cultivo con las raíces suspendidas en el aire y nebulizadas con solución nutritiva.",
+    "aliases": [
+      "aeroponic",
+      "aeroponics",
+      "aeropónico"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "agrovoc",
+        "external_id": "c_34200",
+        "match": "exact"
+      },
+      {
+        "scheme": "peco",
+        "external_id": "PECO:0001073",
+        "match": "close"
+      }
+    ]
+  },
+  {
+    "seed_key": "region",
+    "domain": "place",
+    "parent_seed_key": null,
+    "label": "Región",
+    "definition": "Área geográfica delimitada en la que se ubica un sitio o un nodo.",
+    "aliases": [
+      "region"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "geosparql",
+        "external_id": "http://www.opengis.net/ont/geosparql#Feature",
+        "match": "broad"
+      }
+    ]
+  },
+  {
+    "seed_key": "koppen_zone",
+    "domain": "place",
+    "parent_seed_key": null,
+    "label": "Zona climática (Köppen)",
+    "definition": "Tipo de clima de un lugar según la clasificación de Köppen, basada en temperatura y precipitación.",
+    "aliases": [
+      "zona climática",
+      "clima Köppen",
+      "Köppen climate zone"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "agrovoc",
+        "external_id": "c_1669",
+        "match": "broad"
+      }
+    ]
+  },
+  {
+    "seed_key": "node",
+    "domain": "node",
+    "parent_seed_key": null,
+    "label": "Nodo",
+    "definition": "Instalación de cultivo de la red HarvestT que aloja dispositivos y produce mediciones.",
+    "aliases": [
+      "node"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "sosa",
+        "external_id": "http://www.w3.org/ns/sosa/Platform",
+        "match": "close"
+      }
+    ]
+  },
+  {
+    "seed_key": "greenhouse",
+    "domain": "node",
+    "parent_seed_key": "node",
+    "label": "Invernadero",
+    "definition": "Nodo formado por una estructura cerrada y cubierta que protege al cultivo.",
+    "aliases": [
+      "greenhouse"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "envo",
+        "external_id": "ENVO:03600087",
+        "match": "close"
+      },
+      {
+        "scheme": "agrovoc",
+        "external_id": "c_3379",
+        "match": "close"
+      }
+    ]
+  },
+  {
+    "seed_key": "cultivator",
+    "domain": "node",
+    "parent_seed_key": "node",
+    "label": "Cultivador",
+    "definition": "Nodo de cultivo compacto, de interior, con control de luz y riego.",
+    "aliases": [
+      "cultivator"
+    ],
+    "unit": null,
+    "equivalences": []
+  },
+  {
+    "seed_key": "germinator",
+    "domain": "node",
+    "parent_seed_key": "node",
+    "label": "Germinador",
+    "definition": "Nodo dedicado a germinar semillas y criar plántulas en condiciones controladas.",
+    "aliases": [
+      "germinator"
+    ],
+    "unit": null,
+    "equivalences": []
+  },
+  {
+    "seed_key": "device",
+    "domain": "node",
+    "parent_seed_key": null,
+    "label": "Dispositivo",
+    "definition": "Equipo electrónico instalado en un nodo que agrupa sensores o actuadores.",
+    "aliases": [
+      "device"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "ssn",
+        "external_id": "http://www.w3.org/ns/ssn/System",
+        "match": "close"
+      }
+    ]
+  },
+  {
+    "seed_key": "sensor",
+    "domain": "node",
+    "parent_seed_key": null,
+    "label": "Sensor",
+    "definition": "Componente que mide una variable del ambiente o del cultivo y entrega un valor.",
+    "aliases": [
+      "sensor"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "sosa",
+        "external_id": "http://www.w3.org/ns/sosa/Sensor",
+        "match": "exact"
+      },
+      {
+        "scheme": "agrovoc",
+        "external_id": "c_28279",
+        "match": "close"
+      }
+    ]
+  },
+  {
+    "seed_key": "reading",
+    "domain": "node",
+    "parent_seed_key": null,
+    "label": "Lectura",
+    "definition": "Valor registrado por un sensor en un momento dado, con su unidad.",
+    "aliases": [
+      "reading",
+      "medición"
+    ],
+    "unit": null,
+    "equivalences": [
+      {
+        "scheme": "sosa",
+        "external_id": "http://www.w3.org/ns/sosa/Observation",
+        "match": "close"
+      }
+    ]
+  },
+  {
+    "seed_key": "signature",
+    "domain": "node",
+    "parent_seed_key": null,
+    "label": "Firma",
+    "definition": "Sello criptográfico que permite comprobar que una lectura proviene de un dispositivo y no fue alterada.",
+    "aliases": [
+      "signature",
+      "firma digital"
+    ],
+    "unit": null,
+    "equivalences": []
+  }
+]

@@ -363,3 +363,173 @@ def test_integrity_error_on_commit_maps_to_409(client, db, tenants, monkeypatch)
     monkeypatch.setattr(Session, "commit", real)
     assert res.status_code == 409 and res.json()["error"]["code"] == "conflict"
     assert db.get(OntologyTerm, term["id"]).status == "proposed"
+
+
+# ---- Tarea 4: vocabularios externos verificados y semilla ----
+
+import json  # noqa: E402
+import re  # noqa: E402
+
+from sqlalchemy import func, select  # noqa: E402
+
+from app.modules.ontology import seed as ontology_seed  # noqa: E402
+from app.modules.ontology.models import DOMAINS, MATCH_TYPES, SCHEMES  # noqa: E402
+
+DATA = Path(__file__).resolve().parents[1] / "app" / "modules" / "ontology" / "data"
+ID_FORMATS = {
+    "ncbi_taxon": r"\d+", "po": r"PO:\d{7}", "peco": r"PECO:\d{7}", "envo": r"ENVO:\d{8}", "agrovoc": r"c_\w+",
+    "bbch": r"\d{1,3}", "ucum": r"\S+", "sosa": r"http://www\.w3\.org/ns/sosa/\w+",
+    "ssn": r"http://www\.w3\.org/ns/ssn/\w+", "geosparql": r"http://www\.opengis\.net/ont/geosparql#\w+",
+}
+
+
+def _load(name):
+    return json.loads((DATA / name).read_text(encoding="utf-8"))
+
+
+def test_seed_files_are_consistent():
+    concepts = _load("external_concepts.json")
+    terms = _load("seed_terms.json")
+    keys = [(c["scheme"], c["external_id"]) for c in concepts]
+    assert len(keys) == len(set(keys))
+    for c in concepts:
+        assert c["scheme"] in SCHEMES
+        assert re.fullmatch(ID_FORMATS[c["scheme"]], c["external_id"]), c
+        assert c["label"].strip() and c["url"].startswith("http") and c["verified_via"].strip()
+        date.fromisoformat(c["verified_at"])
+    seen: dict[str, str] = {}
+    labels, alias_keys = set(), {}
+    for t in terms:
+        assert t["seed_key"] not in seen, t["seed_key"]
+        assert t["domain"] in DOMAINS
+        if t["parent_seed_key"] is not None:
+            assert seen.get(t["parent_seed_key"]) == t["domain"], f"padre de {t['seed_key']}"
+        seen[t["seed_key"]] = t["domain"]
+        label_key = (t["domain"], normalize_label(t["label"]))
+        assert label_key not in labels, label_key
+        labels.add(label_key)
+        assert (t["unit"] is not None) == (t["domain"] == "trait"), t["seed_key"]
+        assert 10 <= len(t["definition"]) <= 400
+        # Un texto libre solo puede resolver a un término por dominio (Tarea 5).
+        for key in {normalize_label(x) for x in [t["label"], *t["aliases"]]}:
+            assert alias_keys.setdefault((t["domain"], key), t["seed_key"]) == t["seed_key"], (key, t["seed_key"])
+        for eq in t["equivalences"]:
+            assert eq["scheme"] in SCHEMES and eq["match"] in MATCH_TYPES
+            assert (eq["scheme"], eq["external_id"]) in keys, eq
+
+
+def test_seed_aliases_cover_values_in_use():
+    terms = _load("seed_terms.json")
+
+    def resolves(domain, raw):
+        return [t["seed_key"] for t in terms if t["domain"] == domain
+                and normalize_label(raw) in {normalize_label(x) for x in [t["label"], *t["aliases"]]}]
+
+    variables = [("air_temperature", "Cel"), ("relative_humidity", "%"), ("photoperiod", "h"), ("ph", "[pH]")]
+    for variable, unit in variables:
+        [key] = resolves("trait", variable)
+        assert next(t for t in terms if t["seed_key"] == key)["unit"] == unit
+    for system in ("hydroponic", "substrate", "soil", "aeroponic"):
+        assert len(resolves("environment", system)) == 1
+    assert resolves("environment", "other") == []
+    assert resolves("plant", "Germinación") == ["bbch_0"]
+    assert resolves("plant", "floración") == ["bbch_6"]
+    for name in ("Lactuca sativa", "Solanum lycopersicum", "Ocimum basilicum"):
+        assert len(resolves("organism", name)) == 1
+
+
+def _seed_terms(db):
+    return list(db.scalars(select(OntologyTerm).order_by(OntologyTerm.hvt_id)))
+
+
+def test_seed_is_idempotent(db):
+    ontology_seed.seed(db)
+    db.commit()
+    ontology_seed.seed(db)
+    db.commit()
+    terms = _seed_terms(db)
+    n = len(_load("seed_terms.json"))
+    assert len(terms) == n
+    assert [t.hvt_id for t in terms] == [f"HVT:{i:06d}" for i in range(1, n + 1)]
+    assert [r.version for r in db.scalars(select(OntologyRelease))] == [1]
+    assert db.scalar(select(OntologyRelease.note)) == f"Semilla: {n} términos"
+    assert all(t.status == "published" and t.published_in_version == 1 for t in terms)
+    assert all(t.proposed_by is None for t in terms)
+    assert all(t.review_note == "Vocabulario semilla del equipo" for t in terms)
+    assert db.scalar(select(func.count()).select_from(ExternalConcept)) == len(_load("external_concepts.json"))
+    # Orden del archivo y padres resueltos.
+    by_key = {t.seed_key: t for t in terms}
+    assert by_key["asteraceae"].hvt_id == "HVT:000001"
+    assert by_key["lactuca_sativa"].parent_id == by_key["lactuca"].id
+    assert by_key["air_temperature"].unit == "Cel"
+    eq = db.scalar(select(TermEquivalence).where(TermEquivalence.term_id == by_key["lactuca_sativa"].id))
+    assert (eq.scheme, eq.external_id, eq.match, eq.external_label) == ("ncbi_taxon", "4236", "exact", "Lactuca sativa")
+    assert eq.url == "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=4236"
+
+
+def test_seed_adds_new_terms_in_new_version(db, tmp_path, monkeypatch):
+    ontology_seed.seed(db)
+    db.commit()
+    before = {t.seed_key: t.hvt_id for t in _seed_terms(db)}
+    # Un término existente editado en la base no se toca al volver a sembrar.
+    lettuce = db.scalar(select(OntologyTerm).where(OntologyTerm.seed_key == "lactuca_sativa"))
+    lettuce.status = "obsolete"
+    db.commit()
+
+    terms = _load("seed_terms.json")
+    terms.append({
+        "seed_key": "co2", "domain": "trait", "parent_seed_key": None, "label": "Concentración de CO₂",
+        "definition": "Cantidad de dióxido de carbono en el aire.", "aliases": ["co2"], "unit": "ppm",
+        "equivalences": [],
+    })
+    patched = tmp_path / "seed_terms.json"
+    patched.write_text(json.dumps(terms), encoding="utf-8")
+    monkeypatch.setattr(ontology_seed, "TERMS_FILE", patched)
+    ontology_seed.seed(db)
+    db.commit()
+
+    after = {t.seed_key: t for t in _seed_terms(db)}
+    assert {k: after[k].hvt_id for k in before} == before
+    assert after["co2"].hvt_id == f"HVT:{len(before) + 1:06d}"
+    assert after["co2"].published_in_version == 2
+    assert after["lactuca_sativa"].status == "obsolete"
+    assert [r.version for r in db.scalars(select(OntologyRelease).order_by(OntologyRelease.version))] == [1, 2]
+    assert db.scalar(select(OntologyRelease.note).where(OntologyRelease.version == 2)) == "Semilla: 1 términos"
+
+
+def test_seed_updates_external_concepts_in_place(db, tmp_path, monkeypatch):
+    ontology_seed.seed(db)
+    db.commit()
+    concepts = _load("external_concepts.json")
+    concepts[0]["verified_at"] = "2027-01-01"
+    patched = tmp_path / "external_concepts.json"
+    patched.write_text(json.dumps(concepts), encoding="utf-8")
+    monkeypatch.setattr(ontology_seed, "CONCEPTS_FILE", patched)
+    ontology_seed.seed(db)
+    db.commit()
+    assert db.scalar(select(func.count()).select_from(ExternalConcept)) == len(concepts)
+    first = db.scalar(select(ExternalConcept).where(
+        ExternalConcept.scheme == concepts[0]["scheme"], ExternalConcept.external_id == concepts[0]["external_id"]))
+    assert first.verified_at == date(2027, 1, 1)
+    assert first.label_key == normalize_label(concepts[0]["label"])
+
+
+def test_seed_skips_label_already_taken(db, tmp_path, monkeypatch):
+    """Si alguien ya publicó (o propuso) la misma etiqueta, la semilla no crea un duplicado."""
+    db.add(OntologyTerm(domain="trait", label="Fotoperíodo", label_key=normalize_label("Fotoperíodo"),
+                        definition="Propuesto por un usuario.", status="proposed"))
+    db.commit()
+    ontology_seed.seed(db)
+    db.commit()
+    assert db.scalar(select(OntologyTerm).where(OntologyTerm.seed_key == "photoperiod")) is None
+    assert db.scalar(select(func.count()).select_from(OntologyTerm).where(
+        OntologyTerm.label_key == "fotoperiodo")) == 1
+    hvt = [t.hvt_id for t in _seed_terms(db) if t.hvt_id]
+    assert hvt == [f"HVT:{i:06d}" for i in range(1, len(hvt) + 1)]
+
+
+def test_startup_seeds_ontology_after_catalog():
+    from app.modules.catalog import seed as catalog_seed
+    from scripts.seed import SEEDS
+
+    assert SEEDS.index(ontology_seed) == SEEDS.index(catalog_seed) + 1
