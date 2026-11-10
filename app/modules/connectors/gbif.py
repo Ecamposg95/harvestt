@@ -9,7 +9,6 @@ from app.modules.connectors.http import Fetcher
 
 API = "https://api.gbif.org/v1/occurrence/search"
 PAGE = 300
-MIN_INTERVAL = 0.25
 MEXICO_MAX_RECORDS = 3000
 CELL_DEG = 0.5
 LICENSES = ["CC0_1_0", "CC_BY_4_0"]
@@ -46,7 +45,7 @@ class GbifConnector:
         while True:
             page = fetch(f"{licensed}&country=MX&limit={PAGE}&offset={offset}", None)
             mx_total = page["count"]
-            results = page.get("results") or []
+            results = (page.get("results") or [])[: MEXICO_MAX_RECORDS - fetched]
             fetched += len(results)
             for r in results:
                 lat, lon = r.get("decimalLatitude"), r.get("decimalLongitude")

@@ -82,6 +82,14 @@ def test_gbif_sample_when_over_cap(monkeypatch):
     assert sum("country=MX" in u for u in fetch.urls) == 1
 
 
+def test_gbif_cap_is_exact_when_not_multiple_of_page(monkeypatch):
+    monkeypatch.setattr(gbif, "MEXICO_MAX_RECORDS", 5)
+    res = GbifConnector().fetch(species(TOMATO), FakeFetcher(small_pages()), date(2026, 11, 10))
+    mx = res.payload["mexico"]
+    assert mx["sampled"] == gbif.MEXICO_MAX_RECORDS == 5
+    assert sum(c["count"] for c in mx["cells"]) == 5
+
+
 def test_gbif_page_failure_does_not_store_partial_cells():
     fetch = FakeFetcher(small_pages(), fail_offset=300)
     with pytest.raises(FetchError):
