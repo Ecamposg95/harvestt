@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { errorMessage } from '@/api/client'
-import { Badge, ErrorState, Loading } from '@/components/ui'
+import { Badge, Button, ErrorState, Loading } from '@/components/ui'
+import { useAuth } from '@/store/auth'
 import { ontologyApi, type TermDetail, type TermSummary, type TermUsage } from './api'
 import { DOMAIN_LABELS, labelOf, MATCH_LABELS, SCHEME_LABELS, STATUS_LABELS, STATUS_TONES } from './labels'
+import { ObsoleteDialog } from './ReviewQueue'
 import { TermNeighbors } from './TermNeighbors'
 
 /** Enlace interno a la ficha de un término: por su ID HVT si lo tiene, si no por su id interno. */
@@ -36,9 +39,20 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-export function TermCard({ termId, onOpen }: { termId: string; onOpen: (t: TermSummary) => void }) {
+interface CardProps {
+  termId: string
+  onOpen: (t: TermSummary) => void
+  /** Abre el formulario de propuesta con este término como padre. */
+  onProposeChild?: (parent: TermDetail) => void
+  /** Avisa que el término cambió (p. ej., quedó obsoleto) para refrescar árbol y versión. */
+  onChanged?: (t: TermDetail) => void
+}
+
+export function TermCard({ termId, onOpen, onProposeChild, onChanged }: CardProps) {
   const [state, setState] = useState<State>({ phase: 'loading' })
   const [attempt, setAttempt] = useState(0)
+  const [obsoleting, setObsoleting] = useState(false)
+  const isSuper = useAuth((s) => !!s.user?.is_superadmin)
 
   useEffect(() => {
     let alive = true
@@ -63,7 +77,39 @@ export function TermCard({ termId, onOpen }: { termId: string; onOpen: (t: TermS
     <section aria-label="Ficha del término" className="glass min-w-0 p-5 sm:p-7">
       {state.phase === 'loading' && <Loading label="Cargando término…" />}
       {state.phase === 'error' && <ErrorState message={state.message} onRetry={() => setAttempt((a) => a + 1)} />}
-      {state.phase === 'ready' && <TermBody term={state.term} usage={state.usage} onOpen={onOpen} />}
+      {state.phase === 'ready' && (
+        <>
+          <TermBody term={state.term} usage={state.usage} onOpen={onOpen} />
+          {state.term.status === 'published' && (onProposeChild || isSuper) && (
+            <div className="mt-6 flex flex-wrap gap-2 border-t border-border/60 pt-5">
+              {onProposeChild && (
+                <Button variant="secondary" className="!px-4 !py-2 text-xs" onClick={() => onProposeChild(state.term)}>
+                  Proponer subtérmino
+                </Button>
+              )}
+              {isSuper && (
+                <Button variant="ghost" className="!px-4 !py-2 text-xs !text-danger hover:!bg-danger/10" onClick={() => setObsoleting(true)}>
+                  Marcar obsoleto
+                </Button>
+              )}
+            </div>
+          )}
+          {obsoleting &&
+            // El panel de vidrio (backdrop-filter) atraparía el `fixed` del diálogo: se monta en <body>.
+            createPortal(
+              <ObsoleteDialog
+                term={state.term}
+                onClose={() => setObsoleting(false)}
+                onDone={(updated) => {
+                  setObsoleting(false)
+                  setState({ phase: 'ready', term: updated, usage: state.usage })
+                  onChanged?.(updated)
+                }}
+              />,
+              document.body,
+            )}
+        </>
+      )}
     </section>
   )
 }

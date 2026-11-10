@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { errorMessage } from '@/api/client'
-import { cx, Empty, ErrorState, Input, Loading, PageHeader } from '@/components/ui'
-import { DOMAINS, EXPORT_JSON_URL, EXPORT_TURTLE_URL, ontologyApi, type Domain, type TermSummary } from './api'
+import { Button, cx, Empty, ErrorState, Input, Loading, PageHeader } from '@/components/ui'
+import { useAuth } from '@/store/auth'
+import { DOMAINS, EXPORT_JSON_URL, EXPORT_TURTLE_URL, ontologyApi, type Domain, type TermDetail, type TermSummary } from './api'
 import { DOMAIN_LABELS } from './labels'
+import { MyProposals } from './MyProposals'
+import { ProposeTermDialog } from './ProposeTermDialog'
+import { ReviewQueue } from './ReviewQueue'
 import { TermCard } from './TermCard'
 import { TermRow, TermTree } from './TermTree'
 import { buildTree } from './tree'
@@ -16,6 +20,20 @@ type State =
   | { phase: 'ready'; terms: TermSummary[]; version: number | null }
 
 type Search = { q: string; results: TermSummary[] | null; error: string | null }
+
+type View = 'explorar' | 'propuestas' | 'revision'
+const VIEWS: { key: View; label: string; superOnly?: boolean }[] = [
+  { key: 'explorar', label: 'Explorar' },
+  { key: 'propuestas', label: 'Mis propuestas' },
+  { key: 'revision', label: 'Revisión', superOnly: true },
+]
+
+/** Términos y versión vigente (la mayor de las publicaciones). */
+async function fetchOntology(): Promise<{ terms: TermSummary[]; version: number | null }> {
+  const [terms, releases] = await Promise.all([ontologyApi.list(), ontologyApi.releases().catch(() => [])])
+  const version = releases.length ? Math.max(...releases.map((r) => r.version)) : null
+  return { terms, version }
+}
 
 function isDomain(d: string): d is Domain {
   return (DOMAINS as readonly string[]).includes(d)
@@ -30,21 +48,41 @@ export default function OntologyPage() {
   const [query, setQuery] = useState('')
   const [search, setSearch] = useState<Search>({ q: '', results: null, error: null })
   const cardRef = useRef<HTMLDivElement>(null)
+  const isSuper = useAuth((s) => !!s.user?.is_superadmin)
+  const [proposing, setProposing] = useState<{ domain: Domain; parent: TermSummary | null } | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
+
+  const viewParam = params.get('vista')
+  const view: View = viewParam === 'propuestas' || (viewParam === 'revision' && isSuper) ? viewParam : 'explorar'
 
   useEffect(() => {
     let alive = true
     setState({ phase: 'loading' })
-    Promise.all([ontologyApi.list(), ontologyApi.releases().catch(() => [])])
-      .then(([terms, releases]) => {
-        if (!alive) return
-        const version = releases.length ? Math.max(...releases.map((r) => r.version)) : null
-        setState({ phase: 'ready', terms, version })
-      })
+    fetchOntology()
+      .then((data) => alive && setState({ phase: 'ready', ...data }))
       .catch((err) => alive && setState({ phase: 'error', message: errorMessage(err, 'No se pudo cargar la ontología') }))
     return () => {
       alive = false
     }
   }, [attempt])
+
+  // Refresco silencioso tras proponer, aprobar u obsoletar: árbol y «Versión N» sin desmontar la vista.
+  const refresh = useCallback(() => {
+    fetchOntology()
+      .then((data) => setState({ phase: 'ready', ...data }))
+      .catch(() => undefined)
+  }, [])
+
+  const setView = useCallback(
+    (v: View) =>
+      setParams((prev) => {
+        const next = new URLSearchParams(prev)
+        if (v === 'explorar') next.delete('vista')
+        else next.set('vista', v)
+        return next
+      }),
+    [setParams],
+  )
 
   // Búsqueda con debounce: el servidor compara contra etiqueta y alias normalizados.
   useEffect(() => {
@@ -90,6 +128,7 @@ export default function OntologyPage() {
       setParams((prev) => {
         const next = new URLSearchParams(prev)
         next.set('term', t.hvt_id ?? t.id)
+        next.delete('vista')
         return next
       })
       // En pantallas angostas la ficha queda debajo del árbol: la traemos a la vista.
@@ -101,6 +140,13 @@ export default function OntologyPage() {
 
   const version = state.phase === 'ready' ? state.version : null
 
+  const proposed = (t: TermDetail) => {
+    setProposing(null)
+    setNotice(`Propuesta enviada: «${t.label}». Un superadministrador la revisará; síguela aquí, en «Mis propuestas».`)
+    refresh()
+    setView('propuestas')
+  }
+
   return (
     <div className="min-w-0">
       <PageHeader
@@ -109,6 +155,9 @@ export default function OntologyPage() {
         description="Términos con ID permanente HVT, jerarquía por dominio y equivalencias verificadas con ontologías abiertas. Licencia CC-BY 4.0."
         actions={
           <>
+            <Button className="!px-4 !py-2 text-xs" onClick={() => setProposing({ domain, parent: null })}>
+              Proponer término
+            </Button>
             {version != null && (
               <span className="inline-flex items-center rounded-full bg-lime px-4 py-2 text-xs font-bold text-ink">
                 Versión {version}
@@ -134,9 +183,61 @@ export default function OntologyPage() {
         }
       />
 
-      {state.phase === 'loading' && <Loading label="Cargando ontología…" />}
-      {state.phase === 'error' && <ErrorState message={state.message} onRetry={() => setAttempt((a) => a + 1)} />}
-      {state.phase === 'ready' && tree && (
+      <div
+        role="tablist"
+        aria-label="Secciones de la ontología"
+        className="mb-5 flex max-w-full gap-1 overflow-x-auto rounded-full bg-fg/5 p-1 sm:inline-flex"
+      >
+        {VIEWS.filter((v) => !v.superOnly || isSuper).map((v) => (
+          <button
+            key={v.key}
+            type="button"
+            role="tab"
+            aria-selected={view === v.key}
+            onClick={() => setView(v.key)}
+            className={cx(
+              'shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-colors',
+              view === v.key ? 'bg-surface text-fg shadow-sm' : 'text-muted hover:text-fg',
+            )}
+          >
+            {v.label}
+          </button>
+        ))}
+      </div>
+
+      {notice && (
+        <div role="status" className="mb-5 flex items-start justify-between gap-3 rounded-2xl bg-accent/10 px-4 py-3 text-sm text-fg">
+          <p className="min-w-0 break-words">{notice}</p>
+          <button
+            type="button"
+            aria-label="Cerrar aviso"
+            onClick={() => setNotice(null)}
+            className="shrink-0 rounded-md px-1.5 text-lg leading-none text-muted hover:text-fg"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {proposing && (
+        <ProposeTermDialog
+          initialDomain={proposing.domain}
+          parent={proposing.parent}
+          onDone={proposed}
+          onClose={() => setProposing(null)}
+        />
+      )}
+
+      {view === 'propuestas' && (
+        <MyProposals onOpen={open} onPropose={() => setProposing({ domain, parent: null })} onChanged={refresh} />
+      )}
+      {view === 'revision' && <ReviewQueue onOpen={open} onChanged={refresh} />}
+
+      {view === 'explorar' && state.phase === 'loading' && <Loading label="Cargando ontología…" />}
+      {view === 'explorar' && state.phase === 'error' && (
+        <ErrorState message={state.message} onRetry={() => setAttempt((a) => a + 1)} />
+      )}
+      {view === 'explorar' && state.phase === 'ready' && tree && (
         <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
           <div className="glass flex min-w-0 flex-col p-4 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:self-start">
             <Input
@@ -211,7 +312,13 @@ export default function OntologyPage() {
 
           <div ref={cardRef} className="min-w-0 scroll-mt-4">
             {selected ? (
-              <TermCard key={selected.id} termId={selected.id} onOpen={open} />
+              <TermCard
+                key={selected.id}
+                termId={selected.id}
+                onOpen={open}
+                onProposeChild={(t) => isDomain(t.domain) && setProposing({ domain: t.domain, parent: t })}
+                onChanged={refresh}
+              />
             ) : termParam ? (
               <Empty title="No encontramos ese término" description={`«${termParam}» no existe o no tienes acceso a él.`} />
             ) : (

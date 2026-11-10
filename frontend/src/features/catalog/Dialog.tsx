@@ -4,10 +4,12 @@ interface Props {
   title: string
   onClose: () => void
   children: ReactNode
+  /** Ancho del panel: `md` (formularios cortos, por defecto) o `lg` (formularios largos). */
+  size?: 'md' | 'lg'
 }
 
 /** Diálogo modal mínimo: cierra con Escape o clic en el fondo y enfoca su contenido al abrir. */
-export function Dialog({ title, onClose, children }: Props) {
+export function Dialog({ title, onClose, children, size = 'md' }: Props) {
   const titleId = useId()
   const panel = useRef<HTMLDivElement>(null)
   const close = useRef(onClose)
@@ -36,7 +38,7 @@ export function Dialog({ title, onClose, children }: Props) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="glass max-h-full w-full max-w-md overflow-y-auto p-6"
+        className={`glass max-h-full w-full overflow-y-auto p-6 ${size === 'lg' ? 'max-w-2xl' : 'max-w-md'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
