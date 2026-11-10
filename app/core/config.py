@@ -41,6 +41,7 @@ class Settings:
     seed_demo_simulation: bool = field(
         default_factory=lambda: _env("SEED_DEMO_SIMULATION", "0").lower() in ("1", "true", "yes")
     )
+    genesys_api_token: str = field(default_factory=lambda: _env("GENESYS_API_TOKEN"))
     storage_backend: str = field(default_factory=lambda: _env("STORAGE_BACKEND", "local"))
     storage_dir: str = field(default_factory=lambda: _env("STORAGE_DIR", "storage"))
     s3_endpoint: str = field(default_factory=lambda: _env("S3_ENDPOINT"))
