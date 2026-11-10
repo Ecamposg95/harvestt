@@ -37,8 +37,8 @@ Rama `feat/hito-m2-ontologia`. Ejecución con subagentes: implementación y revi
 | 6 · Exportación | Completa (revisada) | `4ff0587` |
 | 7 · Grafo | Completa (revisada) | `a0ff38c` |
 | 8 · Página de ontología | Completa (revisada) | `5422c96` |
-| 9 · Propuestas y revisión (UI) | En curso | |
-| 10 · Visión, docs y puerta | Pendiente | |
+| 9 · Propuestas y revisión (UI) | Completa (revisada) | `fa49e86` |
+| 10 · Visión, docs y puerta | En curso | |
 
 ## Global Constraints
 
