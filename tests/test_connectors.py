@@ -80,9 +80,12 @@ class FakeConnector:
     def __init__(self):
         self.fail = False
         self.calls = []
+        self.script = None  # callable(species) -> FetchResult | raises FetchError
 
     def fetch(self, species, fetch, today):
         self.calls.append((species.scientific_name, today))
+        if self.script is not None:
+            return self.script(species)
         if self.fail:
             raise FetchError("fuente caída")
         return FetchResult("ok", "123", {"n": 1, "today": today.isoformat()}, "CC0 1.0", "GBIF", "https://x")
@@ -187,6 +190,7 @@ def test_sync_caps_species_and_is_partial(db, fake):
     db.commit()
     sync = csync.run_sync(db, "gbif", None, T0, _fetcher_factory)
     assert sync.status == "partial" and sync.species_total == 50 and len(fake.calls) == 50
+    assert sync.error == "Tope de 50 especies alcanzado"
 
 
 def test_make_fetcher_wraps_http_errors(monkeypatch):
@@ -203,3 +207,81 @@ def test_make_fetcher_wraps_http_errors(monkeypatch):
     assert seen["auth"] == "API-Token secreto"
     assert "Authorization" not in str(exc.value) and "secreto" not in str(exc.value)
     assert chttp.TIMEOUT == 30
+
+
+NOT_FOUND = FetchResult("not_found", None, {}, None, None, None, "Sin coincidencia exacta en World Flora Online")
+
+
+def test_first_run_failure_creates_error_snapshot(db, fake):
+    sp = _species(db)
+    fake.fail = True
+    sync = csync.run_sync(db, "gbif", None, T0, _fetcher_factory)
+    assert sync.status == "error" and sync.species_ok == 0 and sync.species_total == 1
+    snap = db.scalars(select(ConnectorSnapshot).where(ConnectorSnapshot.species_id == sp.id)).one()
+    assert snap.status == "error" and snap.payload == {} and snap.fetched_at is None
+    assert snap.last_error == "fuente caída" and snap.reason is None
+
+
+def test_not_found_persists_reason_and_fetched_at(db, fake):
+    sp = _species(db)
+    fake.script = lambda s: NOT_FOUND
+    sync = csync.run_sync(db, "gbif", None, T0, _fetcher_factory)
+    assert sync.status == "ok"
+    snap = db.scalars(select(ConnectorSnapshot).where(ConnectorSnapshot.species_id == sp.id)).one()
+    assert snap.status == "not_found" and snap.reason == "Sin coincidencia exacta en World Flora Online"
+    assert snap.fetched_at is not None and snap.payload == {} and snap.last_error is None
+
+
+def test_not_found_after_ok_replaces_payload(db, fake):
+    sp = _species(db)
+    csync.run_sync(db, "gbif", None, T0, _fetcher_factory)
+    later = T0 + timedelta(minutes=11)
+    fake.script = lambda s: NOT_FOUND
+    csync.run_sync(db, "gbif", None, later, _fetcher_factory)
+    db.expire_all()
+    snap = db.scalars(select(ConnectorSnapshot).where(ConnectorSnapshot.species_id == sp.id)).one()
+    assert snap.status == "not_found" and snap.payload == {} and snap.external_id is None
+    assert snap.fetched_at.replace(tzinfo=timezone.utc) == later and snap.reason
+    # y un ok posterior limpia el motivo
+    fake.script = None
+    csync.run_sync(db, "gbif", None, later + timedelta(minutes=11), _fetcher_factory)
+    db.expire_all()
+    snap = db.scalars(select(ConnectorSnapshot).where(ConnectorSnapshot.species_id == sp.id)).one()
+    assert snap.status == "ok" and snap.reason is None and snap.payload["n"] == 1
+
+
+def test_partial_run_from_mixed_failures_and_successes(db, fake):
+    for name in ("Aaa one", "Bbb two", "Ccc three"):
+        db.add(Species(scientific_name=name))
+    db.commit()
+
+    def script(species):
+        if species.scientific_name == "Bbb two":
+            raise FetchError("fuente caída")
+        return FetchResult("ok", "1", {"n": 1}, None, None, None)
+
+    fake.script = script
+    sync = csync.run_sync(db, "gbif", None, T0, _fetcher_factory)
+    assert sync.status == "partial" and sync.species_total == 3 and sync.species_ok == 2
+    assert sync.error == "1 especies fallaron"
+    statuses = {
+        r.species_id: r.status for r in db.scalars(select(ConnectorSnapshot)).all()
+    }
+    assert sorted(statuses.values()) == ["error", "ok", "ok"]
+
+
+def test_unexpected_exception_keeps_counts(db, fake):
+    for name in ("Aaa one", "Bbb two"):
+        db.add(Species(scientific_name=name))
+    db.commit()
+
+    def script(species):
+        if species.scientific_name == "Bbb two":
+            raise RuntimeError("boom")
+        return FetchResult("ok", "1", {}, None, None, None)
+
+    fake.script = script
+    with pytest.raises(RuntimeError):
+        csync.run_sync(db, "gbif", None, T0, _fetcher_factory)
+    sync = db.scalars(select(ConnectorSync)).one()
+    assert sync.status == "error" and sync.species_total == 2 and sync.species_ok == 1

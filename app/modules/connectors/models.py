@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.db import Base
 from app.core.mixins import AuditMixin, UUIDMixin, utcnow
 
-SNAPSHOT_STATUSES = ("ok", "not_found")
+SNAPSHOT_STATUSES = ("ok", "not_found", "error")
 SYNC_STATUSES = ("running", "ok", "partial", "error")
 
 
@@ -19,7 +19,8 @@ class ConnectorSnapshot(UUIDMixin, AuditMixin, Base):
 
     source: Mapped[str] = mapped_column(String(20), nullable=False)
     species_id: Mapped[str] = mapped_column(String(36), ForeignKey("species.id"), nullable=False, index=True)
-    status: Mapped[str] = mapped_column(String(20), nullable=False)  # ok | not_found
+    # ok | not_found | error ("error" solo si el primer intento falló y no hay copia previa)
+    status: Mapped[str] = mapped_column(String(20), nullable=False)
     external_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
     payload: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     license: Mapped[str | None] = mapped_column(String(200), nullable=True)
@@ -28,6 +29,7 @@ class ConnectorSnapshot(UUIDMixin, AuditMixin, Base):
     fetched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_attempt_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utcnow)
     last_error: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    reason: Mapped[str | None] = mapped_column(String(300), nullable=True)  # motivo visible de not_found
 
 
 class ConnectorSync(UUIDMixin, Base):

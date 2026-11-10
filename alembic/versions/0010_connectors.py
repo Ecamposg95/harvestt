@@ -27,6 +27,7 @@ def upgrade() -> None:
         sa.Column("fetched_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("last_attempt_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("last_error", sa.String(500), nullable=True),
+        sa.Column("reason", sa.String(300), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),

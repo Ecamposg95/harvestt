@@ -79,13 +79,14 @@ def run_sync(
         raise SyncRefused(409, "connector_unavailable", "Esta fuente no se puede sincronizar")
     sync = _start_run(db, key, actor, now)
     sync_id = sync.id
+    done = failed = total = 0
     try:
         fetcher = (fetcher_factory or default_fetcher_factory)(key)
         all_species = db.scalars(
             select(Species).where(Species.deleted_at.is_(None)).order_by(Species.scientific_name)
         ).all()
         capped = len(all_species) > MAX_SPECIES
-        done = failed = 0
+        total = min(len(all_species), MAX_SPECIES)
         for species in all_species[:MAX_SPECIES]:
             snap = db.scalars(
                 select(ConnectorSnapshot).where(
@@ -97,8 +98,8 @@ def run_sync(
             except FetchError as exc:
                 failed += 1
                 if snap is None:
-                    # Sin copia previa: se registra el intento sin datos (nunca se finge una copia).
-                    snap = ConnectorSnapshot(source=key, species_id=species.id, status="not_found", payload={})
+                    # Primer intento fallido y sin copia previa: se registra sin datos.
+                    snap = ConnectorSnapshot(source=key, species_id=species.id, status="error", payload={})
                     db.add(snap)
                 snap.last_attempt_at = now
                 snap.last_error = str(exc)[:500]
@@ -107,25 +108,27 @@ def run_sync(
                 if snap is None:
                     snap = ConnectorSnapshot(source=key, species_id=species.id)
                     db.add(snap)
+                ok = result.status == "ok"
                 snap.status = result.status
-                snap.external_id = result.external_id
-                snap.payload = result.payload
+                snap.external_id = result.external_id if ok else None
+                snap.payload = result.payload if ok else {}
                 snap.license = result.license
                 snap.attribution = result.attribution
                 snap.source_url = result.source_url
+                snap.reason = None if ok else (result.reason or "")[:300] or None
                 snap.last_attempt_at = now
                 snap.last_error = None
-                snap.fetched_at = now if result.status == "ok" else snap.fetched_at
+                snap.fetched_at = now
             db.commit()
         sync = db.get(ConnectorSync, sync_id)
-        sync.species_total = min(len(all_species), MAX_SPECIES)
+        sync.species_total = total
         sync.species_ok = done
         if done == 0 and failed > 0:
             sync.status = "error"
             sync.error = "Todas las especies fallaron"
         elif failed > 0 or capped:
             sync.status = "partial"
-            sync.error = f"Se alcanzó el tope de {MAX_SPECIES} especies" if capped and not failed else None
+            sync.error = f"{failed} especies fallaron" if failed else f"Tope de {MAX_SPECIES} especies alcanzado"
         else:
             sync.status = "ok"
         sync.finished_at = now
@@ -136,6 +139,8 @@ def run_sync(
         sync = db.get(ConnectorSync, sync_id)
         sync.status = "error"
         sync.error = "Error inesperado"
+        sync.species_total = total
+        sync.species_ok = done
         sync.finished_at = now
         db.commit()
         raise
