@@ -28,7 +28,7 @@ Rama `feat/hito-m3-bancos`. Se actualiza y se sube al cerrar cada tarea.
 |---|---|---|
 | 1 · Modelos, registro y migración 0010 | Completa (revisada) | `57f9338` |
 | 2 · Motor de sincronización | Completa (revisada, 1 ronda de corrección) | `be44416`, `113bbf9` |
-| 3 · Conector GBIF | Pendiente | |
+| 3 · Conector GBIF | Completa (revisada) | `36efbb9` |
 | 4 · Conectores WFO y Wikidata/Commons | Pendiente | |
 | 5 · Genesys y «Usar en mi ciclo» (API) | Pendiente | |
 | 6 · API de ficha y panel, comando de sync | Pendiente | |
