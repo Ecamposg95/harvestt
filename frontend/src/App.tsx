@@ -11,6 +11,7 @@ import { PrototypePublicPage } from '@/features/prototypes/PrototypePublicPage'
 import { PrototypesAdminPage } from '@/features/prototypes/PrototypesAdminPage'
 import { RequestsInboxPage } from '@/features/vision/RequestsInboxPage'
 import { VisionPage } from '@/features/vision/VisionPage'
+import OntologyPage from '@/features/ontology/OntologyPage'
 import { ShowcasePage } from '@/features/prototypes/ShowcasePage'
 import { StudioPage } from '@/features/studio/StudioPage'
 import { AppLayout } from '@/layouts/AppLayout'
@@ -59,6 +60,7 @@ export default function App() {
         <Route path="solicitudes" element={<RequestsInboxPage />} />
         <Route path="prototypes" element={<PrototypesAdminPage />} />
         <Route path="prototypes/:id" element={<PrototypeAdminDetailPage />} />
+        <Route path="ontologia" element={<OntologyPage />} />
         <Route
           path="graph"
           element={

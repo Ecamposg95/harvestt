@@ -79,3 +79,11 @@ it('incluye el grafo de conocimiento', async () => {
   await renderSidebar()
   expect(screen.getByRole('link', { name: 'Grafo' })).toHaveAttribute('href', '/app/graph')
 })
+
+it('incluye la ontología justo después del grafo', async () => {
+  await renderSidebar()
+  expect(screen.getByRole('link', { name: 'Ontología' })).toHaveAttribute('href', '/app/ontologia')
+  const { NAV_ITEMS } = await import('./Sidebar')
+  const labels = NAV_ITEMS.map((i) => i.label)
+  expect(labels.indexOf('Ontología')).toBe(labels.indexOf('Grafo') + 1)
+})
