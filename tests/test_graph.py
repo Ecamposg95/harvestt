@@ -318,3 +318,90 @@ def test_add_edge_merges_provenance_without_duplicates():
     g.add_edge("species:x", "species:x", "related_to", {"kind": "fk"})  # lazo
     assert len(g.edges) == 1
     assert [p["assertion_id"] for p in g.edges[("species:x", "trait:ph", "has_trait")].provenance] == ["1", "2"]
+
+
+# ---- Términos de la ontología (M2) ----
+
+
+@pytest.fixture
+def terms(db, species):
+    from app.modules.ontology import seed as ontology_seed
+    from app.modules.term_links import service as term_links
+
+    ontology_seed.seed(db)
+    db.commit()
+    term_links.relink(db)
+    db.commit()
+
+
+def _term(db, label):
+    from app.modules.ontology.models import OntologyTerm
+
+    return db.scalars(select(OntologyTerm).where(OntologyTerm.label == label)).first()
+
+
+def test_terms_join_graph(client, db, tenants, species, terms):
+    body = graph(client, tenants["alfa_viewer"])
+    air = _term(db, "Temperatura del aire")
+    assert air is not None and air.status == "published"
+    tid = f"term:{air.hvt_id}"
+    node = next(n for n in body["nodes"] if n["id"] == tid)
+    assert node["type"] == "term" and node["label"] == "Temperatura del aire" and node["origin"] is None
+    assert node["meta"] == {"hvt_id": air.hvt_id, "domain": air.domain, "status": "published"}
+    edge = edge_map(body)[("trait:air_temperature", tid, "classified_as")]
+    assert edge["provenance"][0]["kind"] == "fk"
+    assert edge["provenance"][0]["field"] == "trait_assertions.variable_term_id"
+
+
+def test_subclass_and_replaced_by_edges(client, db, tenants, species, terms):
+    from app.modules.ontology.models import OntologyTerm
+
+    child = db.scalars(
+        select(OntologyTerm).where(OntologyTerm.parent_id.is_not(None), OntologyTerm.status == "published")
+    ).first()
+    assert child is not None
+    parent = db.get(OntologyTerm, child.parent_id)
+    other = db.scalars(
+        select(OntologyTerm).where(OntologyTerm.status == "published", OntologyTerm.id.notin_([child.id, parent.id]))
+    ).first()
+    child.status, child.replaced_by_id = "obsolete", other.id
+    db.commit()
+    body = graph(client, tenants["alfa_viewer"], types="term")
+    m = edge_map(body)
+    assert (f"term:{child.hvt_id}", f"term:{parent.hvt_id}", "subclass_of") in m
+    assert (f"term:{child.hvt_id}", f"term:{other.hvt_id}", "replaced_by") in m
+    assert next(n for n in body["nodes"] if n["id"] == f"term:{child.hvt_id}")["meta"]["status"] == "obsolete"
+
+
+def test_proposed_terms_absent_from_graph(client, db, tenants, species, terms):
+    air = _term(db, "Temperatura del aire")
+    air.status = "proposed"
+    db.commit()
+    body = graph(client, tenants["alfa_viewer"])
+    assert f"term:{air.hvt_id}" not in {n["id"] for n in body["nodes"]}
+    assert not any(e["relation"] == "classified_as" and e["dst"] == f"term:{air.hvt_id}" for e in body["edges"])
+
+
+def test_project_classified_only_in_own_tenant(client, db, tenants, species, terms):
+    from app.modules.ontology.models import OntologyTerm
+    from app.modules.projects.models import Project
+
+    lettuce = species["Lactuca sativa L."].id
+    pa = tenant_data(client, tenants["alfa_admin"], lettuce, "Proyecto Alfa")["project"]
+    pb = tenant_data(client, tenants["beta_admin"], lettuce, "Proyecto Beta")["project"]
+    hydro = db.scalars(select(OntologyTerm).where(OntologyTerm.status == "published").order_by(OntologyTerm.hvt_id)).first()
+    for pid in (pa, pb):
+        db.get(Project, pid).system_term_id = hydro.id
+    db.commit()
+    body = graph(client, tenants["alfa_admin"])
+    ids = {n["id"] for n in body["nodes"]}
+    assert f"project:{pa}" in ids and f"project:{pb}" not in ids
+    m = edge_map(body)
+    assert (f"project:{pa}", f"term:{hydro.hvt_id}", "classified_as") in m
+    assert not any(e["src"] == f"project:{pb}" for e in body["edges"])
+
+
+def test_create_edge_resolves_term_by_hvt_id(db, tenants, species, terms):
+    air = _term(db, "Temperatura del aire")
+    assert service._node_exists(db, None, "term", air.hvt_id)
+    assert not service._node_exists(db, None, "term", "HVT:999999")

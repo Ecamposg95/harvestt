@@ -1,6 +1,6 @@
 import { api } from '@/api/client'
 
-export const NODE_TYPES = ['species', 'cultivar', 'trait', 'source', 'project', 'crop_cycle', 'prototype'] as const
+export const NODE_TYPES = ['species', 'cultivar', 'trait', 'source', 'project', 'crop_cycle', 'prototype', 'term'] as const
 export type NodeType = (typeof NODE_TYPES)[number]
 
 export interface GraphNode {

@@ -24,18 +24,23 @@ from app.modules.graph.models import (
     NODE_PROTOTYPE,
     NODE_SOURCE,
     NODE_SPECIES,
+    NODE_TERM,
     NODE_TRAIT,
     NODE_TYPES,
     REL_CITES,
+    REL_CLASSIFIED_AS,
     REL_CULTIVAR_OF,
     REL_GROWS,
     REL_HAS_CYCLE,
     REL_HAS_TRAIT,
+    REL_REPLACED_BY,
+    REL_SUBCLASS_OF,
     TENANT_NODE_TYPES,
     GraphEdge,
 )
 from app.modules.graph.schemas import EdgeCreate, GraphEdgeOut, GraphNodeOut, GraphOut
 from app.modules.identity.models import MEMBERSHIP_ACTIVE, ROLE_EDITOR, ROLE_RANK, Membership, User
+from app.modules.ontology.models import OntologyTerm
 from app.modules.projects.models import CropCycle, Project
 from app.modules.prototypes.models import Prototype
 
@@ -78,6 +83,9 @@ def _node_exists(db: Session, organization_id: str | None, node_type: str, raw_i
             TraitAssertion.variable == raw_id, TraitAssertion.deleted_at.is_(None)
         )
         return db.scalar(stmt.limit(1)) is not None
+    if node_type == NODE_TERM:
+        stmt = select(OntologyTerm.id).where(OntologyTerm.hvt_id == raw_id, OntologyTerm.deleted_at.is_(None))
+        return db.scalar(stmt) is not None
     model = _MODELS[node_type]
     stmt = select(model.id).where(model.id == raw_id, model.deleted_at.is_(None))
     if node_type in TENANT_NODE_TYPES:
@@ -204,7 +212,43 @@ def _species_label(species: Species) -> str:
     return species.scientific_name
 
 
-def _add_catalog(db: Session, g: Graph) -> None:
+_TERM_STATUSES = ("published", "obsolete")
+
+
+def _add_terms(db: Session, g: Graph) -> dict[str, str]:
+    """Términos publicados y obsoletos. Devuelve id interno -> id de nodo."""
+    terms = list(
+        db.scalars(
+            select(OntologyTerm)
+            .where(
+                OntologyTerm.status.in_(_TERM_STATUSES),
+                OntologyTerm.deleted_at.is_(None),
+                OntologyTerm.hvt_id.is_not(None),
+            )
+            .order_by(OntologyTerm.label, OntologyTerm.id)
+        )
+    )
+    ids = {t.id: node_id(NODE_TERM, t.hvt_id) for t in terms}
+    for t in terms:
+        g.add_node(
+            Node(ids[t.id], NODE_TERM, t.label, meta={"hvt_id": t.hvt_id, "domain": t.domain, "status": t.status})
+        )
+    for t in terms:
+        if t.parent_id in ids:
+            g.add_edge(ids[t.id], ids[t.parent_id], REL_SUBCLASS_OF, {"kind": "fk", "field": "ontology_terms.parent_id"})
+        if t.replaced_by_id in ids:
+            g.add_edge(
+                ids[t.id], ids[t.replaced_by_id], REL_REPLACED_BY, {"kind": "fk", "field": "ontology_terms.replaced_by_id"}
+            )
+    return ids
+
+
+def _classify(g: Graph, term_ids: dict[str, str], src: str, term_id: str | None, field_name: str) -> None:
+    if term_id and term_id in term_ids:
+        g.add_edge(src, term_ids[term_id], REL_CLASSIFIED_AS, {"kind": "fk", "field": field_name})
+
+
+def _add_catalog(db: Session, g: Graph, term_ids: dict[str, str]) -> None:
     species = list(
         db.scalars(select(Species).where(Species.deleted_at.is_(None)).order_by(Species.scientific_name, Species.id))
     )
@@ -212,6 +256,7 @@ def _add_catalog(db: Session, g: Graph) -> None:
         g.add_node(
             Node(node_id(NODE_SPECIES, s.id), NODE_SPECIES, _species_label(s), meta={"scientific_name": s.scientific_name})
         )
+        _classify(g, term_ids, node_id(NODE_SPECIES, s.id), s.term_id, "species.term_id")
 
     cultivars = db.scalars(select(Cultivar).where(Cultivar.deleted_at.is_(None)).order_by(Cultivar.name, Cultivar.id))
     for c in cultivars:
@@ -252,6 +297,7 @@ def _add_catalog(db: Session, g: Graph) -> None:
         trait = node_id(NODE_TRAIT, a.variable)
         g.add_node(Node(trait, NODE_TRAIT, TRAIT_LABELS.get(a.variable, a.variable), meta={"variable": a.variable}))
         origins[trait].append(a.origin)
+        _classify(g, term_ids, trait, a.variable_term_id, "trait_assertions.variable_term_id")
         g.add_edge(
             subject,
             trait,
@@ -277,9 +323,10 @@ def _add_catalog(db: Session, g: Graph) -> None:
         g.nodes[trait].origin = min(values, key=lambda o: _ORIGIN_RANK.get(o, len(_ORIGIN_RANK)))
 
 
-def _add_tenant(db: Session, ctx: RequestContext, g: Graph) -> None:
+def _add_tenant(db: Session, ctx: RequestContext, g: Graph, term_ids: dict[str, str]) -> None:
     for p in db.scalars(scoped(Project, ctx).order_by(Project.created_at, Project.id)):
         g.add_node(Node(node_id(NODE_PROJECT, p.id), NODE_PROJECT, p.name, meta={"system": p.system}))
+        _classify(g, term_ids, node_id(NODE_PROJECT, p.id), p.system_term_id, "projects.system_term_id")
 
     cycles = db.scalars(scoped(CropCycle, ctx).order_by(CropCycle.created_at, CropCycle.id)).unique()
     for c in cycles:
@@ -292,6 +339,7 @@ def _add_tenant(db: Session, ctx: RequestContext, g: Graph) -> None:
             label += f" · {c.started_on.isoformat()}"
         cid = node_id(NODE_CROP_CYCLE, c.id)
         g.add_node(Node(cid, NODE_CROP_CYCLE, label, meta={"project_id": c.project_id, "status": c.status}))
+        _classify(g, term_ids, cid, c.stage_term_id, "crop_cycles.stage_term_id")
         g.add_edge(project, cid, REL_HAS_CYCLE, {"kind": "fk", "field": "crop_cycles.project_id"})
         g.add_edge(cid, node_id(NODE_SPECIES, c.species_id), REL_GROWS, {"kind": "fk", "field": "crop_cycles.species_id"})
         if c.cultivar_id:
@@ -328,8 +376,9 @@ def _add_stored_edges(db: Session, ctx: RequestContext, g: Graph) -> None:
 def build_graph(db: Session, ctx: RequestContext) -> Graph:
     """Grafo visible para el tenant activo: catálogo global + datos propios + aristas guardadas visibles."""
     g = Graph()
-    _add_catalog(db, g)
-    _add_tenant(db, ctx, g)
+    term_ids = _add_terms(db, g)
+    _add_catalog(db, g, term_ids)
+    _add_tenant(db, ctx, g, term_ids)
     _add_stored_edges(db, ctx, g)
     return g
 

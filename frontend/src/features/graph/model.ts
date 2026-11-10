@@ -10,6 +10,7 @@ export const TYPE_META: Record<NodeType, { label: string; plural: string }> = {
   project: { label: 'Proyecto', plural: 'Proyectos' },
   crop_cycle: { label: 'Ciclo de cultivo', plural: 'Ciclos' },
   prototype: { label: 'Prototipo', plural: 'Prototipos' },
+  term: { label: 'Término', plural: 'Términos' },
 }
 
 /** [desde el origen, desde el destino] */
@@ -21,6 +22,9 @@ const RELATION_LABELS: Record<string, [string, string]> = {
   has_cycle: ['Ciclo del proyecto', 'Pertenece al proyecto'],
   designed_for: ['Diseñado para', 'Prototipo diseñado para esta'],
   related_to: ['Relacionado con', 'Relacionado con'],
+  subclass_of: ['Subclase de', 'Término más específico'],
+  classified_as: ['Clasificado como', 'Datos clasificados'],
+  replaced_by: ['Reemplazado por', 'Reemplaza a'],
 }
 
 export function relationLabel(relation: string, outgoing: boolean): string {
@@ -48,6 +52,8 @@ export function nodeLink(node: GraphNode): NodeLink {
       return meta.project_id ? { kind: 'internal', to: `/app/projects/${meta.project_id}`, label: 'Abrir proyecto del ciclo' } : null
     case 'prototype':
       return { kind: 'internal', to: `/app/prototypes/${rawId}`, label: 'Abrir prototipo' }
+    case 'term':
+      return { kind: 'internal', to: `/app/ontologia?term=${rawId}`, label: 'Abrir término en la ontología' }
     case 'source':
       return meta.url ? { kind: 'external', href: meta.url, label: 'Abrir fuente original' } : null
     default:

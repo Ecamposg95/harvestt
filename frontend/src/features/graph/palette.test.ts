@@ -10,6 +10,11 @@ describe('graphPalette', () => {
     }
   })
 
+  it('incluye el término en claro y oscuro', () => {
+    expect(graphPalette(false).node.term).toMatch(/^#/)
+    expect(graphPalette(true).node.term).toMatch(/^#/)
+  })
+
   it('cambia nodos, aristas y etiquetas con el tema', () => {
     const light = graphPalette(false)
     const dark = graphPalette(true)
