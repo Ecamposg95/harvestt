@@ -39,6 +39,8 @@ Rama `feat/hito-m2-ontologia`. Ejecución con subagentes: implementación y revi
 | 8 · Página de ontología | Completa (revisada) | `5422c96` |
 | 9 · Propuestas y revisión (UI) | Completa (revisada) | `fa49e86` |
 | 10 · Visión, docs y puerta | Completa (revisada) | `5d646b6`, `5928f2a` |
+| Revisión final de rama | Completa (1 ronda de corrección) | `48db79e` |
+| Fusión y despliegue | En producción el 2026-11-10 | `b272409` |
 
 ## Global Constraints
 

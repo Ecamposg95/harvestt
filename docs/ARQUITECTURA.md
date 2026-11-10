@@ -87,7 +87,7 @@ La especificación OpenAPI completa se publica en `/api/docs`.
 
 `GET /public/vision` devuelve cifras con origen y razón; una cifra sin dato es `null` y se muestra «pronto» o «Sin datos suficientes», nunca 0 por falta de dato. «Nodos operando» cuenta proyectos con un dispositivo no simulado con lectura no simulada en los últimos 7 días (ventana acotada en SQL). Las solicitudes públicas (`POST /public/requests`) llevan un campo trampa anti-bots, exigen `lat` y `lon` juntos (422 en caso contrario) y redondean las coordenadas a 1 decimal antes de guardarse. Aprobar una solicitud solo cambia su estado (sin invitación por correo). Configuración: `PUBLIC_ORIGIN_LABEL`, `PUBLIC_ORIGIN_LAT`, `PUBLIC_ORIGIN_LON`. El globo es un chunk perezoso de three.js con mapa 2D sin WebGL.
 
-### 5.2.2 Módulos `ontology` y `term_links` (M2, en rama)
+### 5.2.2 Módulos `ontology` y `term_links` (M2)
 
 `ontology` es un módulo separable: importa solo de `app.core` y `app.modules.identity`, nunca de catálogo, proyectos, grafo, telemetría ni visión, para poder extraerse como servicio propio. Los términos son globales (sin organización) y pertenecen a un dominio (`organism`, `plant`, `trait`, `environment`, `place`, `node`). Ciclo de vida: `proposed → in_review → published | rejected`; un término publicado solo puede pasar a `obsolete`, con `replaced_by` apuntando a otro publicado. El ID permanente `HVT:` + 6 dígitos se asigna al publicar, dentro de un candado de publicación que serializa las versiones (`with_for_update()`), y nunca se reutiliza. Cada publicación, obsolescencia o cambio de equivalencias de un término publicado crea una versión nueva (`OntologyRelease`, entero que empieza en 1 con la semilla). Proponer requiere cuenta; revisar, obsoletar y editar equivalencias de un publicado es solo de superadministrador, con nota obligatoria de 3 a 500 caracteres. La etiqueta se compara normalizada (NFKD sin acentos, `casefold`, espacios colapsados) por dominio. Las equivalencias (`exact`, `close`, `broad` → `skos:exactMatch`, `skos:closeMatch`, `skos:broadMatch`) apuntan a `ontology_external_concepts`; la sugerencia es una búsqueda en esa tabla, sin LLM. La semilla de 45 términos se publica al arrancar de forma idempotente. La exportación pública (Turtle con `owl:versionInfo`, y JSON) lleva licencia CC-BY 4.0 y construye las IRI con `ONTOLOGY_BASE_IRI`.
 
@@ -144,7 +144,7 @@ Sistema de diseño «Salvia cristal», con modo claro y oscuro y diseño adaptab
 | `0006_studio_layout_species_media` | Zonas y plantas del Studio; medios de especie |
 | `0007_graph_edges` | Aristas explícitas del grafo |
 | `0008_vision` | Reconocimientos y solicitudes entrantes (módulo `vision`, M1) |
-| `0009_ontology` | Términos, equivalencias, conceptos externos y versiones de la ontología; columnas `*_term_id` en catálogo y proyectos (M2, en rama, sin aplicar en producción) |
+| `0009_ontology` | Términos, equivalencias, conceptos externos y versiones de la ontología; columnas `*_term_id` en catálogo y proyectos (M2; aplicada en producción el 2026-11-10) |
 
 Toda migración se verifica en PostgreSQL 17 con el ciclo `upgrade → check → downgrade → upgrade → check` sin diferencias.
 
