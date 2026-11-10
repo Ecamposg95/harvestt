@@ -35,6 +35,10 @@ async function fetchOntology(): Promise<{ terms: TermSummary[]; version: number 
   return { terms, version }
 }
 
+function isPublic(t: TermSummary): boolean {
+  return t.status === 'published' || t.status === 'obsolete'
+}
+
 function isDomain(d: string): d is Domain {
   return (DOMAINS as readonly string[]).includes(d)
 }
@@ -95,7 +99,7 @@ export default function OntologyPage() {
     const timer = setTimeout(() => {
       ontologyApi
         .list({ q })
-        .then((results) => alive && setSearch({ q, results, error: null }))
+        .then((all) => alive && setSearch({ q, results: all.filter(isPublic), error: null }))
         .catch((err) => alive && setSearch({ q, results: [], error: errorMessage(err, 'No se pudo buscar') }))
     }, DEBOUNCE_MS)
     return () => {
@@ -105,12 +109,14 @@ export default function OntologyPage() {
   }, [query])
 
   const terms = state.phase === 'ready' ? state.terms : null
-  const tree = useMemo(() => (terms ? buildTree(terms) : null), [terms])
+  // Explorar muestra solo el vocabulario vigente; las propuestas viven en «Mis propuestas» y «Revisión».
+  const explorable = useMemo(() => (terms ? terms.filter(isPublic) : null), [terms])
+  const tree = useMemo(() => (explorable ? buildTree(explorable) : null), [explorable])
   const counts = useMemo(() => {
     const out = Object.fromEntries(DOMAINS.map((d) => [d, 0])) as Record<Domain, number>
-    for (const t of terms ?? []) if (isDomain(t.domain)) out[t.domain] += 1
+    for (const t of explorable ?? []) if (isDomain(t.domain)) out[t.domain] += 1
     return out
-  }, [terms])
+  }, [explorable])
 
   // ?term= acepta el ID HVT (lo permanente) o, para propuestas sin ID, el id interno.
   const selected = useMemo(
@@ -324,7 +330,7 @@ export default function OntologyPage() {
             ) : (
               <Empty
                 title="Elige un término"
-                description={`Explora ${terms?.length ?? 0} términos por dominio o búscalos por nombre. Cada ficha muestra su ID permanente, sus equivalencias y dónde se usa.`}
+                description={`Explora ${explorable?.length ?? 0} términos por dominio o búscalos por nombre. Cada ficha muestra su ID permanente, sus equivalencias y dónde se usa.`}
               />
             )}
           </div>

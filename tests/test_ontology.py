@@ -222,7 +222,32 @@ def test_request_changes_then_edit_then_approve(client, db, tenants):
     assert client.get("/api/v1/ontology/releases", headers=owner).json()[0]["version"] == 1
     edited = client.patch(f"{T}/{term['id']}", json={"definition": "Definición corregida y completa."}, headers=owner)
     assert edited.json()["status"] == "proposed"
+    assert edited.json()["review_note"] is None and edited.json()["reviewed_at"] is None
     assert _review(client, root, term["id"]).json()["status"] == "published"
+
+
+def test_edit_cannot_overwrite_concurrent_approval(client, db, tenants):
+    from app.modules.identity.models import User
+    from app.core.errors import AppError
+    import pytest
+    from app.modules.ontology import service as ontology_service
+    from app.modules.ontology.schemas import TermEdit
+
+    _v1(db)
+    owner = tenants["alfa_viewer"]
+    term = _propose(client, owner).json()
+    stale = db.get(OntologyTerm, term["id"])
+    label = stale.label
+    root = _root(db, client)
+    assert _review(client, root, term["id"]).json()["status"] == "published"
+    user = db.get(User, stale.proposed_by)
+    assert stale.status == "proposed"  # instancia obsoleta: la sesión de prueba no la recargó
+    with pytest.raises(AppError) as exc:
+        ontology_service.edit(db, user, stale, TermEdit(label="Cambiada"))
+    assert exc.value.status_code == 409 and exc.value.code == "not_editable"
+    db.rollback()
+    fresh = db.get(OntologyTerm, term["id"])
+    assert fresh.status == "published" and fresh.label == label and fresh.hvt_id
 
 
 def test_reject_keeps_reason_visible_to_proposer(client, db, tenants):
@@ -568,6 +593,10 @@ def test_export_turtle_shape(client, db):
     assert "skos:exactMatch" in ttl
     assert 'dcterms:creator "Equipo HarvestT"' in ttl
     assert "secreto" not in ttl
+    assert 'skos:altLabel "' in ttl
+    air = ttl[ttl.index('rdfs:label "Temperatura del aire"@es'):]
+    air = air[:air.index(" .\n")]
+    assert 'qudt:ucumCode "Cel"' in air and "skos:altLabel" in air
 
 
 def test_turtle_escapes_literals(db):

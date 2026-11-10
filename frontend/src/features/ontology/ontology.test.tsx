@@ -191,6 +191,26 @@ it('una propuesta sin ID dice «Sin ID: propuesta»', async () => {
   }
 })
 
+it('Explorar no mezcla propuestas ni rechazados en el árbol, los conteos ni la búsqueda', async () => {
+  const proposal = summary({ id: 'p1', domain: 'organism', label: 'Variedad fantasma', status: 'proposed' })
+  const rejected = summary({ id: 'p2', domain: 'organism', label: 'Rechazada fantasma', status: 'rejected' })
+  TERMS.push(proposal, rejected)
+  try {
+    setup()
+    const tree = await screen.findByRole('list', { name: 'Términos de Organismo' })
+    expect(within(tree).getByRole('button', { name: /Especie/ })).toBeInTheDocument()
+    expect(within(tree).queryByText(/fantasma/)).toBeNull()
+    const organismTab = screen.getByRole('tab', { name: /Organismo/ })
+    const expected = TERMS.filter((t) => t.domain === 'organism' && ['published', 'obsolete'].includes(t.status)).length
+    expect(organismTab.textContent).toContain(String(expected))
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'fantasma' } })
+    expect(await screen.findByText(/Ningún término coincide/)).toBeInTheDocument()
+  } finally {
+    TERMS.pop()
+    TERMS.pop()
+  }
+})
+
 // --- Escritura: proponer, mis propuestas y revisión -------------------------------------------
 
 const axiosError = (status: number, code: string, message: string, details: Record<string, unknown> = {}) => ({

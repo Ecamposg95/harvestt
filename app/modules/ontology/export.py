@@ -80,6 +80,7 @@ def to_turtle(
         "@prefix skos: <http://www.w3.org/2004/02/skos/core#> .",
         "@prefix dcterms: <http://purl.org/dc/terms/> .",
         "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .",
+        "@prefix qudt: <http://qudt.org/schema/qudt/> .",
         "",
         f"{_iri_ref(base_iri)} a owl:Ontology ;",
         f"    owl:versionInfo {_lit(str(version))} ;",
@@ -93,6 +94,10 @@ def to_turtle(
             f"skos:definition {_lit(t.definition)}@es",
             f"skos:notation {_lit(t.hvt_id)}",
         ]
+        for alias in t.aliases or []:
+            props.append(f"skos:altLabel {_lit(alias)}@es")
+        if t.unit:
+            props.append(f"qudt:ucumCode {_lit(t.unit)}")
         parent = by_id.get(t.parent_id) if t.parent_id else None
         if parent is not None:
             props.append(f"rdfs:subClassOf {_iri_ref(iri(parent.hvt_id, base_iri))}")

@@ -65,7 +65,7 @@ Semilla: 45 términos publicados en la versión 1, firmados «Equipo HarvestT»,
 | Reconocimientos (medallas) | **Real** — administrables por superadministrador, con evidencia obligatoria; carga en producción pendiente (evidencia por confirmar con el equipo) |
 | Ontología: términos de la semilla (rama M2) | **Real** — 45 términos del equipo («Equipo HarvestT»), equivalencias externas verificadas; no desplegada |
 | Ontología: propuestas y revisión | **Real** — cualquier cuenta propone; revisa solo superadministrador, con razón visible |
-| Enlaces de datos existentes a términos | **Real** — solo por coincidencia exacta con etiqueta o alias publicado; sin correspondencia, «Desconocido» |
+| Enlaces de datos existentes a términos | **Real** — solo por coincidencia exacta con etiqueta o alias publicado; sin correspondencia el enlace queda vacío (sin término); se ve como conteo de uso en la ficha y aristas «clasificado como» en el grafo |
 | Exportación pública OWL/Turtle y JSON | **Real** — solo publicados y obsoletos; CC-BY 4.0 |
 | Rol de curador de la ontología | **Pendiente** — hoy revisa solo superadministrador |
 | Telemetría de dispositivos físicos | **Pendiente** — Etapa III |

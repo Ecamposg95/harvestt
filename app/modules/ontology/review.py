@@ -1,26 +1,18 @@
 """Revisión de propuestas, ID permanente, versiones de la ontología y obsolescencia."""
 from datetime import UTC, datetime
 
-from sqlalchemy import func, select, text
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError, unprocessable
 from app.modules.identity.models import User
+from app.modules.ontology.locks import ONTOLOGY_PUBLISH_LOCK, lock_term as _lock_term, serialize_publications  # noqa: F401
 from app.modules.ontology.models import OntologyRelease, OntologyTerm
 from app.modules.ontology.schemas import EquivalencesIn, ObsoleteIn, ReleaseOut, ReviewIn
 from app.modules.ontology.service import _audit, _check_duplicate, _check_parent, _set_equivalences
 
 ACTION_STATUS = {"request_changes": "in_review", "reject": "rejected"}
-
-
-ONTOLOGY_PUBLISH_LOCK = 7_250_002
-
-
-def serialize_publications(db: Session) -> None:
-    """Serializa publicaciones concurrentes (Postgres: candado asesor de transacción; SQLite: nada)."""
-    if db.get_bind().dialect.name == "postgresql":
-        db.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": ONTOLOGY_PUBLISH_LOCK})
 
 
 def current_version(db: Session, lock: bool = False) -> int:
@@ -41,12 +33,6 @@ def next_hvt_id(db: Session) -> str:
     """Mayor ID + 1 (el relleno con ceros hace que el orden léxico sea el numérico). Dentro del candado."""
     top = db.scalar(select(func.max(OntologyTerm.hvt_id)))
     return f"HVT:{(int(top[4:]) if top else 0) + 1:06d}"
-
-
-def _lock_term(db: Session, term: OntologyTerm) -> None:
-    """Toma el candado de publicación y recarga el término con bloqueo de fila antes de validar su estado."""
-    serialize_publications(db)
-    db.refresh(term, with_for_update=True)
 
 
 def _commit(db: Session) -> None:

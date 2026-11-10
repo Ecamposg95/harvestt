@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.audit import record
 from app.core.errors import AppError, forbidden, not_found, unprocessable
 from app.modules.identity.models import User
+from app.modules.ontology.locks import lock_term
 from app.modules.ontology.models import ExternalConcept, OntologyTerm, TermEquivalence
 from app.modules.ontology.schemas import EquivalenceOut, TermDetail, TermEdit, TermProposal, TermSummary
 from app.modules.ontology.text import normalize_label
@@ -157,6 +158,7 @@ def propose(db: Session, user: User, data: TermProposal) -> OntologyTerm:
 def edit(db: Session, user: User, term: OntologyTerm, data: TermEdit) -> OntologyTerm:
     if term.proposed_by != user.id:
         raise forbidden("Solo quien propuso el término puede editarlo")
+    lock_term(db, term)  # una revisión concurrente no puede ser pisada por una edición
     if term.status not in ("proposed", "in_review"):
         raise AppError(409, "not_editable", "El término ya no se puede editar")
     fields = data.model_dump(exclude_unset=True)
@@ -177,6 +179,7 @@ def edit(db: Session, user: User, term: OntologyTerm, data: TermEdit) -> Ontolog
     if data.equivalences is not None:
         _set_equivalences(db, term, data.equivalences)
     term.status = "proposed"
+    term.review_note = term.reviewed_by = term.reviewed_at = None  # el historial queda en la auditoría
     _audit(db, user, term, "edit", {"fields": sorted(fields)})
     db.commit()
     db.refresh(term)
