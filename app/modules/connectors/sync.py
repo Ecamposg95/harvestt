@@ -8,12 +8,13 @@ from sqlalchemy.orm import Session
 from app.core.errors import AppError
 from app.modules.catalog.models import Species
 from app.modules.connectors.base import Connector
+from app.modules.connectors.gbif import GbifConnector
 from app.modules.connectors.http import FetchError, Fetcher, make_fetcher
 from app.modules.connectors.models import ConnectorSnapshot, ConnectorSync
 from app.modules.connectors.registry import source_status
 from app.modules.identity.models import User
 
-CONNECTORS: dict[str, Connector] = {}
+CONNECTORS: dict[str, Connector] = {"gbif": GbifConnector()}
 
 SYNC_LOCK = 7_250_003
 COOLDOWN = timedelta(minutes=10)
