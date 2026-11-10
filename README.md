@@ -58,6 +58,7 @@ La cronología completa está en [`docs/HISTORIA.md`](docs/HISTORIA.md).
 | Impacto | KPIs de proyecto y públicos con fórmula y origen por cifra | Medido / Derivado / Simulado |
 | Grafo de conocimiento | Nodos y relaciones derivados únicamente de datos registrados, con procedencia | Derivado |
 | Página Visión (M1, en producción) | Página pública `/vision` con cifras honestas («nodos operando» medido; «lecturas firmadas» = pronto), globo con el prototipo histórico de CDMX y nodos futuros solo de solicitudes aprobadas, recorrido por capas y solicitudes de nodo o contacto; bandeja `/app/solicitudes` para superadministrador | Medido / Derivado / Ilustrativo |
+| Ontología (M2, en rama, pendiente de autorización para fusionar y desplegar) | Términos globales con ID permanente `HVT:000001`, ciclo propuesta → revisión → publicación, equivalencias verificadas con vocabularios externos (NCBI Taxon, PO, BBCH, AGROVOC, UCUM, SOSA, …), versiones y exportación pública OWL/Turtle y JSON con licencia CC-BY 4.0; los datos existentes se enlazan a términos solo por coincidencia exacta y, sin ella, quedan «Desconocido»; página `/app/ontologia` y términos en el grafo | Real (semilla del equipo y propuestas revisadas) / Desconocido |
 
 ## Arquitectura en síntesis
 
@@ -66,12 +67,12 @@ Monolito modular *API-first* y multi-organización desde el origen.
 ```
 React 18 · TypeScript · Vite · Tailwind · three.js · d3-force
                          │  /api/v1
-FastAPI · Pydantic 2 · SQLAlchemy 2 · Alembic (0001 → 0008)
+FastAPI · Pydantic 2 · SQLAlchemy 2 · Alembic (0001 → 0009)
                          │
 PostgreSQL 17                 Almacenamiento de objetos S3 (Railway)
 ```
 
-Módulos de dominio: `identity`, `audit`, `catalog`, `projects`, `prototypes`, `simulation`, `telemetry`, `studio`, `impact`, `graph`, `home`, `vision`. Descripción completa, modelo de datos y decisiones en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
+Módulos de dominio: `identity`, `audit`, `catalog`, `projects`, `prototypes`, `simulation`, `telemetry`, `studio`, `impact`, `graph`, `home`, `vision`, `ontology` (separable), `term_links`. Descripción completa, modelo de datos y decisiones en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
 
 ## Puesta en marcha
 
