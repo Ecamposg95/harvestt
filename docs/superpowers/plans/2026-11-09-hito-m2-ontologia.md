@@ -32,8 +32,8 @@ Rama `feat/hito-m2-ontologia`. Ejecución con subagentes: implementación y revi
 | 1 · Modelos y migración 0009 | Completa (revisada) | `111db9d` |
 | 2 · Propuestas y sugerencias | Completa (revisada) | `ea0e761` |
 | 3 · Revisión y versiones | Completa (revisada, 1 ronda de corrección) | `681b13b`, `398939f` |
-| 4 · Semilla verificada | En curso | |
-| 5 · Puente con datos | Pendiente | |
+| 4 · Semilla verificada | Completa (revisada) | `d45e902` |
+| 5 · Puente con datos | En curso | |
 | 6 · Exportación | Pendiente | |
 | 7 · Grafo | Pendiente | |
 | 8 · Página de ontología | Pendiente | |
