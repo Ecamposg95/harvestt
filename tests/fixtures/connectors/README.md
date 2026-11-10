@@ -32,3 +32,9 @@ Reales (recortadas):
 Sintéticas:
 - `search_two_hits.json`: copia de la búsqueda real con `totalhits: 2` y un segundo resultado inventado (`Q99999999`).
 - `commons_nc.json`: copia de la respuesta real de Commons con `LicenseShortName: "CC BY-NC 2.0"`.
+
+## genesys/ (TODAS SINTÉTICAS)
+
+Genesys exige token y no hay API alcanzable sin credenciales, así que ninguna respuesta es real. Se construyeron solo con los campos documentados del `AccessionDTO` (`instituteCode`, `accessionNumber`, `doi`, `origCty`, `sampStat`, `taxonomy.genus`, `taxonomy.species`) y el sobre paginado (`content`, `totalElements`, `number`, `size`, `last`). Los códigos de instituto, números y DOI son inventados.
+- `acn_filter_page_0.json` y `acn_filter_page_1.json`: lechuga, 5 accesiones en dos páginas (`totalElements: 5`).
+- `acn_filter_wrong_genus.json`: un registro de otro género (*Solanum lycopersicum*), para probar que un filtro no aplicado falla.

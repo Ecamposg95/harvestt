@@ -102,6 +102,23 @@ class CropCycleOut(BaseModel):
     stage: str
     status: str
     created_at: datetime
+    accession_ref: dict | None = None
+
+
+class CropCycleListItem(CropCycleOut):
+    project_name: str
+
+
+class AccessionLink(BaseModel):
+    source: Literal["genesys"]
+    institute_code: str = Field(pattern=r"^[A-Z]{3}\d{3,4}$")
+    accession_number: str = Field(min_length=1, max_length=64)
+    doi: str | None = Field(default=None, pattern=r"^10\.\S+/\S+$")
+
+    @field_validator("doi", mode="before")
+    @classmethod
+    def _clean(cls, v):
+        return _blank_to_none(v)
 
 
 class ProjectOut(BaseModel):

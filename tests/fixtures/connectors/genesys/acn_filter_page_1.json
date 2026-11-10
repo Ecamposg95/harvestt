@@ -1,0 +1,30 @@
+{
+  "content": [
+    {
+      "instituteCode": "NLD037",
+      "accessionNumber": "CGN04568",
+      "doi": null,
+      "origCty": null,
+      "sampStat": null,
+      "taxonomy": {
+        "genus": "Lactuca",
+        "species": "sativa"
+      }
+    },
+    {
+      "instituteCode": "USA029",
+      "accessionNumber": "PI 123456",
+      "doi": "10.18730/CCC3",
+      "origCty": "MEX",
+      "sampStat": 999,
+      "taxonomy": {
+        "genus": "Lactuca",
+        "species": "sativa"
+      }
+    }
+  ],
+  "totalElements": 5,
+  "number": 1,
+  "size": 3,
+  "last": true
+}

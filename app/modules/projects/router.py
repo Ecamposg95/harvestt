@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
@@ -6,6 +6,8 @@ from app.core.deps import RequestContext, get_context, require_role
 from app.modules.identity.models import ROLE_EDITOR
 from app.modules.projects import service
 from app.modules.projects.schemas import (
+    AccessionLink,
+    CropCycleListItem,
     CropCycleCreate,
     CropCycleOut,
     ObservationCreate,
@@ -39,6 +41,15 @@ def list_projects(
 def create_project(data: ProjectCreate, ctx: RequestContext = Depends(editor), db: Session = Depends(get_db)):
     project = service.create_project(db, ctx, data)
     return service.project_detail(db, ctx, project)
+
+
+@router.get("/crop-cycles", response_model=list[CropCycleListItem])
+def list_crop_cycles(
+    species_id: str = Query(min_length=1, max_length=36),
+    ctx: RequestContext = Depends(get_context),
+    db: Session = Depends(get_db),
+):
+    return service.list_cycles_by_species(db, ctx, species_id)
 
 
 @router.get("/{project_id}", response_model=ProjectDetail)
@@ -83,3 +94,25 @@ def create_observation(
 ):
     project = service.get_project(db, ctx, project_id)
     return service.observation_out(service.create_observation(db, ctx, project, data))
+
+
+@router.put("/{project_id}/crop-cycles/{cycle_id}/accession", response_model=CropCycleOut)
+def link_accession(
+    project_id: str,
+    cycle_id: str,
+    data: AccessionLink,
+    species_id: str = Query(min_length=1, max_length=36),
+    ctx: RequestContext = Depends(editor),
+    db: Session = Depends(get_db),
+):
+    project = service.get_project(db, ctx, project_id)
+    return service.crop_cycle_out(service.link_accession(db, ctx, project, cycle_id, species_id, data))
+
+
+@router.delete("/{project_id}/crop-cycles/{cycle_id}/accession", status_code=204)
+def unlink_accession(
+    project_id: str, cycle_id: str, ctx: RequestContext = Depends(editor), db: Session = Depends(get_db)
+):
+    project = service.get_project(db, ctx, project_id)
+    service.unlink_accession(db, ctx, project, cycle_id)
+    return Response(status_code=204)

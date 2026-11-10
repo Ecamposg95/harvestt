@@ -9,6 +9,7 @@ from app.core.errors import AppError
 from app.modules.catalog.models import Species
 from app.modules.connectors.base import Connector
 from app.modules.connectors.gbif import GbifConnector
+from app.modules.connectors.genesys import GenesysConnector
 from app.modules.connectors.http import FetchError, Fetcher, make_fetcher
 from app.modules.connectors.models import ConnectorSnapshot, ConnectorSync
 from app.modules.connectors.registry import source_status
@@ -20,6 +21,7 @@ CONNECTORS: dict[str, Connector] = {
     "gbif": GbifConnector(),
     "wfo": WfoConnector(),
     "wikidata": WikidataConnector(),
+    "genesys": GenesysConnector(),
 }
 
 SYNC_LOCK = 7_250_003
