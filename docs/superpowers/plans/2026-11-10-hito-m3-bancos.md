@@ -26,7 +26,7 @@ Rama `feat/hito-m3-bancos`. Se actualiza y se sube al cerrar cada tarea.
 
 | Tarea | Estado | Commits |
 |---|---|---|
-| 1 · Modelos, registro y migración 0010 | Pendiente | |
+| 1 · Modelos, registro y migración 0010 | Completa (revisada) | `57f9338` |
 | 2 · Motor de sincronización | Pendiente | |
 | 3 · Conector GBIF | Pendiente | |
 | 4 · Conectores WFO y Wikidata/Commons | Pendiente | |
