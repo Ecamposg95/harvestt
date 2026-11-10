@@ -1,0 +1,230 @@
+{
+ "homotypic": [
+  {
+   "id": "wfo-0000052192-2026-06",
+   "name": {
+    "scientificName": "Lactuca scariola var. sativa",
+    "authorship": "(L.) Moris"
+   },
+   "status": "synonym"
+  }
+ ],
+ "heterotypic": [
+  {
+   "id": "wfo-0000039414-2026-06",
+   "name": {
+    "scientificName": "Lactuca capitata",
+    "authorship": "Garsault"
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000086950-2026-06",
+   "name": {
+    "scientificName": "Lactuca capitata",
+    "authorship": "(L.) DC."
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000026479-2026-06",
+   "name": {
+    "scientificName": "Lactuca crispa",
+    "authorship": "(L.) Roth"
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000011138-2026-06",
+   "name": {
+    "scientificName": "Lactuca dregeana",
+    "authorship": "DC."
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000023762-2026-06",
+   "name": {
+    "scientificName": "Lactuca laciniata",
+    "authorship": "Roth"
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000018086-2026-06",
+   "name": {
+    "scientificName": "Lactuca palmata",
+    "authorship": "Willd."
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000097575-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa subsp. asparagina",
+    "authorship": "(L.H.Bailey) Janch."
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000069781-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa subsp. capitata",
+    "authorship": "(L.) Schübl. & G.Martens"
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000106036-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa subsp. crispa",
+    "authorship": "(L.) Schübl. & G.Martens"
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000098437-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa subsp. longifolia",
+    "authorship": "(Lam.) Alef."
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000064188-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa subsp. minii",
+    "authorship": "Hadidi"
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000106008-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa subsp. romana",
+    "authorship": "Spielm. ex Schübl. & G.Martens"
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000058491-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa subsp. sativa",
+    "authorship": null
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000109280-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa subsp. secalina",
+    "authorship": "Alef."
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-1200069040-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa var. acephala",
+    "authorship": "Alef."
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0001415710-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa var. asparagina",
+    "authorship": "L.H.Bailey"
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-1200069041-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa var. aurescens",
+    "authorship": "Hegi"
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-1200068578-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa var. capitata",
+    "authorship": "L."
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-1200068583-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa var. crispa",
+    "authorship": "L."
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-1200069042-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa var. foliosa",
+    "authorship": "Bremer"
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-1200069043-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa var. integrifolia",
+    "authorship": "Stankov & Taliev"
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-1200069175-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa var. longifolia",
+    "authorship": "Lam."
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-1200069044-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa var. pseudoscariola",
+    "authorship": "Schur"
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000056724-2026-06",
+   "name": {
+    "scientificName": "Lactuca sativa var. sativa",
+    "authorship": null
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-1200069218-2026-06",
+   "name": {
+    "scientificName": "Lactuca scariola var. hortensis",
+    "authorship": "Bisch."
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-1200069051-2026-06",
+   "name": {
+    "scientificName": "Lactuca scariola var. laciniata",
+    "authorship": "(Roth) Bisch."
+   },
+   "status": "synonym"
+  },
+  {
+   "id": "wfo-0000105972-2026-06",
+   "name": {
+    "scientificName": "Lactuca scariola var. sativa",
+    "authorship": "Moris"
+   },
+   "status": "synonym"
+  }
+ ]
+}

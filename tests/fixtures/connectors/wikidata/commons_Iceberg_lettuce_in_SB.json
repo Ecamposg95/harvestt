@@ -1,0 +1,43 @@
+{
+ "query": {
+  "pages": {
+   "2344199": {
+    "pageid": 2344199,
+    "ns": 6,
+    "title": "File:Iceberg lettuce in SB.jpg",
+    "imageinfo": [
+     {
+      "thumburl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Iceberg_lettuce_in_SB.jpg/960px-Iceberg_lettuce_in_SB.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "thumbwidth": 800,
+      "thumbheight": 600,
+      "descriptionurl": "https://commons.wikimedia.org/wiki/File:Iceberg_lettuce_in_SB.jpg",
+      "extmetadata": {
+       "Artist": {
+        "value": "<a href=\"https://en.wikipedia.org/wiki/User:Geographer\" class=\"extiw\" title=\"en:User:Geographer\">en:User:Geographer</a>",
+        "source": "commons-desc-page"
+       },
+       "LicenseShortName": {
+        "value": "CC BY 1.0",
+        "source": "commons-desc-page",
+        "hidden": ""
+       },
+       "LicenseUrl": {
+        "value": "https://creativecommons.org/licenses/by/1.0",
+        "source": "commons-desc-page"
+       },
+       "AttributionRequired": {
+        "value": "true",
+        "source": "commons-desc-page",
+        "hidden": ""
+       },
+       "UsageTerms": {
+        "value": "Creative Commons Attribution 1.0",
+        "source": "commons-desc-page"
+       }
+      }
+     }
+    ]
+   }
+  }
+ }
+}

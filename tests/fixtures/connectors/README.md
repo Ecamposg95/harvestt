@@ -11,3 +11,24 @@ Reales (recortadas a los campos que usa el conector):
 
 Sintéticas (derivadas de `mx_page_0.json`):
 - `mx_page_0_small.json` y `mx_page_1_small.json`: los primeros 4 y los 2 siguientes registros reales, con `count: 6` y `endOfRecords` coherente, para probar la paginación con pocas filas.
+
+## wfo/ (grabadas el 2026-11-10 desde `api.checklistbank.org`, dataset 2004, *Lactuca sativa* L.)
+
+Reales (recortadas a los campos que usa el conector):
+- `match_lactuca.json`: `match/nameusage?q=Lactuca sativa&authorship=L.` (`type: "exact"`; `usage` reducido a `id`, `name`, `authorship`, `rank`, `status`).
+- `synonyms_wfo-0000128816.json`: `taxon/wfo-0000128816/synonyms` (1 homotípico y 27 heterotípicos; cada uno reducido a `id`, `name.scientificName`, `name.authorship`, `status`).
+- `dataset_2004.json`: `dataset/2004` recortado a `title`, `license` y `version`.
+
+Sintética:
+- `match_fuzzy.json`: copia de `match_lactuca.json` con `type: "variant"`.
+
+## wikidata/ (grabadas el 2026-11-10; lechuga, GBIF 7403263, `Q83193`)
+
+Reales (recortadas):
+- `search_P846_7403263.json`: `list=search&srsearch=haswbstatement:P846=7403263`; la lista de resultados se redujo a `ns`, `title` y `pageid` (sin `snippet`).
+- `entity_Q83193.json`: `wbgetentities` con `labels|aliases|claims`, `languages=es|en`; solo etiquetas y alias `es`/`en` y las *claims* P846, P685, P7715, P961, P18 y P1843. Cada *claim* conserva `mainsnak`, `type` y `rank` (sin referencias). P18 conserva solo la primera declaración (`Iceberg lettuce in SB.jpg`); P1843 conserva todos los idiomas.
+- `commons_Iceberg_lettuce_in_SB.json`: `imageinfo` de Commons; solo `thumburl`, `thumbwidth`, `thumbheight`, `descriptionurl` y, de `extmetadata`, `Artist` (HTML real), `LicenseShortName` (`CC BY 1.0`), `LicenseUrl`, `AttributionRequired` y `UsageTerms`.
+
+Sintéticas:
+- `search_two_hits.json`: copia de la búsqueda real con `totalhits: 2` y un segundo resultado inventado (`Q99999999`).
+- `commons_nc.json`: copia de la respuesta real de Commons con `LicenseShortName: "CC BY-NC 2.0"`.

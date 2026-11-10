@@ -12,9 +12,15 @@ from app.modules.connectors.gbif import GbifConnector
 from app.modules.connectors.http import FetchError, Fetcher, make_fetcher
 from app.modules.connectors.models import ConnectorSnapshot, ConnectorSync
 from app.modules.connectors.registry import source_status
+from app.modules.connectors.wfo import WfoConnector
+from app.modules.connectors.wikidata import WikidataConnector
 from app.modules.identity.models import User
 
-CONNECTORS: dict[str, Connector] = {"gbif": GbifConnector()}
+CONNECTORS: dict[str, Connector] = {
+    "gbif": GbifConnector(),
+    "wfo": WfoConnector(),
+    "wikidata": WikidataConnector(),
+}
 
 SYNC_LOCK = 7_250_003
 COOLDOWN = timedelta(minutes=10)

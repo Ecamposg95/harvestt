@@ -1,0 +1,359 @@
+{
+ "entities": {
+  "Q83193": {
+   "type": "item",
+   "id": "Q83193",
+   "labels": {
+    "es": {
+     "language": "es",
+     "value": "lechuga"
+    },
+    "en": {
+     "language": "en",
+     "value": "Lactuca sativa"
+    }
+   },
+   "aliases": {
+    "es": [
+     {
+      "language": "es",
+      "value": "Lactuca sativa"
+     },
+     {
+      "language": "es",
+      "value": "lechugón"
+     },
+     {
+      "language": "es",
+      "value": "lechugon"
+     }
+    ],
+    "en": [
+     {
+      "language": "en",
+      "value": "lettuce"
+     }
+    ]
+   },
+   "claims": {
+    "P846": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P846",
+       "datavalue": {
+        "value": "7403263",
+        "type": "string"
+       },
+       "datatype": "external-id"
+      },
+      "type": "statement",
+      "rank": "normal"
+     }
+    ],
+    "P685": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P685",
+       "datavalue": {
+        "value": "4236",
+        "type": "string"
+       },
+       "datatype": "external-id"
+      },
+      "type": "statement",
+      "rank": "normal"
+     }
+    ],
+    "P7715": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P7715",
+       "datavalue": {
+        "value": "wfo-0000128816",
+        "type": "string"
+       },
+       "datatype": "external-id"
+      },
+      "type": "statement",
+      "rank": "normal"
+     }
+    ],
+    "P961": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P961",
+       "datavalue": {
+        "value": "228239-1",
+        "type": "string"
+       },
+       "datatype": "external-id"
+      },
+      "type": "statement",
+      "rank": "normal"
+     }
+    ],
+    "P18": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P18",
+       "datavalue": {
+        "value": "Iceberg lettuce in SB.jpg",
+        "type": "string"
+       },
+       "datatype": "commonsMedia"
+      },
+      "type": "statement",
+      "rank": "normal"
+     }
+    ],
+    "P1843": [
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "letusen yr ardd",
+         "language": "cy"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "garden lettuce",
+         "language": "en"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "Sla",
+         "language": "nl"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "locika setá",
+         "language": "cs"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "الخَسّ",
+         "language": "ar"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "莴苣",
+         "language": "zh-hans"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "莴苣",
+         "language": "zh"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "莴苣子",
+         "language": "zh"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "生菜",
+         "language": "zh"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "苦菜",
+         "language": "zh"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "白苣",
+         "language": "zh"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "苣胜子",
+         "language": "zh"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "llechuga",
+         "language": "ast"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "gojena solata",
+         "language": "sl"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     },
+     {
+      "mainsnak": {
+       "snaktype": "value",
+       "property": "P1843",
+       "datavalue": {
+        "value": {
+         "text": "レタス",
+         "language": "ja"
+        },
+        "type": "monolingualtext"
+       },
+       "datatype": "monolingualtext"
+      },
+      "type": "statement",
+      "rank": "normal"
+     }
+    ]
+   }
+  }
+ }
+}
