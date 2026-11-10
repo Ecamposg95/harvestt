@@ -294,3 +294,21 @@ def test_operating_formula_wording(client, monkeypatch):
     monkeypatch.setattr(vision_router, "settings", Settings(public_org_slug="alfa"))
     f = _figures(client.get("/api/v1/public/vision"))["operating_nodes"]["formula"]
     assert "dispositivo no simulado" in f and "físico" not in f
+
+
+def test_knowledge_layer_reports_ontology_version(client, db):
+    from app.modules.ontology import seed as ontology_seed
+    from app.modules.ontology.models import OntologyTerm
+
+    before = _layers(client.get("/api/v1/public/vision"))["knowledge"]
+    assert before["status"] == "in_construction"
+    assert before["reason"] == "Ontología, bancos de plantas y mapa GIS: hito M2–M4."
+
+    ontology_seed.seed(db)
+    db.commit()
+    published = db.scalar(select(func.count()).select_from(OntologyTerm).where(OntologyTerm.status == "published"))
+    assert published > 0
+    after = _layers(client.get("/api/v1/public/vision"))["knowledge"]
+    assert after["status"] == "in_construction"
+    assert after["reason"] == (f"Ontología publicada (versión 1, {published} términos). "
+                               "Bancos de plantas y mapa GIS: hitos M3–M4.")
