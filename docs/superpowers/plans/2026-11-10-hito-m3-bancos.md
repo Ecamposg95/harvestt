@@ -30,7 +30,7 @@ Rama `feat/hito-m3-bancos`. Se actualiza y se sube al cerrar cada tarea.
 | 2 · Motor de sincronización | Completa (revisada, 1 ronda de corrección) | `be44416`, `113bbf9` |
 | 3 · Conector GBIF | Completa (revisada) | `36efbb9` |
 | 4 · Conectores WFO y Wikidata/Commons | Completa (revisada) | `92ea77a`, `0a4018b` |
-| 5 · Genesys y «Usar en mi ciclo» (API) | Pendiente | |
+| 5 · Genesys y «Usar en mi ciclo» (API) | Completa (revisada) | `abe4c28` |
 | 6 · API de ficha y panel, comando de sync | Pendiente | |
 | 7 · Página `/app/fuentes` | Pendiente | |
 | 8 · Sección de la ficha | Pendiente | |
