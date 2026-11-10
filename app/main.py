@@ -18,6 +18,7 @@ from app.modules.identity.router import router as identity_router
 from app.modules.impact.router import router as impact_router
 from app.modules.ontology.router import public_router as ontology_public_router
 from app.modules.ontology.router import router as ontology_router
+from app.modules.term_links.router import router as term_links_router
 from app.modules.projects.router import router as projects_router
 from app.modules.prototypes.router import router as prototypes_router
 from app.modules.simulation.router import router as simulation_router
@@ -72,6 +73,7 @@ def create_app() -> FastAPI:
         vision_admin_router,
         ontology_router,
         ontology_public_router,
+        term_links_router,
     ):
         api.include_router(router)
     app.include_router(api)

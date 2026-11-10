@@ -19,6 +19,7 @@ from app.modules.projects.schemas import (
     ProjectOut,
     ProjectUpdate,
 )
+from app.modules.term_links.service import resolve
 
 UPDATABLE_FIELDS = ("name", "objectives", "area_m2", "system", "location")
 
@@ -39,7 +40,10 @@ def list_projects(db: Session, ctx: RequestContext, page: int, page_size: int):
 
 
 def create_project(db: Session, ctx: RequestContext, data: ProjectCreate) -> Project:
-    project = Project(organization_id=ctx.organization_id, version=1, **data.model_dump())
+    project = Project(
+        organization_id=ctx.organization_id, version=1,
+        system_term_id=resolve(db, "environment", data.system), **data.model_dump(),
+    )
     db.add(project)
     db.flush()
     record(db, ctx, "project", project.id, "create", data.model_dump(mode="json"))
@@ -58,6 +62,8 @@ def update_project(db: Session, ctx: RequestContext, project: Project, data: Pro
             if new != old:
                 changes[field] = {"from": old, "to": new}
                 setattr(project, field, new)
+                if field == "system":
+                    project.system_term_id = resolve(db, "environment", new)
     project.version += 1
     project.updated_at = datetime.now(timezone.utc)
     record(db, ctx, "project", project.id, "update", {"changes": changes, "version": project.version})
@@ -98,7 +104,10 @@ def create_crop_cycle(db: Session, ctx: RequestContext, project: Project, data: 
         cultivar = db.get(Cultivar, data.cultivar_id)
         if cultivar is None or cultivar.deleted_at is not None or cultivar.species_id != species.id:
             raise unprocessable("La variedad no pertenece a la especie indicada", {"field": "cultivar_id"})
-    cycle = CropCycle(organization_id=ctx.organization_id, project_id=project.id, **data.model_dump())
+    cycle = CropCycle(
+        organization_id=ctx.organization_id, project_id=project.id,
+        stage_term_id=resolve(db, "plant", data.stage), **data.model_dump(),
+    )
     db.add(cycle)
     db.flush()
     record(db, ctx, "crop_cycle", cycle.id, "create", {"project_id": project.id, **data.model_dump(mode="json")})
