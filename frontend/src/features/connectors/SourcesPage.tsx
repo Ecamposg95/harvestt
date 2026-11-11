@@ -115,7 +115,7 @@ export default function SourcesPage() {
               </thead>
               <tbody>
                 {rows.map((c) => (
-                  <tr key={c.key} className="border-t border-line align-top">
+                  <tr key={c.key} className="border-t border-border align-top">
                     <td className="px-4 py-3 font-medium text-fg">
                       <a href={c.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
                         {c.label}
@@ -149,8 +149,12 @@ export default function SourcesPage() {
                 <p>{c.contribution}</p>
                 <p className="text-xs text-muted">Licencia: {c.license}</p>
                 <StateCell c={c} sync={syncs[c.key]} />
-                <LastSync c={c} />
-                <Copies c={c} />
+                <div>
+                  <LastSync c={c} />
+                </div>
+                <div>
+                  <Copies c={c} />
+                </div>
                 <div>
                   <SyncButton c={c} sync={syncs[c.key]} onSync={onSync} />
                 </div>

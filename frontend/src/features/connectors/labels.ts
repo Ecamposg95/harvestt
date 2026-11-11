@@ -39,3 +39,29 @@ export const SAMPSTAT_LABELS: Record<number, string> = {
 
 export const sampstatLabel = (code: number | null | undefined): string =>
   code == null ? 'Sin dato' : (SAMPSTAT_LABELS[code] ?? `Código MCPD ${code}`)
+
+/** Fecha corta dd/mm/aaaa (zona local). */
+export const formatDay = (iso: string): string =>
+  new Date(iso).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' })
+
+/** Conteo con separador de miles de es-MX. */
+export const formatCount = (n: number): string => n.toLocaleString('es-MX')
+
+let regionNames: Intl.DisplayNames | null | undefined
+/** Nombre del país en español a partir de un código ISO alfa-2; otros códigos se muestran tal cual. */
+export function countryName(code: string | null | undefined): string {
+  if (!code) return 'Sin dato'
+  if (regionNames === undefined) {
+    try {
+      regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
+    } catch {
+      regionNames = null
+    }
+  }
+  if (code.length !== 2 || !regionNames) return code
+  try {
+    return regionNames.of(code.toUpperCase()) ?? code
+  } catch {
+    return code
+  }
+}

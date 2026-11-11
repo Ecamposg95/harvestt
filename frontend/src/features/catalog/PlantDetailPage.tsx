@@ -4,6 +4,7 @@ import { errorMessage, errorStatus } from '@/api/client'
 import { Button, Card, Empty, ErrorState, Forbidden, Loading, OriginBadge } from '@/components/ui'
 import { useAuth, useHasRole } from '@/store/auth'
 import { ExternalId, getPlant, Source, SpeciesDetail } from './api'
+import { BanksSection } from '../connectors/BanksSection'
 import { AddToProjectDialog } from './AddToProjectDialog'
 import {
   CONTEXT_LABELS,
@@ -130,7 +131,7 @@ export function PlantDetailPage() {
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="space-y-6 p-5 lg:col-span-1">
+        <Card className="min-w-0 space-y-6 p-5 lg:col-span-1">
           <Section title="Identidad">
             <dl className="space-y-2 text-sm">
               <div>
@@ -200,7 +201,7 @@ export function PlantDetailPage() {
           </Section>
         </Card>
 
-        <div className="space-y-6 lg:col-span-2">
+        <div className="min-w-0 space-y-6 lg:col-span-2">
           <Card className="p-5">
             <Section title="Afirmaciones y evidencia">
               <p className="text-xs text-muted">
@@ -280,6 +281,15 @@ export function PlantDetailPage() {
           {isSuperadmin && <MediaAdmin species={s} onChanged={() => load()} />}
         </div>
       </div>
+
+      <Card className="mt-6 p-5 sm:p-6">
+        <Section title="Bancos de plantas y distribución">
+          <p className="text-xs text-muted">
+            Copia local de fuentes abiertas. Lo importado se muestra junto a lo capturado por el equipo y nunca lo sobrescribe.
+          </p>
+          <BanksSection speciesId={s.id} commonNames={s.common_names} />
+        </Section>
+      </Card>
 
       {adding && <AddToProjectDialog species={s} onClose={() => setAdding(false)} />}
     </>
