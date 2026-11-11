@@ -7,6 +7,8 @@ from app.core import audit
 from app.core.config import settings
 from app.core.errors import not_found
 from app.core.mixins import utcnow
+from app.modules.connectors.models import ConnectorSnapshot
+from app.modules.connectors.registry import SOURCES, source_status
 from app.modules.identity.models import User
 from app.modules.catalog.models import Species
 from app.modules.ontology.models import OntologyTerm
@@ -109,14 +111,30 @@ def _operating_nodes(db: Session, org_id: str, now: datetime) -> int:
     return db.scalar(stmt) or 0
 
 
+def _banks_phrase(db: Session) -> str:
+    ok_sources = set(db.scalars(
+        select(ConnectorSnapshot.source).where(ConnectorSnapshot.status == "ok").distinct()
+    ))
+    active = [s for s in SOURCES if source_status(s.key) == "active" and s.key in ok_sources]
+    if not active:
+        return "Bancos de plantas: conectores listos, sin sincronizar. Mapa GIS: hito M4."
+    n = len(active)
+    text = f"Bancos de plantas: {n} {'fuente activa' if n == 1 else 'fuentes activas'} ({', '.join(s.label for s in active)})"
+    if source_status("genesys") != "active":
+        text += "; Genesys requiere credenciales"
+    return text + ". Mapa GIS: hito M4."
+
+
 def _knowledge_reason(db: Session) -> str:
     version = current_version(db)
     if version < 1:
-        return "Ontología, bancos de plantas y mapa GIS: hito M2–M4."
-    terms = db.scalar(select(func.count()).select_from(OntologyTerm).where(
-        OntologyTerm.status == "published", OntologyTerm.deleted_at.is_(None),
-    )) or 0
-    return f"Ontología publicada (versión {version}, {terms} términos). Bancos de plantas y mapa GIS: hitos M3–M4."
+        ontology = "Ontología sin publicar."
+    else:
+        terms = db.scalar(select(func.count()).select_from(OntologyTerm).where(
+            OntologyTerm.status == "published", OntologyTerm.deleted_at.is_(None),
+        )) or 0
+        ontology = f"Ontología publicada (versión {version}, {terms} términos)."
+    return f"{ontology} {_banks_phrase(db)}"
 
 
 def vision_summary(db: Session, org_id: str | None, now: datetime) -> VisionOut:

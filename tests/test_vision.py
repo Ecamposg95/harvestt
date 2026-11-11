@@ -302,7 +302,8 @@ def test_knowledge_layer_reports_ontology_version(client, db):
 
     before = _layers(client.get("/api/v1/public/vision"))["knowledge"]
     assert before["status"] == "in_construction"
-    assert before["reason"] == "Ontología, bancos de plantas y mapa GIS: hito M2–M4."
+    assert before["reason"] == ("Ontología sin publicar. Bancos de plantas: conectores listos, "
+                                "sin sincronizar. Mapa GIS: hito M4.")
 
     ontology_seed.seed(db)
     db.commit()
@@ -311,4 +312,45 @@ def test_knowledge_layer_reports_ontology_version(client, db):
     after = _layers(client.get("/api/v1/public/vision"))["knowledge"]
     assert after["status"] == "in_construction"
     assert after["reason"] == (f"Ontología publicada (versión 1, {published} términos). "
-                               "Bancos de plantas y mapa GIS: hitos M3–M4.")
+                               "Bancos de plantas: conectores listos, sin sincronizar. Mapa GIS: hito M4.")
+
+
+def _snapshot(db, species, source, status="ok"):
+    from app.modules.connectors.models import ConnectorSnapshot
+
+    db.add(ConnectorSnapshot(source=source, species_id=species.id, status=status, payload={}))
+    db.commit()
+
+
+def _knowledge_reason_text(client):
+    return _layers(client.get("/api/v1/public/vision"))["knowledge"]["reason"]
+
+
+def test_knowledge_reason_banks_without_genesys_token(client, db, monkeypatch):
+    from app.modules.connectors import registry
+
+    monkeypatch.setattr(registry, "settings", Settings(genesys_api_token=""))
+    sp = Species(scientific_name="Lactuca sativa")
+    db.add(sp)
+    db.commit()
+    for src in ("gbif", "wfo", "wikidata"):
+        _snapshot(db, sp, src)
+    _snapshot(db, sp, "genesys", status="not_found")
+    reason = _knowledge_reason_text(client)
+    assert reason.endswith("Bancos de plantas: 3 fuentes activas (GBIF, World Flora Online, "
+                           "Wikidata / Wikimedia Commons); Genesys requiere credenciales. Mapa GIS: hito M4.")
+    assert _layers(client.get("/api/v1/public/vision"))["knowledge"]["status"] == "in_construction"
+
+
+def test_knowledge_reason_banks_with_genesys_active(client, db, monkeypatch):
+    from app.modules.connectors import registry
+
+    monkeypatch.setattr(registry, "settings", Settings(genesys_api_token="x"))
+    sp = Species(scientific_name="Lactuca sativa")
+    db.add(sp)
+    db.commit()
+    for src in ("gbif", "wfo", "wikidata", "genesys"):
+        _snapshot(db, sp, src)
+    assert _knowledge_reason_text(client).endswith(
+        "Bancos de plantas: 4 fuentes activas (GBIF, World Flora Online, Wikidata / Wikimedia Commons, "
+        "Genesys). Mapa GIS: hito M4.")
