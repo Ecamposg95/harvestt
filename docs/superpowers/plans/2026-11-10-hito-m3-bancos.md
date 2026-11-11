@@ -34,7 +34,7 @@ Rama `feat/hito-m3-bancos`. Se actualiza y se sube al cerrar cada tarea.
 | 6 · API de ficha y panel, comando de sync | Completa (revisada) | `c553e23` |
 | 7 · Página `/app/fuentes` | Completa (revisada) | `061b042` |
 | 8 · Sección de la ficha | Completa (revisada) | `5ca844a` |
-| 9 · Visión, docs y puerta | Pendiente | |
+| 9 · Visión, docs y puerta | Completa (revisada) | `3c4eacb`, `4825bc0`, `710c67a` |
 
 ## Lo verificado contra las fuentes reales (2026-11-10)
 
