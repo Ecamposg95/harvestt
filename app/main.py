@@ -12,6 +12,7 @@ from app.core.config import settings
 from app.core.db import get_db
 from app.core.errors import install_error_handling
 from app.modules.catalog.router import router as catalog_router
+from app.modules.connectors.router import router as connectors_router
 from app.modules.graph.router import router as graph_router
 from app.modules.home.router import router as home_router
 from app.modules.identity.router import router as identity_router
@@ -74,6 +75,7 @@ def create_app() -> FastAPI:
         ontology_router,
         ontology_public_router,
         term_links_router,
+        connectors_router,
     ):
         api.include_router(router)
     app.include_router(api)
