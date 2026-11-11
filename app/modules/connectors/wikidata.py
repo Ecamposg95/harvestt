@@ -1,12 +1,14 @@
 """Conector Wikidata / Wikimedia Commons: nombres comunes, identificadores cruzados e imágenes con licencia abierta."""
 import html
 import re
+import unicodedata
 from datetime import date
 from urllib.parse import quote, urlencode
 
 from app.modules.catalog.models import Species
 from app.modules.connectors.base import FetchResult
 from app.modules.connectors.http import Fetcher
+from app.modules.connectors.wfo import _bare_name
 
 WIKIDATA_API = "https://www.wikidata.org/w/api.php"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
@@ -22,6 +24,11 @@ def _plain(value: str | None) -> str:
     return " ".join(html.unescape(TAGS.sub(" ", value or "")).split())
 
 
+def _fold(text: str) -> str:
+    decomposed = unicodedata.normalize("NFKD", text)
+    return "".join(c for c in decomposed if not unicodedata.combining(c)).casefold().strip()
+
+
 def _claim_values(claims: dict, prop: str) -> list:
     out = []
     for c in claims.get(prop) or []:
@@ -31,7 +38,7 @@ def _claim_values(claims: dict, prop: str) -> list:
     return out
 
 
-def _common_names(entity: dict, lang: str) -> list[str]:
+def _common_names(entity: dict, lang: str, scientific: str) -> list[str]:
     names = []
     label = (entity.get("labels") or {}).get(lang)
     if label:
@@ -40,6 +47,8 @@ def _common_names(entity: dict, lang: str) -> list[str]:
     for v in _claim_values(entity.get("claims") or {}, "P1843"):
         if isinstance(v, dict) and v.get("language") == lang:
             names.append(v["text"])
+    # Wikidata a veces usa el nombre científico como etiqueta: no es un nombre común.
+    names = [n for n in names if _fold(n) != _fold(scientific)]
     return list(dict.fromkeys(names))
 
 
@@ -112,7 +121,7 @@ class WikidataConnector:
         payload = {
             "qid": qid,
             "label_es": label_es["value"] if label_es else None,
-            "common_names": {lang: _common_names(entity, lang) for lang in LANGS},
+            "common_names": {lang: _common_names(entity, lang, _bare_name(species)) for lang in LANGS},
             "ids": ids,
             "images": images,
         }

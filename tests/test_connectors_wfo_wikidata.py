@@ -166,6 +166,24 @@ def test_wikidata_ids_names_and_images():
     assert "haswbstatement:P846=7403263" in unquote(fetch.urls[0])
 
 
+def test_wikidata_common_names_exclude_scientific_name():
+    entity = load("wikidata/entity_Q83193.json")
+    ent = entity["entities"]["Q83193"]
+    ent["labels"]["es"]["value"] = "Lactuca sativa"
+    ent["aliases"]["es"] = ent["aliases"].get("es", []) + [{"language": "es", "value": "LÁCTUCA  sativa".replace("  ", " ")}]
+
+    class F(WikidataFetcher):
+        def __call__(self, url, body=None):
+            if parse_qs(urlparse(url).query).get("action") == ["wbgetentities"]:
+                return entity
+            return super().__call__(url, body)
+
+    p = WikidataConnector().fetch(lettuce(), F(), TODAY).payload
+    assert p["label_es"] == "Lactuca sativa"
+    assert all(n.casefold().replace("á", "a") != "lactuca sativa" for n in p["common_names"]["es"])
+    assert "lettuce" in p["common_names"]["en"]
+
+
 def test_wikidata_without_gbif_is_not_found():
     for ids in (None, {}, {"gbif": {}}):
         fetch = WikidataFetcher()
