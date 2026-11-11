@@ -16,6 +16,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 
 ### Corregido
 - Wikidata: los nombres comunes excluyen el nombre científico (su etiqueta en español para el tomate era «Solanum lycopersicum»).
+- Wikidata: los alias de nombres comunes descartan sinónimos latinos (mismo género o binomio latino); se conservan la etiqueta y los valores P1843. La lista de licencias de Commons exige coincidencia completa, y las URL de imagen deben ser `https://`.
+- World Flora Online: la atribución ya no muestra «(None)» si falta el título del conjunto de datos.
+- Panel de fuentes: el conteo de especies se rotula «consultadas».
 
 ## 2026-11-10 · M2 Ontología
 
