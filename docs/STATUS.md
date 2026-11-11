@@ -26,9 +26,11 @@ Semilla: 45 términos publicados en la versión 1, firmados «Equipo HarvestT»,
 
 **Verificado en producción (2026-11-10):** el arranque aplicó `0009`, la semilla publicó 45 términos en la versión 1 y el `relink` enlazó `TraitAssertion.variable` 12 (las 12 afirmaciones de producción), `Species.scientific_name` 3 y 0 en los demás campos; ningún proyecto de producción tiene un sistema con término publicado (`other` no se mapea). Responden 200 `/api/v1/health/ready`, `/api/v1/public/ontology/export.json` (versión 1, 45 términos, CC-BY 4.0), `/api/v1/public/ontology/terms/HVT_000027` («Temperatura del aire») y `/app/ontologia`; la capa `knowledge` de `/api/v1/public/vision` informa «Ontología publicada (versión 1, 45 términos)». La consulta autenticada del grafo (`/api/v1/graph?focus_type=term&focus_id=HVT:000027`) queda por hacer desde una sesión de administrador.
 
-## 1.3 Hito M3 · Bancos de datos de plantas (en rama `feat/hito-m3-bancos`, pendiente de autorización para fusionar y desplegar)
+## 1.3 Hito M3 · Bancos de datos de plantas (en producción)
 
-M3 incorpora el módulo `connectors` (GBIF, World Flora Online, Wikidata/Wikimedia Commons y Genesys), las copias locales con fecha (`connector_snapshots`, `connector_syncs`; migración `0010_connectors`), el panel `/app/fuentes`, la sección «Bancos de plantas y distribución» en la ficha de especie y la CLI `python -m scripts.connectors.sync`. **No está fusionada ni desplegada: producción sigue en `0009_ontology`.**
+M3 incorpora el módulo `connectors` (GBIF, World Flora Online, Wikidata/Wikimedia Commons y Genesys), las copias locales con fecha (`connector_snapshots`, `connector_syncs`; migración `0010_connectors`), el panel `/app/fuentes`, la sección «Bancos de plantas y distribución» en la ficha de especie y la CLI `python -m scripts.connectors.sync`. **Fusionada a `main` (`fd8295a`) y desplegada en producción el 2026-11-11 con autorización del fundador** (despliegue Railway `7afc62b5`, SUCCESS). Migración `0010_connectors` aplicada en producción.
+
+**Verificación en producción (2026-11-11):** `/api/v1/health/ready` → `ok`; `python -m scripts.connectors.sync --source all` ejecutado dentro del servicio (`railway ssh`): GBIF, WFO y Wikidata `ok` 3/3, Genesys rechazada (`connector_unavailable`, sin token); por SQL de solo lectura, las 9 copias (3 especies × 3 fuentes) en `ok` sin error; la capa `knowledge` de `/api/v1/public/vision` informa «Bancos de plantas: 3 fuentes activas (GBIF, World Flora Online, Wikidata / Wikimedia Commons); Genesys requiere credenciales». No se revisó la interfaz `/app/fuentes` en producción con sesión de superadministrador.
 
 Hechos que condicionan el hito: **Genesys exige token** (`GENESYS_API_TOKEN`, no configurado; el fundador debe pedirlo a `helpdesk@genesys-pgr.org`), por lo que su conector no se ha ejecutado contra la fuente real y figura «Requiere credenciales»; el cuerpo del filtro de su API no está documentado y se confirmará con el token. **WFO se consulta vía ChecklistBank** (dataset 2004, CC0) porque `list.worldfloraonline.org` sirve una cadena TLS incompleta. De GBIF se excluyen los registros CC BY-NC (en el tomate, 25 844 registros).
 
@@ -36,7 +38,7 @@ Hechos que condicionan el hito: **Genesys exige token** (`GENESYS_API_TOKEN`, no
 
 **Corridas reales contra las fuentes (demo local con red):** GBIF, WFO y Wikidata, 3/3 especies en `ok` (lechuga, albahaca y tomate). GBIF, registros CC0/CC BY con coordenadas: lechuga 18 827 (1 442 CC BY-NC excluidos), albahaca 2 546 (1 293 excluidos), tomate 33 655 (25 844 excluidos). WFO (versión «World Flora Online Plant List 2026-06»): los tres nombres aceptados; sinónimos: lechuga 28, albahaca 1, tomate 50 (tope). Wikidata: Q83193, Q38859 y Q23501, con 2 imágenes cada una. Genesys: no ejecutado (sin token). Los nombres comunes de Wikidata excluyen el nombre científico y, en los alias, los sinónimos latinos (mismo género o binomio latino): albahaca es = Alfábega, Alfabega, Alábega, Albaca, Alhabega, Albahaca, Alhábega, Alabega; lechuga es = lechuga, lechugón, lechugon; tomate es = tomatera.
 
-La capa `knowledge` de `/api/v1/public/vision` informa, en el código de la rama, «Bancos de plantas: n fuentes activas (…)»; sin copias, «conectores listos, sin sincronizar»; con Genesys sin token se agrega «Genesys requiere credenciales». Sigue «en construcción» hasta M4 (mapa GIS).
+La capa `knowledge` de `/api/v1/public/vision` informa «Bancos de plantas: n fuentes activas (…)»; sin copias, «conectores listos, sin sincronizar»; con Genesys sin token se agrega «Genesys requiere credenciales». Sigue «en construcción» hasta M4 (mapa GIS).
 
 ## 2. Fases del hito visual
 
@@ -80,7 +82,7 @@ La capa `knowledge` de `/api/v1/public/vision` informa, en el código de la rama
 | Enlaces de datos existentes a términos | **Real** — solo por coincidencia exacta con etiqueta o alias publicado; sin correspondencia el enlace queda vacío (sin término); se ve como conteo de uso en la ficha y aristas «clasificado como» en el grafo |
 | Exportación pública OWL/Turtle y JSON | **Real** — solo publicados y obsoletos; CC-BY 4.0 |
 | Rol de curador de la ontología | **Pendiente** — hoy revisa solo superadministrador |
-| Bancos de plantas: GBIF, WFO, Wikidata/Commons | **Real** (fuente citada, copia con fecha) — en rama, sin desplegar; solo coincidencia exacta; GBIF solo CC0/CC BY; WFO vía ChecklistBank |
+| Bancos de plantas: GBIF, WFO, Wikidata/Commons | **Real** (fuente citada, copia con fecha) — en producción, sincronizado el 2026-11-11; solo coincidencia exacta; GBIF solo CC0/CC BY; WFO vía ChecklistBank |
 | Bancos de plantas: Genesys | **Pendiente** — requiere token; no ejecutado contra la fuente real; sin redistribución (solo conteos y consulta en vivo) |
 | Bancos de plantas: GRIN, CIMMYT, INIFAP | **Pendiente** — filas informativas («En construcción» / «Requiere alianza»), no sincronizables |
 | Mapa de distribución (GIS) | **Pendiente** — hito M4 |
@@ -93,7 +95,7 @@ La capa `knowledge` de `/api/v1/public/vision` informa, en el código de la rama
 3. **Defectos menores conocidos:** dos altas simultáneas pueden dejar 13 puntos en un prototipo; puntos borrados en cascada sin evento de auditoría propio; STL con normales invertidas no seleccionables desde fuera; piso ilustrativo no cuadrado en Studio sin área; sin *pinch-zoom* táctil en el grafo.
 4. **Limpieza de ramas remotas:** hecha el 2026-11-07; las quince ramas `feat/*` y `sdd/*` integradas se eliminaron del remoto. El repositorio conserva solo `main`.
 5. **M2 · pendientes:** rol de curador (hoy revisa solo superadministrador); prueba real de concurrencia de publicación con dos sesiones en PostgreSQL (hoy cubierta por el candado `with_for_update()` y pruebas de una sola sesión); ejecución de la semilla y del `relink` en producción al desplegar (por verificar tras la autorización).
-6. **M3 · pendientes:** autorización, fusión y despliegue; sincronizar las tres fuentes reales en producción; token de Genesys y confirmación de su filtro; cron semanal de Railway solo con autorización. Los nombres comunes de Wikidata se filtran con una heurística (se descartan los alias que son binomios latinos o comparten el género): puede dejar pasar algún sinónimo latino atípico o descartar un nombre común con forma de binomio; se muestran con su fuente, sin curar.
+6. **M3 · pendientes:** token de Genesys y confirmación de su filtro; cron semanal de Railway solo con autorización. Los nombres comunes de Wikidata se filtran con una heurística (se descartan los alias que son binomios latinos o comparten el género): puede dejar pasar algún sinónimo latino atípico o descartar un nombre común con forma de binomio; se muestran con su fuente, sin curar.
 
 ## Hoja de ruta
 
@@ -103,7 +105,6 @@ Derivada del backlog de [`HARVESTT_TASK_PACK.md`](HARVESTT_TASK_PACK.md) (§10).
 |---|---|---|
 | P0 | Cierre de M1: autorización, fusión, despliegue y carga de reconocimientos | M1 |
 | P0 | Cierre de M2: autorización, fusión, despliegue y verificación de la ontología en producción | M2 |
-| P0 | Cierre de M3: autorización, fusión, despliegue y sincronización de bancos en producción | M3 |
 | P0 | Conocimiento y RAG con citas verificables y abstención | HVT-007 a HVT-010 |
 | P0 | Agentes con herramientas tipadas y ejecución auditada | HVT-011 |
 | P0 | Comparador de escenarios y exportación del expediente | HVT-016, HVT-017 |

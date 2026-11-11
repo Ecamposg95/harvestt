@@ -80,7 +80,7 @@ Las versiones están fijadas en `requirements.txt` y `frontend/package.json`. Un
 | `vision` | Recognition, InboundRequest | `GET /public/vision`, `POST /public/requests`; superadministrador: `/admin/recognitions`, `/admin/requests` |
 | `ontology` (separable) | OntologyTerm, TermEquivalence, ExternalConcept, OntologyRelease | `/ontology/terms` (lista, ficha, propuesta, edición de la propia propuesta), `/ontology/suggest`, `/ontology/releases`; superadministrador: `/ontology/review-queue`, `/ontology/terms/{id}/review`, `/obsolete`, `/equivalences`; públicos: `/public/ontology/export.ttl`, `/public/ontology/export.json`, `/public/ontology/terms/{hvt_id}` |
 | `term_links` | — (columnas `*_term_id` en catálogo y proyectos) | `GET /ontology/terms/{id}/usage` |
-| `connectors` (M3, en rama) | ConnectorSnapshot, ConnectorSync | `GET /plants/{species_id}/banks`, `GET /connectors`, `GET /connectors/genesys/accessions` (consulta en vivo); superadministrador: `POST /connectors/{key}/sync` |
+| `connectors` (M3) | ConnectorSnapshot, ConnectorSync | `GET /plants/{species_id}/banks`, `GET /connectors`, `GET /connectors/genesys/accessions` (consulta en vivo); superadministrador: `POST /connectors/{key}/sync` |
 
 La especificación OpenAPI completa se publica en `/api/docs`.
 
@@ -88,7 +88,7 @@ La especificación OpenAPI completa se publica en `/api/docs`.
 
 `GET /public/vision` devuelve cifras con origen y razón; una cifra sin dato es `null` y se muestra «pronto» o «Sin datos suficientes», nunca 0 por falta de dato. «Nodos operando» cuenta proyectos con un dispositivo no simulado con lectura no simulada en los últimos 7 días (ventana acotada en SQL). Las solicitudes públicas (`POST /public/requests`) llevan un campo trampa anti-bots, exigen `lat` y `lon` juntos (422 en caso contrario) y redondean las coordenadas a 1 decimal antes de guardarse. Aprobar una solicitud solo cambia su estado (sin invitación por correo). Configuración: `PUBLIC_ORIGIN_LABEL`, `PUBLIC_ORIGIN_LAT`, `PUBLIC_ORIGIN_LON`. El globo es un chunk perezoso de three.js con mapa 2D sin WebGL.
 
-### 5.2.3 Módulo `connectors` (M3, en rama `feat/hito-m3-bancos`)
+### 5.2.3 Módulo `connectors` (M3)
 
 `connectors` importa datos de bancos públicos de plantas y los guarda como copias locales con fecha; no escribe en `species`, `cultivars`, `trait_assertions` ni `species_media`. Cada conector expone `fetch(species, fetch, today)` sobre un *fetcher* inyectable (las pruebas usan respuestas grabadas, nunca red). El registro de fuentes es fijo en código: `gbif`, `wfo`, `wikidata` y `genesys` tienen conector; `grin`, `cimmyt` e `inifap` son filas informativas («En construcción» o «Requiere alianza») que responden 409 `connector_unavailable` al sincronizar.
 
@@ -157,7 +157,7 @@ Sistema de diseño «Salvia cristal», con modo claro y oscuro y diseño adaptab
 | `0007_graph_edges` | Aristas explícitas del grafo |
 | `0008_vision` | Reconocimientos y solicitudes entrantes (módulo `vision`, M1) |
 | `0009_ontology` | Términos, equivalencias, conceptos externos y versiones de la ontología; columnas `*_term_id` en catálogo y proyectos (M2; aplicada en producción el 2026-11-10) |
-| `0010_connectors` | Copias locales de bancos de plantas (`connector_snapshots`), corridas de sincronización (`connector_syncs`) y `crop_cycles.accession_ref` (M3; en rama, sin aplicar en producción) |
+| `0010_connectors` | Copias locales de bancos de plantas (`connector_snapshots`), corridas de sincronización (`connector_syncs`) y `crop_cycles.accession_ref` (M3; aplicada en producción el 2026-11-11) |
 
 Toda migración se verifica en PostgreSQL 17 con el ciclo `upgrade → check → downgrade → upgrade → check` sin diferencias.
 

@@ -4,7 +4,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). L
 
 ## 2026-11-10 · M3 Bancos de datos de plantas
 
-### Añadido (en la rama `feat/hito-m3-bancos`; pendiente de autorización para fusionar y desplegar)
+### Añadido (fusionado a `main` en `fd8295a` y desplegado en producción el 2026-11-11)
 - **M3 · Bancos de plantas:** módulo `connectors` con conectores de solo lectura a GBIF, World Flora Online, Wikidata/Wikimedia Commons y Genesys; migración `0010_connectors` (`connector_snapshots`, `connector_syncs`).
 - Copias locales con fecha, licencia, atribución y URL de origen; una sincronización fallida conserva la copia anterior y registra el error.
 - Solo coincidencia exacta de identidad (GBIF por `usageKey`; WFO `exact` y `accepted`; Wikidata con un único ítem); sin coincidencia, «Sin coincidencia» con motivo y sin datos.

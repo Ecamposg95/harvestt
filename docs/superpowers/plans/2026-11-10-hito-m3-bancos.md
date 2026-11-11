@@ -36,7 +36,7 @@ Rama `feat/hito-m3-bancos`. Se actualiza y se sube al cerrar cada tarea.
 | 8 · Sección de la ficha | Completa (revisada) | `5ca844a` |
 | 9 · Visión, docs y puerta | Completa (revisada) | `3c4eacb`, `4825bc0`, `710c67a` |
 | Revisión final de rama | Completa (1 ronda de corrección) | `cdeee72`, `75580c8` |
-| Fusión y despliegue | Pendiente de autorización del fundador | |
+| Fusión y despliegue | Completa (2026-11-11, con autorización) | `fd8295a`; Railway `7afc62b5` SUCCESS; sync en producción 3/3 |
 
 ## Lo verificado contra las fuentes reales (2026-11-10)
 
