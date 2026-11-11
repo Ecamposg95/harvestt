@@ -45,6 +45,14 @@ Cada valor expuesto por la API y la interfaz pertenece exactamente a una categor
 20. **Crédito del proponente.** Un término publicado muestra «Propuesto por *nombre*», también en la exportación pública; el formulario lo avisa antes de enviar. Los términos de la semilla dicen «Equipo HarvestT». El correo del proponente nunca se publica: sin nombre registrado, el crédito es «Colaborador».
 21. **Licencia abierta.** La ontología se publica bajo CC-BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>), declarada en la exportación OWL/Turtle y JSON, que solo incluye términos publicados y obsoletos.
 
+### Importación desde bancos públicos
+
+22. **Solo lectura, sin sobrescritura.** Los conectores solo consultan las fuentes; una sincronización nunca modifica `species`, `cultivars`, `trait_assertions` ni `species_media` (una prueba compara las filas antes y después). La ficha muestra lo capturado por el equipo y lo importado lado a lado; lo importado lleva origen **Fuente** (`sourced`).
+23. **Coincidencia exacta.** Un conector guarda datos solo si la identidad casa sin ambigüedad: GBIF por `usageKey` del catálogo, WFO con `type = exact` y `status = accepted`, Wikidata con exactamente un ítem con ese ID de GBIF. Cualquier otro caso queda «Sin coincidencia» con el motivo visible, sin datos y sin «mejor coincidencia». Si los identificadores cruzados difieren entre fuentes, la ficha lo marca «No coinciden» y no elige uno.
+24. **Licencia por fuente.** GBIF: solo registros CC0 1.0 y CC BY 4.0; los CC BY-NC se excluyen y se informa cuántos. WFO y Wikidata: CC0 1.0. Commons: solo CC0, dominio público, CC BY y CC BY-SA, con autor (texto plano) y licencia visibles; las imágenes se enlazan, no se descargan. Genesys permite usar los datos pero **prohíbe redistribuirlos**: no se guardan accesiones, solo conteos; la lista se consulta en vivo y enlaza a Genesys, con cita de la fuente. Toda copia lleva licencia, atribución y URL de origen.
+25. **Copia con fecha.** Cada copia muestra la fecha de consulta. Si una sincronización falla, se conserva la copia anterior y la ficha dice «Fuente no disponible · última copia del <fecha>»; nunca se mezcla una copia parcial. Sin copia: «Sin datos de esta fuente todavía».
+26. **Lo importado no es evidencia revisada.** Que un banco publique un dato no lo convierte en afirmación del catálogo ni mueve la cobertura de evidencia (§3.9): para eso el equipo debe cargar la afirmación con su fuente revisada. Tampoco se calcula con estos datos ningún «óptimo» ni puntaje (§3.2 y §3.3). El mapa de distribución es hito M4.
+
 ## 4. Representaciones tridimensionales
 
 Las escenas 3D son representaciones, nunca autoridad científica. Las plantas procedurales llevan el aviso «Representación ilustrativa; no predice crecimiento». Los modelos de los prototipos históricos se reconstruyeron a partir de fotografías y láminas del equipo y no son planos de fabricación.
