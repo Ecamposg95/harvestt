@@ -15,7 +15,8 @@ COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 LANGS = ("es", "en")
 MAX_IMAGES = 3
 ID_PROPS = {"gbif": "P846", "ncbi": "P685", "wfo": "P7715", "ipni": "P961"}
-LICENSE_OK = re.compile(r"^(CC0( 1\.0)?|Public domain|CC BY( \d\.\d)?|CC BY-SA( \d\.\d)?)$")
+LICENSE_OK = re.compile(r"(CC0( 1\.0)?|Public domain|CC BY( \d\.\d)?|CC BY-SA( \d\.\d)?)")
+LATIN_BINOMIAL = re.compile(r"^[A-Z][a-z]+ [a-z]+(?:-[a-z]+)?$")
 TAGS = re.compile(r"<[^>]*>")
 LICENSE_TEXT = "CC0 1.0 (datos); imágenes con licencia propia"
 
@@ -38,12 +39,25 @@ def _claim_values(claims: dict, prop: str) -> list:
     return out
 
 
+def _https(url: str | None) -> str | None:
+    return url if isinstance(url, str) and url.startswith("https://") else None
+
+
+def _is_latin_alias(alias: str, genus: str) -> bool:
+    """Los alias de Wikidata suelen ser sinónimos latinos (R13): se descartan; etiqueta y P1843 no."""
+    first = alias.split(" ", 1)[0]
+    return _fold(first) == _fold(genus) or bool(LATIN_BINOMIAL.match(alias))
+
+
 def _common_names(entity: dict, lang: str, scientific: str) -> list[str]:
     names = []
     label = (entity.get("labels") or {}).get(lang)
     if label:
         names.append(label["value"])
-    names += [a["value"] for a in (entity.get("aliases") or {}).get(lang) or []]
+    genus = scientific.split(" ", 1)[0]
+    names += [
+        a["value"] for a in (entity.get("aliases") or {}).get(lang) or [] if not _is_latin_alias(a["value"], genus)
+    ]
     for v in _claim_values(entity.get("claims") or {}, "P1843"):
         if isinstance(v, dict) and v.get("language") == lang:
             names.append(v["text"])
@@ -64,14 +78,15 @@ def _image(file: str, fetch: Fetcher) -> dict | None:
             meta = info.get("extmetadata") or {}
             lic = (meta.get("LicenseShortName") or {}).get("value", "")
             artist = _plain((meta.get("Artist") or {}).get("value"))
-            if not LICENSE_OK.match(lic) or not info.get("thumburl") or not artist:
+            thumb = _https(info.get("thumburl"))
+            if not LICENSE_OK.fullmatch(lic) or not thumb or not artist:
                 return None
             return {
                 "file": file,
-                "thumb_url": info["thumburl"],
-                "page_url": info.get("descriptionurl"),
+                "thumb_url": thumb,
+                "page_url": _https(info.get("descriptionurl")),
                 "license": lic,
-                "license_url": (meta.get("LicenseUrl") or {}).get("value"),
+                "license_url": _https((meta.get("LicenseUrl") or {}).get("value")),
                 "artist": artist,
             }
     return None

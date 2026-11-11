@@ -40,7 +40,7 @@ function LastSync({ c }: { c: ConnectorOut }) {
     <div className="space-y-0.5">
       <p>{fmt(s.started_at)}</p>
       <p className="text-xs text-muted">
-        {SYNC_STATUS_LABELS[s.status] ?? s.status} · {s.species_ok} de {s.species_total} especies
+        {SYNC_STATUS_LABELS[s.status] ?? s.status} · {s.species_ok} de {s.species_total} especies consultadas
       </p>
     </div>
   )

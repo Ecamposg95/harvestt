@@ -39,7 +39,8 @@ class WfoConnector:
             for item in syn.get(group) or []:
                 name = item.get("name") or {}
                 synonyms.append({"name": name.get("scientificName"), "authorship": name.get("authorship")})
-        release = (fetch(API, None) or {}).get("title")
+        ds = fetch(API, None) or {}
+        release = ds.get("title") or ds.get("version")
 
         payload = {
             "wfo_id": wfo_id,
@@ -54,6 +55,6 @@ class WfoConnector:
             wfo_id,
             payload,
             "CC0 1.0",
-            f"World Flora Online Plant List ({release}), vía ChecklistBank.",
+            "World Flora Online Plant List" + (f" ({release})" if release else "") + ", vía ChecklistBank.",
             f"https://www.worldfloraonline.org/taxon/{wfo_id}",
         )

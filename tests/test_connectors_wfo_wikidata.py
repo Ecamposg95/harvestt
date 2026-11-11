@@ -216,7 +216,7 @@ def _with_info(**changes):
     doc = load("wikidata/commons_Iceberg_lettuce_in_SB.json")
     info = next(iter(doc["query"]["pages"].values()))["imageinfo"][0]
     for k, v in changes.items():
-        if k in ("Artist", "LicenseShortName"):
+        if k in ("Artist", "LicenseShortName", "LicenseUrl"):
             info["extmetadata"][k] = {"value": v}
         elif v is None:
             info.pop(k, None)
@@ -260,3 +260,52 @@ def test_registered_and_pacing_in_sync_only():
     assert isinstance(CONNECTORS["wikidata"], WikidataConnector)
     assert MIN_INTERVALS["wfo"] == 0.5 and MIN_INTERVALS["wikidata"] == 1.0
     assert not hasattr(wfo, "MIN_INTERVAL") and not hasattr(wikidata, "MIN_INTERVAL")
+
+
+def test_wikidata_alias_filter_drops_latin_synonyms():
+    entity = {
+        "labels": {"es": {"value": "Albahaca"}},
+        "aliases": {"es": [{"value": v} for v in (
+            "Ocimum album", "Basilicum polystachion", "Plectranthus barrelieri", "Albahaca", "albahaca morada",
+            "Ocimum x-y", "Alfábega",
+        )]},
+        "claims": {"P1843": [{"mainsnak": {"snaktype": "value", "datavalue": {"value": {"language": "es", "text": "Ocimum común"}}}}]},
+    }
+    names = wikidata._common_names(entity, "es", "Ocimum basilicum")
+    assert names == ["Albahaca", "albahaca morada", "Alfábega", "Ocimum común"]
+
+
+def test_license_fullmatch_rejects_trailing_newline():
+    assert not wikidata.LICENSE_OK.fullmatch("CC BY 4.0\n")
+    res = WikidataConnector().fetch(lettuce(), WikidataFetcher(commons=_with_info(LicenseShortName="CC BY 4.0\n")), TODAY)
+    assert res.payload["images"] == []
+
+
+def test_commons_urls_must_be_https():
+    res = WikidataConnector().fetch(lettuce(), WikidataFetcher(commons=_with_info(thumburl="http://x.org/a.jpg")), TODAY)
+    assert res.payload["images"] == []
+    res = WikidataConnector().fetch(
+        lettuce(), WikidataFetcher(commons=_with_info(descriptionurl="javascript:x", LicenseUrl="http://c.org")), TODAY)
+    img = res.payload["images"][0]
+    assert img["page_url"] is None and img["license_url"] is None and img["thumb_url"].startswith("https://")
+
+
+def test_wfo_attribution_without_title():
+    class F(WfoFetcher):
+        def __call__(self, url, body=None):
+            if url.endswith("/dataset/2004"):
+                return {"version": "2026-06 01"}
+            return super().__call__(url, body)
+
+    res = WfoConnector().fetch(lettuce(), F(), TODAY)
+    assert res.attribution == "World Flora Online Plant List (2026-06 01), vía ChecklistBank."
+
+    class G(F):
+        def __call__(self, url, body=None):
+            if url.endswith("/dataset/2004"):
+                return {}
+            return WfoFetcher.__call__(self, url, body)
+
+    res = WfoConnector().fetch(lettuce(), G(), TODAY)
+    assert res.attribution == "World Flora Online Plant List, vía ChecklistBank."
+    assert "None" not in res.attribution
