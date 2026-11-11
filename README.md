@@ -59,6 +59,7 @@ La cronología completa está en [`docs/HISTORIA.md`](docs/HISTORIA.md).
 | Grafo de conocimiento | Nodos y relaciones derivados únicamente de datos registrados, con procedencia | Derivado |
 | Página Visión (M1, en producción) | Página pública `/vision` con cifras honestas («nodos operando» medido; «lecturas firmadas» = pronto), globo con el prototipo histórico de CDMX y nodos futuros solo de solicitudes aprobadas, recorrido por capas y solicitudes de nodo o contacto; bandeja `/app/solicitudes` para superadministrador | Medido / Derivado / Ilustrativo |
 | Ontología (M2) | Términos globales con ID permanente `HVT:000001`, ciclo propuesta → revisión → publicación, equivalencias verificadas con vocabularios externos (NCBI Taxon, PO, BBCH, AGROVOC, SOSA, …), versiones y exportación pública OWL/Turtle y JSON con licencia CC-BY 4.0; los datos existentes se enlazan a términos solo por coincidencia exacta y, sin ella, quedan sin término (sin correspondencia mostrada; los enlaces se ven como conteo de uso en la ficha y aristas «clasificado como» en el grafo); página `/app/ontologia` y términos en el grafo | Real (semilla del equipo y propuestas revisadas) / Desconocido |
+| Bancos de plantas (M3, en rama `feat/hito-m3-bancos`, pendiente de autorización para fusionar y desplegar) | Conectores de solo lectura a GBIF (presencia georreferenciada, solo CC0 1.0 y CC BY 4.0), World Flora Online (nombre aceptado y sinónimos, vía ChecklistBank), Wikidata y Wikimedia Commons (nombres comunes, identificadores cruzados, imágenes con licencia abierta) y Genesys (accesiones; requiere token, no configurado); copias locales con fecha en `connector_snapshots`; panel `/app/fuentes`; sección «Bancos de plantas y distribución» en la ficha de especie; sincronización desde el panel (solo superadministrador) o con `python -m scripts.connectors.sync`; solo coincidencia exacta y nunca sobrescribe lo capturado por el equipo | Fuente (importado) |
 
 ## Arquitectura en síntesis
 
@@ -67,7 +68,7 @@ Monolito modular *API-first* y multi-organización desde el origen.
 ```
 React 18 · TypeScript · Vite · Tailwind · three.js · d3-force
                          │  /api/v1
-FastAPI · Pydantic 2 · SQLAlchemy 2 · Alembic (0001 → 0009)
+FastAPI · Pydantic 2 · SQLAlchemy 2 · Alembic (0001 → 0010)
                          │
 PostgreSQL 17                 Almacenamiento de objetos S3 (Railway)
 ```

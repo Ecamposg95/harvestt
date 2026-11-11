@@ -2,6 +2,24 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Las fechas siguen ISO 8601.
 
+## 2026-11-10 · M3 Bancos de datos de plantas
+
+### Añadido (en la rama `feat/hito-m3-bancos`; pendiente de autorización para fusionar y desplegar)
+- **M3 · Bancos de plantas:** módulo `connectors` con conectores de solo lectura a GBIF, World Flora Online, Wikidata/Wikimedia Commons y Genesys; migración `0010_connectors` (`connector_snapshots`, `connector_syncs`).
+- Copias locales con fecha, licencia, atribución y URL de origen; una sincronización fallida conserva la copia anterior y registra el error.
+- Solo coincidencia exacta de identidad (GBIF por `usageKey`; WFO `exact` y `accepted`; Wikidata con un único ítem); sin coincidencia, «Sin coincidencia» con motivo y sin datos.
+- GBIF: solo registros CC0 1.0 y CC BY 4.0; los CC BY-NC se excluyen y se informa cuántos. WFO se consulta vía ChecklistBank (dataset 2004) por la cadena TLS incompleta de `list.worldfloraonline.org`. Commons: imágenes con licencia abierta, enlazadas y con autor en texto plano.
+- Genesys: requiere token (`GENESYS_API_TOKEN`, no configurado); sin acceso a su API no se ha ejecutado contra la fuente real. No se guardan accesiones (solo conteos); la lista se consulta en vivo y la accesión se puede vincular a un ciclo de cultivo.
+- `/api/v1/plants/{id}/banks`, `/api/v1/connectors`, `/api/v1/connectors/{key}/sync` (solo superadministrador; enfriamiento de 10 minutos por fuente) y `/api/v1/connectors/genesys/accessions`; CLI `python -m scripts.connectors.sync`.
+- Frontend: panel `/app/fuentes` y sección «Bancos de plantas y distribución» en la ficha de especie.
+- Visión: la capa «knowledge» informa las fuentes de bancos activas con copia.
+
+### Corregido
+- Wikidata: los nombres comunes excluyen el nombre científico (su etiqueta en español para el tomate era «Solanum lycopersicum»).
+- Wikidata: los alias de nombres comunes descartan sinónimos latinos (mismo género o binomio latino); se conservan la etiqueta y los valores P1843. La lista de licencias de Commons exige coincidencia completa, y las URL de imagen deben ser `https://`.
+- World Flora Online: la atribución ya no muestra «(None)» si falta el título del conjunto de datos.
+- Panel de fuentes: el conteo de especies se rotula «consultadas».
+
 ## 2026-11-10 · M2 Ontología
 
 ### Añadido (fusionado a `main` en `b272409` y desplegado en producción el 2026-11-10)

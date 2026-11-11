@@ -1,0 +1,18 @@
+{
+ "offset": 300,
+ "limit": 300,
+ "endOfRecords": true,
+ "count": 6,
+ "results": [
+  {
+   "decimalLatitude": 19.481251,
+   "decimalLongitude": -99.131051,
+   "license": "http://creativecommons.org/licenses/by/4.0/legalcode"
+  },
+  {
+   "decimalLatitude": 16.760175,
+   "decimalLongitude": -93.08873,
+   "license": "http://creativecommons.org/licenses/by/4.0/legalcode"
+  }
+ ]
+}

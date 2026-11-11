@@ -1,0 +1,53 @@
+{
+ "offset": 0,
+ "limit": 0,
+ "endOfRecords": false,
+ "count": 33655,
+ "facets": [
+  {
+   "field": "COUNTRY",
+   "counts": [
+    {
+     "name": "ES",
+     "count": 6616
+    },
+    {
+     "name": "GB",
+     "count": 5390
+    },
+    {
+     "name": "SE",
+     "count": 4394
+    },
+    {
+     "name": "FR",
+     "count": 2743
+    },
+    {
+     "name": "US",
+     "count": 1701
+    },
+    {
+     "name": "MX",
+     "count": 1106
+    },
+    {
+     "name": "BE",
+     "count": 1012
+    },
+    {
+     "name": "FI",
+     "count": 916
+    },
+    {
+     "name": "DK",
+     "count": 519
+    },
+    {
+     "name": "AU",
+     "count": 517
+    }
+   ]
+  }
+ ]
+}

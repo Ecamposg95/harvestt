@@ -1,0 +1,30 @@
+{
+  "content": [
+    {
+      "instituteCode": "MEX001",
+      "accessionNumber": "LS-1",
+      "doi": "10.18730/AAA1",
+      "origCty": "MEX",
+      "sampStat": 300,
+      "taxonomy": {
+        "genus": "Lactuca",
+        "species": "sativa"
+      }
+    },
+    {
+      "instituteCode": "MEX001",
+      "accessionNumber": "XX-9",
+      "doi": null,
+      "origCty": "MEX",
+      "sampStat": 300,
+      "taxonomy": {
+        "genus": "Solanum",
+        "species": "lycopersicum"
+      }
+    }
+  ],
+  "totalElements": 2,
+  "number": 0,
+  "size": 1000,
+  "last": true
+}

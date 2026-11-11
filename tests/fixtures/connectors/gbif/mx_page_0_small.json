@@ -1,0 +1,28 @@
+{
+ "offset": 0,
+ "limit": 300,
+ "endOfRecords": false,
+ "count": 6,
+ "results": [
+  {
+   "decimalLatitude": 22.615728,
+   "decimalLongitude": -105.605659,
+   "license": "http://creativecommons.org/publicdomain/zero/1.0/legalcode"
+  },
+  {
+   "decimalLatitude": 24.826626,
+   "decimalLongitude": -107.363829,
+   "license": "http://creativecommons.org/publicdomain/zero/1.0/legalcode"
+  },
+  {
+   "decimalLatitude": 20.516245,
+   "decimalLongitude": -100.39422,
+   "license": "http://creativecommons.org/licenses/by/4.0/legalcode"
+  },
+  {
+   "decimalLatitude": 24.814177,
+   "decimalLongitude": -107.356919,
+   "license": "http://creativecommons.org/publicdomain/zero/1.0/legalcode"
+  }
+ ]
+}

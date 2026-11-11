@@ -5,11 +5,13 @@ from sqlalchemy.orm import Session
 
 from app.core.audit import record
 from app.core.deps import RequestContext
-from app.core.errors import conflict, unprocessable
+from app.core.errors import AppError, conflict, not_found, unprocessable
 from app.core.tenant import get_scoped_or_404, scoped
 from app.modules.catalog.models import Cultivar, Species
 from app.modules.projects.models import CropCycle, Observation, Project
 from app.modules.projects.schemas import (
+    AccessionLink,
+    CropCycleListItem,
     CropCycleCreate,
     CropCycleOut,
     ObservationCreate,
@@ -83,6 +85,7 @@ def crop_cycle_out(cycle: CropCycle) -> CropCycleOut:
         stage=cycle.stage,
         status=cycle.status,
         created_at=cycle.created_at,
+        accession_ref=cycle.accession_ref,
     )
 
 
@@ -171,3 +174,58 @@ def create_observation(
     db.commit()
     db.refresh(obs)
     return obs
+
+
+def list_cycles_by_species(db: Session, ctx: RequestContext, species_id: str) -> list[CropCycleListItem]:
+    stmt = (
+        scoped(CropCycle, ctx)
+        .where(CropCycle.species_id == species_id, CropCycle.status != "cancelled")
+        .order_by(CropCycle.created_at, CropCycle.id)
+    )
+    cycles = list(db.scalars(stmt).unique())
+    names = {
+        p.id: p.name
+        for p in db.scalars(scoped(Project, ctx).where(Project.id.in_({c.project_id for c in cycles})))
+    }
+    return [
+        CropCycleListItem(**crop_cycle_out(c).model_dump(), project_name=names.get(c.project_id, ""))
+        for c in cycles
+    ]
+
+
+def _get_cycle(db: Session, ctx: RequestContext, project: Project, cycle_id: str) -> CropCycle:
+    cycle = db.scalar(scoped(CropCycle, ctx).where(CropCycle.id == cycle_id, CropCycle.project_id == project.id))
+    if cycle is None:
+        raise not_found("ciclo")
+    return cycle
+
+
+def link_accession(
+    db: Session, ctx: RequestContext, project: Project, cycle_id: str, species_id: str, data: AccessionLink
+) -> CropCycle:
+    from app.modules.connectors.genesys import accession_url
+
+    cycle = _get_cycle(db, ctx, project, cycle_id)
+    if cycle.species_id != species_id:
+        raise AppError(422, "species_mismatch", "La accesión no corresponde a la especie del ciclo")
+    ref = {
+        "source": data.source,
+        "institute_code": data.institute_code,
+        "accession_number": data.accession_number,
+        "doi": data.doi,
+        "url": accession_url(data.doi),
+        "linked_at": datetime.now(timezone.utc).isoformat(),
+    }
+    cycle.accession_ref = ref
+    record(db, ctx, "crop_cycle", cycle.id, "crop_cycle.accession_linked", {"project_id": project.id, **ref})
+    db.commit()
+    db.refresh(cycle)
+    return cycle
+
+
+def unlink_accession(db: Session, ctx: RequestContext, project: Project, cycle_id: str) -> None:
+    cycle = _get_cycle(db, ctx, project, cycle_id)
+    previous = cycle.accession_ref
+    cycle.accession_ref = None
+    record(db, ctx, "crop_cycle", cycle.id, "crop_cycle.accession_unlinked", {"project_id": project.id, "previous": previous})
+    db.commit()

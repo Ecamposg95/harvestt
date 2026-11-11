@@ -1,7 +1,7 @@
 """Proyectos de cultivo, ciclos y bitácora (privados por organización)."""
 from datetime import date, datetime
 
-from sqlalchemy import CheckConstraint, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, CheckConstraint, Date, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
@@ -59,6 +59,9 @@ class CropCycle(UUIDMixin, TenantMixin, AuditMixin, Base):
     stage_term_id: Mapped[str | None] = mapped_column(
         String(36), ForeignKey("ontology_terms.id"), nullable=True, index=True
     )
+
+    # {"source": "genesys", "institute_code", "accession_number", "doi", "url", "linked_at"}: solo identificadores
+    accession_ref: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     species = relationship("Species", lazy="joined")
     cultivar = relationship("Cultivar", lazy="joined")

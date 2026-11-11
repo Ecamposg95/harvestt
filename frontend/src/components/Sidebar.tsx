@@ -16,7 +16,10 @@ export const NAV_ITEMS: Array<{ to: string; label: string; icon: IconName; end?:
   { to: '/app/ontologia', label: 'Ontología', icon: 'tree' },
 ]
 
-const SUPERADMIN_ITEMS: typeof NAV_ITEMS = [{ to: '/app/solicitudes', label: 'Solicitudes', icon: 'folder' }]
+const SUPERADMIN_ITEMS: typeof NAV_ITEMS = [
+  { to: '/app/solicitudes', label: 'Solicitudes', icon: 'folder' },
+  { to: '/app/fuentes', label: 'Fuentes', icon: 'globe' },
+]
 
 function RailButton({ icon, label, expanded, onClick }: { icon: IconName; label: string; expanded: boolean; onClick: () => void }) {
   return (

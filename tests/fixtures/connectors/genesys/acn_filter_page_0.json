@@ -1,0 +1,41 @@
+{
+  "content": [
+    {
+      "instituteCode": "MEX001",
+      "accessionNumber": "LS-1",
+      "doi": "10.18730/AAA1",
+      "origCty": "MEX",
+      "sampStat": 300,
+      "taxonomy": {
+        "genus": "Lactuca",
+        "species": "sativa"
+      }
+    },
+    {
+      "instituteCode": "MEX001",
+      "accessionNumber": "LS-2",
+      "doi": null,
+      "origCty": "MEX",
+      "sampStat": 300,
+      "taxonomy": {
+        "genus": "Lactuca",
+        "species": "sativa"
+      }
+    },
+    {
+      "instituteCode": "NLD037",
+      "accessionNumber": "CGN04567",
+      "doi": "10.18730/BBB2",
+      "origCty": "USA",
+      "sampStat": 500,
+      "taxonomy": {
+        "genus": "Lactuca",
+        "species": "sativa"
+      }
+    }
+  ],
+  "totalElements": 5,
+  "number": 0,
+  "size": 3,
+  "last": false
+}

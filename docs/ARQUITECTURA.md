@@ -80,12 +80,23 @@ Las versiones están fijadas en `requirements.txt` y `frontend/package.json`. Un
 | `vision` | Recognition, InboundRequest | `GET /public/vision`, `POST /public/requests`; superadministrador: `/admin/recognitions`, `/admin/requests` |
 | `ontology` (separable) | OntologyTerm, TermEquivalence, ExternalConcept, OntologyRelease | `/ontology/terms` (lista, ficha, propuesta, edición de la propia propuesta), `/ontology/suggest`, `/ontology/releases`; superadministrador: `/ontology/review-queue`, `/ontology/terms/{id}/review`, `/obsolete`, `/equivalences`; públicos: `/public/ontology/export.ttl`, `/public/ontology/export.json`, `/public/ontology/terms/{hvt_id}` |
 | `term_links` | — (columnas `*_term_id` en catálogo y proyectos) | `GET /ontology/terms/{id}/usage` |
+| `connectors` (M3, en rama) | ConnectorSnapshot, ConnectorSync | `GET /plants/{species_id}/banks`, `GET /connectors`, `GET /connectors/genesys/accessions` (consulta en vivo); superadministrador: `POST /connectors/{key}/sync` |
 
 La especificación OpenAPI completa se publica en `/api/docs`.
 
 ### 5.2.1 Módulo `vision` (M1)
 
 `GET /public/vision` devuelve cifras con origen y razón; una cifra sin dato es `null` y se muestra «pronto» o «Sin datos suficientes», nunca 0 por falta de dato. «Nodos operando» cuenta proyectos con un dispositivo no simulado con lectura no simulada en los últimos 7 días (ventana acotada en SQL). Las solicitudes públicas (`POST /public/requests`) llevan un campo trampa anti-bots, exigen `lat` y `lon` juntos (422 en caso contrario) y redondean las coordenadas a 1 decimal antes de guardarse. Aprobar una solicitud solo cambia su estado (sin invitación por correo). Configuración: `PUBLIC_ORIGIN_LABEL`, `PUBLIC_ORIGIN_LAT`, `PUBLIC_ORIGIN_LON`. El globo es un chunk perezoso de three.js con mapa 2D sin WebGL.
+
+### 5.2.3 Módulo `connectors` (M3, en rama `feat/hito-m3-bancos`)
+
+`connectors` importa datos de bancos públicos de plantas y los guarda como copias locales con fecha; no escribe en `species`, `cultivars`, `trait_assertions` ni `species_media`. Cada conector expone `fetch(species, fetch, today)` sobre un *fetcher* inyectable (las pruebas usan respuestas grabadas, nunca red). El registro de fuentes es fijo en código: `gbif`, `wfo`, `wikidata` y `genesys` tienen conector; `grin`, `cimmyt` e `inifap` son filas informativas («En construcción» o «Requiere alianza») que responden 409 `connector_unavailable` al sincronizar.
+
+- **GBIF:** por `usageKey` del catálogo; solo registros `CC0_1_0` y `CC_BY_4_0` (los `CC_BY_NC_4_0` se excluyen y se informa cuántos).
+- **WFO:** se consulta la WFO Plant List publicada por WFO en ChecklistBank (dataset 2004, CC0), porque `list.worldfloraonline.org` sirve una cadena TLS incompleta que el cliente rechaza. Solo se guarda `type = exact` y `status = accepted`.
+- **Wikidata y Commons:** ítem hallado por P846 (ID de GBIF); si hay 0 o más de 1, `not_found`. Imágenes solo con licencia en lista blanca, enlazadas (*hotlink*), nunca descargadas.
+- **Genesys:** toda su API exige token (`GENESYS_API_TOKEN`); sin él la fuente figura «Requiere credenciales». No se guardan accesiones: la copia local solo lleva conteos por país de origen y estado biológico; la lista se consulta en vivo. Vincular una accesión a un ciclo (`PUT /projects/{pid}/crop-cycles/{cid}/accession`, módulo `projects`; `editor` o superior) guarda solo código de instituto, número y DOI.
+- **Sincronización:** una corrida exitosa reemplaza la copia; una fallida conserva la anterior y registra `last_error`. Enfriamiento de 10 minutos por fuente (429 `sync_cooldown`), 409 `sync_running` con una corrida activa, tope de 50 especies por corrida, pausas mínimas entre solicitudes y `User-Agent` propio. Un bloqueo asesor evita corridas simultáneas. CLI para tareas programadas: `python -m scripts.connectors.sync --source all`.
 
 ### 5.2.2 Módulos `ontology` y `term_links` (M2)
 
@@ -128,6 +139,7 @@ frontend/src/
 | `/app/graph` | Grafo de conocimiento |
 | `/vision` | Página pública Visión: cifras, globo, diagrama del ecosistema, recorrido por capas, solicitudes |
 | `/app/solicitudes` | Bandeja de solicitudes (solo superadministrador) |
+| `/app/fuentes` | Fuentes de bancos de plantas: registro de conectores con estado, licencia y última sincronización; sincronizar (solo superadministrador) |
 | `/app/ontologia` | Ontología: árbol por dominio, buscador y ficha de término; proponer con sugerencias de equivalencias; «Mis propuestas»; bandeja de revisión (solo superadministrador) |
 
 Sistema de diseño «Salvia cristal», con modo claro y oscuro y diseño adaptable desde 375 px. three.js y d3-force se cargan en *chunks* perezosos para no penalizar la carga inicial.
@@ -145,6 +157,7 @@ Sistema de diseño «Salvia cristal», con modo claro y oscuro y diseño adaptab
 | `0007_graph_edges` | Aristas explícitas del grafo |
 | `0008_vision` | Reconocimientos y solicitudes entrantes (módulo `vision`, M1) |
 | `0009_ontology` | Términos, equivalencias, conceptos externos y versiones de la ontología; columnas `*_term_id` en catálogo y proyectos (M2; aplicada en producción el 2026-11-10) |
+| `0010_connectors` | Copias locales de bancos de plantas (`connector_snapshots`), corridas de sincronización (`connector_syncs`) y `crop_cycles.accession_ref` (M3; en rama, sin aplicar en producción) |
 
 Toda migración se verifica en PostgreSQL 17 con el ciclo `upgrade → check → downgrade → upgrade → check` sin diferencias.
 
