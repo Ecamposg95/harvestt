@@ -7,6 +7,7 @@ T = TypeVar("T")
 
 SystemLiteral = Literal["hydroponic", "substrate", "soil", "aeroponic", "other"]
 CycleStatusLiteral = Literal["planned", "active", "finished", "cancelled"]
+VisibilityLiteral = Literal["private", "public"]
 ObservationKindLiteral = Literal["note", "measurement", "incident", "task", "decision"]
 
 
@@ -30,6 +31,10 @@ class ProjectCreate(BaseModel):
     area_m2: float | None = Field(default=None, gt=0)
     system: SystemLiteral = "other"
     location: str | None = Field(default=None, max_length=300)
+    lat: float | None = Field(default=None, ge=-90, le=90)
+    lon: float | None = Field(default=None, ge=-180, le=180)
+    place_term_id: str | None = Field(default=None, max_length=36)
+    visibility: VisibilityLiteral = "private"
 
     @field_validator("name")
     @classmethod
@@ -39,7 +44,7 @@ class ProjectCreate(BaseModel):
             raise ValueError("El nombre es obligatorio")
         return v
 
-    @field_validator("objectives", "location", mode="before")
+    @field_validator("objectives", "location", "place_term_id", mode="before")
     @classmethod
     def _clean(cls, v):
         return _blank_to_none(v)
@@ -52,6 +57,10 @@ class ProjectUpdate(BaseModel):
     area_m2: float | None = Field(default=None, gt=0)
     system: SystemLiteral | None = None
     location: str | None = Field(default=None, max_length=300)
+    lat: float | None = Field(default=None, ge=-90, le=90)
+    lon: float | None = Field(default=None, ge=-180, le=180)
+    place_term_id: str | None = Field(default=None, max_length=36)
+    visibility: VisibilityLiteral | None = None
 
     @field_validator("name")
     @classmethod
@@ -70,7 +79,14 @@ class ProjectUpdate(BaseModel):
             raise ValueError("El sistema no puede quedar vacío")
         return v
 
-    @field_validator("objectives", "location", mode="before")
+    @field_validator("visibility")
+    @classmethod
+    def _visibility(cls, v):
+        if v is None:
+            raise ValueError("La visibilidad no puede quedar vacía")
+        return v
+
+    @field_validator("objectives", "location", "place_term_id", mode="before")
     @classmethod
     def _clean(cls, v):
         return _blank_to_none(v)
@@ -130,6 +146,12 @@ class ProjectOut(BaseModel):
     area_m2: float | None
     system: str
     location: str | None
+    lat: float | None = None
+    lon: float | None = None
+    place_term_id: str | None = None
+    place_label: str | None = None
+    visibility: str = "private"
+    published_at: datetime | None = None
     version: int
     created_at: datetime
     updated_at: datetime

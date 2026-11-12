@@ -8,6 +8,8 @@ from app.core.deps import RequestContext
 from app.core.errors import AppError, conflict, not_found, unprocessable
 from app.core.tenant import get_scoped_or_404, scoped
 from app.modules.catalog.models import Cultivar, Species
+from app.modules.identity.models import ROLE_ADMIN
+from app.modules.ontology.models import OntologyTerm
 from app.modules.projects.models import CropCycle, Observation, Project
 from app.modules.projects.schemas import (
     AccessionLink,
@@ -23,7 +25,35 @@ from app.modules.projects.schemas import (
 )
 from app.modules.term_links.service import resolve
 
-UPDATABLE_FIELDS = ("name", "objectives", "area_m2", "system", "location")
+UPDATABLE_FIELDS = ("name", "objectives", "area_m2", "system", "location", "lat", "lon", "place_term_id")
+
+
+def _check_coordinates(lat: float | None, lon: float | None) -> None:
+    if (lat is None) != (lon is None):
+        raise AppError(422, "coordinates_incomplete", "Indica latitud y longitud juntas, o ninguna")
+
+
+def _check_place_term(db: Session, term_id: str | None) -> None:
+    if term_id is None:
+        return
+    term = db.get(OntologyTerm, term_id)
+    if term is None or term.deleted_at is not None or term.domain != "place" or term.status != "published":
+        raise AppError(
+            422, "invalid_place_term", "El lugar debe ser un término publicado del dominio lugar",
+            {"field": "place_term_id"},
+        )
+
+
+def _check_can_publish(ctx: RequestContext) -> None:
+    if not ctx.has_role(ROLE_ADMIN):
+        raise AppError(403, "publish_forbidden", "Solo una persona administradora puede publicar un proyecto")
+
+
+def place_label(db: Session, project: Project) -> str | None:
+    if not project.place_term_id:
+        return None
+    term = db.get(OntologyTerm, project.place_term_id)
+    return term.label if term else None
 
 
 def _paginate(db: Session, stmt, page: int, page_size: int):
@@ -41,11 +71,17 @@ def list_projects(db: Session, ctx: RequestContext, page: int, page_size: int):
     return _paginate(db, stmt, page, page_size)
 
 
-def create_project(db: Session, ctx: RequestContext, data: ProjectCreate) -> Project:
+def create_project(db: Session, ctx: RequestContext, data: ProjectCreate, now: datetime | None = None) -> Project:
+    _check_coordinates(data.lat, data.lon)
+    _check_place_term(db, data.place_term_id)
+    if data.visibility == "public":
+        _check_can_publish(ctx)
     project = Project(
         organization_id=ctx.organization_id, version=1,
         system_term_id=resolve(db, "environment", data.system), **data.model_dump(),
     )
+    if data.visibility == "public":
+        project.published_at = now or datetime.now(timezone.utc)
     db.add(project)
     db.flush()
     record(db, ctx, "project", project.id, "create", data.model_dump(mode="json"))
@@ -53,9 +89,20 @@ def create_project(db: Session, ctx: RequestContext, data: ProjectCreate) -> Pro
     return project
 
 
-def update_project(db: Session, ctx: RequestContext, project: Project, data: ProjectUpdate) -> Project:
+def update_project(
+    db: Session, ctx: RequestContext, project: Project, data: ProjectUpdate, now: datetime | None = None
+) -> Project:
     if data.version != project.version:
         raise conflict("El proyecto fue modificado por otra persona; recarga para ver la versión actual")
+    sent = data.model_fields_set
+    _check_coordinates(
+        data.lat if "lat" in sent else project.lat, data.lon if "lon" in sent else project.lon
+    )
+    if "place_term_id" in sent and data.place_term_id != project.place_term_id:
+        _check_place_term(db, data.place_term_id)
+    publish_change = "visibility" in sent and data.visibility != project.visibility
+    if publish_change and data.visibility == "public":
+        _check_can_publish(ctx)
     changes = {}
     for field in UPDATABLE_FIELDS:
         if field in data.model_fields_set:
@@ -66,6 +113,10 @@ def update_project(db: Session, ctx: RequestContext, project: Project, data: Pro
                 setattr(project, field, new)
                 if field == "system":
                     project.system_term_id = resolve(db, "environment", new)
+    if publish_change:
+        changes["visibility"] = {"from": project.visibility, "to": data.visibility}
+        project.visibility = data.visibility
+        project.published_at = (now or datetime.now(timezone.utc)) if data.visibility == "public" else None
     project.version += 1
     project.updated_at = datetime.now(timezone.utc)
     record(db, ctx, "project", project.id, "update", {"changes": changes, "version": project.version})
@@ -89,12 +140,18 @@ def crop_cycle_out(cycle: CropCycle) -> CropCycleOut:
     )
 
 
+def project_out(db: Session, project: Project) -> ProjectOut:
+    out = ProjectOut.model_validate(project)
+    out.place_label = place_label(db, project)
+    return out
+
+
 def project_detail(db: Session, ctx: RequestContext, project: Project) -> ProjectDetail:
     cycles = db.scalars(
         scoped(CropCycle, ctx).where(CropCycle.project_id == project.id).order_by(CropCycle.created_at)
     ).unique()
     return ProjectDetail(
-        **ProjectOut.model_validate(project).model_dump(),
+        **project_out(db, project).model_dump(),
         crop_cycles=[crop_cycle_out(c) for c in cycles],
     )
 

@@ -32,7 +32,10 @@ OBSERVATION_KINDS = (OBS_NOTE, OBS_MEASUREMENT, OBS_INCIDENT, OBS_TASK, OBS_DECI
 
 class Project(UUIDMixin, TenantMixin, AuditMixin, Base):
     __tablename__ = "projects"
-    __table_args__ = (CheckConstraint("area_m2 IS NULL OR area_m2 > 0", name="ck_projects_area_positive"),)
+    __table_args__ = (
+        CheckConstraint("area_m2 IS NULL OR area_m2 > 0", name="ck_projects_area_positive"),
+        CheckConstraint("visibility IN ('private', 'public')", name="ck_projects_visibility"),
+    )
 
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     objectives: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -45,6 +48,14 @@ class Project(UUIDMixin, TenantMixin, AuditMixin, Base):
     system_term_id: Mapped[str | None] = mapped_column(
         String(36), ForeignKey("ontology_terms.id"), nullable=True, index=True
     )
+    # Ubicación (M4). Las coordenadas exactas nunca salen de la organización salvo redondeadas y publicadas.
+    lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    lon: Mapped[float | None] = mapped_column(Float, nullable=True)
+    place_term_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("ontology_terms.id"), nullable=True, index=True
+    )
+    visibility: Mapped[str] = mapped_column(String(10), nullable=False, default="private", server_default="private")
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class CropCycle(UUIDMixin, TenantMixin, AuditMixin, Base):

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
@@ -5,6 +7,7 @@ from app.core.db import get_db
 from app.core.deps import RequestContext, get_context, require_role
 from app.modules.identity.models import ROLE_EDITOR
 from app.modules.projects import service
+from app.modules.simulation.clock import get_now
 from app.modules.projects.schemas import (
     AccessionLink,
     CropCycleListItem,
@@ -33,13 +36,18 @@ def list_projects(
 ):
     items, total = service.list_projects(db, ctx, page, page_size)
     return Page[ProjectOut](
-        items=[ProjectOut.model_validate(p) for p in items], total=total, page=page, page_size=page_size
+        items=[service.project_out(db, p) for p in items], total=total, page=page, page_size=page_size
     )
 
 
 @router.post("", response_model=ProjectDetail, status_code=201)
-def create_project(data: ProjectCreate, ctx: RequestContext = Depends(editor), db: Session = Depends(get_db)):
-    project = service.create_project(db, ctx, data)
+def create_project(
+    data: ProjectCreate,
+    ctx: RequestContext = Depends(editor),
+    db: Session = Depends(get_db),
+    now: datetime = Depends(get_now),
+):
+    project = service.create_project(db, ctx, data, now)
     return service.project_detail(db, ctx, project)
 
 
@@ -59,9 +67,13 @@ def get_project(project_id: str, ctx: RequestContext = Depends(get_context), db:
 
 @router.patch("/{project_id}", response_model=ProjectDetail)
 def update_project(
-    project_id: str, data: ProjectUpdate, ctx: RequestContext = Depends(editor), db: Session = Depends(get_db)
+    project_id: str,
+    data: ProjectUpdate,
+    ctx: RequestContext = Depends(editor),
+    db: Session = Depends(get_db),
+    now: datetime = Depends(get_now),
 ):
-    project = service.update_project(db, ctx, service.get_project(db, ctx, project_id), data)
+    project = service.update_project(db, ctx, service.get_project(db, ctx, project_id), data, now)
     return service.project_detail(db, ctx, project)
 
 
